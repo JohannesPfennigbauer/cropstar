@@ -27,10 +27,14 @@ The system consists of three main components:
 - Predictions using Graph Data Science library
 - **📁 For detailed setup instructions, see: [`backend/README.md`](backend/README.md)**
 
+![current architecture of the KG.](backend/static/images/miscellaneous/kg_architecture.png)
+
 ### **Frontend** (Flutter Web App)
 - Interactive plant detail screens with editing capabilities
 - Real-time data synchronization with backend
 - **📁 For detailed setup instructions, see: [`frontend/weedjournal/README.md`](frontend/weedjournal/README.md)**
+
+![screenshot of the current plant details screen UI.](backend/static/images/miscellaneous/plant_details_screen.png)
 
 ### **Data & Knowledge**
 - Structured plant/weed information from agricultural research and guidelines
