@@ -1,0 +1,30 @@
+node_modules
+.pnpm-store
+
+# Nuxt / Nitro
+.nuxt
+.output
+.data
+dist
+.nitro
+.cache
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+
+# Editors & OS
+.DS_Store
+*.log
+logs
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea
+
+# Tooling caches
+.eslintcache
+coverage
+
+.github/skills/*

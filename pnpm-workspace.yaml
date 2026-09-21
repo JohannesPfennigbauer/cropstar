@@ -1,0 +1,10 @@
+packages:
+  - apps/*
+
+# pnpm 10 blocks lifecycle scripts by default; these are the ones Nuxt needs.
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - better-sqlite3
+  - esbuild
+  - sharp
+  - unrs-resolver

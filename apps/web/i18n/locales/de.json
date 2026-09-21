@@ -1,0 +1,152 @@
+{
+  "language": {
+    "label": "Sprache",
+    "de": "Deutsch",
+    "en": "English"
+  },
+  "nav": {
+    "about": "Ansatz",
+    "explore": "Ausprobieren",
+    "contact": "Kontakt",
+    "github": "Cropstar auf GitHub",
+    "earlyAccess": "Früher Zugang"
+  },
+  "seo": {
+    "title": "Cropstar – Software, die erklärt statt vorschreibt",
+    "description": "Quelloffene Betriebssoftware für regenerative Landwirtschaft. Jede Zahl trägt ihre Unsicherheit, ihre Herkunft und ihre Treiber. Szenarien statt Empfehlungen.",
+    "ogTitle": "Cropstar – dein Feld verstehen, selbst entscheiden",
+    "ogDescription": "Quelloffene Betriebssoftware für regenerative Landwirtschaft. Learning by doing, mit sichtbaren Konsequenzen."
+  },
+  "hero": {
+    "eyebrow": "Open Source · Regenerative Landwirtschaft · Österreich",
+    "title": "Dein Feld verstehen. Selbst entscheiden.",
+    "lead": "Cropstar sagt dir nicht, welche Sorte du anbauen, wann du düngen oder was du spritzen sollst. Es zeigt dir, was sich ändert, wenn du etwas änderst – mit Unsicherheit und mit Begründung. Damit du dein Ökosystem wieder selbst liest, statt auf Empfehlungen zu vertrauen, die andere für dich getroffen haben.",
+    "ctaPrimary": "Regler ausprobieren",
+    "ctaSecondary": "Worum es geht",
+    "facts": {
+      "numbersLabel": "Jede Zahl trägt",
+      "numbersValue": "ein Band, eine Quelle und einen Grund",
+      "decisionLabel": "Jede Entscheidung bleibt",
+      "decisionValue": "bei dem Menschen am Feld",
+      "opennessLabel": "Alles ist",
+      "opennessValue": "quelloffen und selbst hostbar"
+    }
+  },
+  "independence": {
+    "eyebrow": "Warum es Cropstar gibt",
+    "title": "Unabhängigkeit beginnt mit Verständnis",
+    "p1": "Sorte, Saatstärke, Düngung, Pflanzenschutz – zu jeder dieser Entscheidungen gibt es eine Empfehlung. Meistens von jemandem, der etwas zu verkaufen hat. Das ist bequem, solange die Saison nach Plan läuft. In dem Jahr, in dem sie das nicht tut, steht niemand neben dir und erklärt, warum.",
+    "p2": "Ein widerstandsfähiger Betrieb entsteht nicht aus Empfehlungen, sondern aus Verständnis. Wer weiß, wie Wasser, Stickstoff, Wurzeln und Bodenleben auf dem eigenen Schlag zusammenspielen, trifft Entscheidungen, die auch im schwierigen Jahr tragen – und kommt im Einklang mit der Natur zu Erträgen, die stabil bleiben.",
+    "p3": "Keine Software kann dieses Verständnis ersetzen. Cropstar versucht es auch nicht. Es will einen Stein ins Rollen bringen: Zusammenhänge sichtbar machen, Konsequenzen durchspielen, Beobachtungen festhalten. Die Entscheidung bleibt, wo sie hingehört."
+  },
+  "principles": {
+    "title": "Vier Regeln, an denen wir uns messen lassen",
+    "lead": "Die meisten Programme geben dir eine Antwort und verstecken den Weg dorthin. Wir machen es umgekehrt. Diese vier Regeln sind Prüfkriterien, keine Schlagworte: Was dagegen verstößt, kommt nicht in die Software.",
+    "numbers": {
+      "title": "Keine nackten Zahlen",
+      "body": "4,2 t/ha ist eine Behauptung. 3,6 bis 4,9 t/ha, gerechnet aus deinem Wetter und deinem Boden, ist eine Information. Jeder Wert kommt mit seiner Unsicherheit und seiner Herkunft – und sagt dazu, ob er beobachtet oder gerechnet ist."
+    },
+    "scenarios": {
+      "title": "Szenarien statt Empfehlungen",
+      "body": "Du legst die Varianten fest, Cropstar stellt sie nebeneinander. Keine Reihung, kein „optimal“, kein vorausgefüllter Wert. Die Abwägung zwischen Ertrag, Qualität, Kosten und dem, was im Boden bleibt, gehört dir."
+    },
+    "why": {
+      "title": "Immer eine Antwort auf „warum“",
+      "body": "Wasserstress, Stickstoffmangel, BBCH-Stadium: Was angezeigt wird, kann die Treiber benennen, die dahinterstehen. Was sich nicht erklären lässt, wird gar nicht erst angezeigt."
+    },
+    "warnings": {
+      "title": "Warnungen beschreiben, sie verordnen nicht",
+      "body": "„Die pflanzenverfügbare Bodenfeuchte liegt seit zwölf Tagen unter 40 %.“ Nicht „jetzt bewässern“. Du kennst deine Technik, deinen Boden und deine Verträge – die Software nicht."
+    }
+  },
+  "explore": {
+    "eyebrow": "Learning by doing",
+    "title": "Ändere eine Sache. Sieh, was sich bewegt.",
+    "lead": "Zwei Hebel, wie sie am Feld wirklich vorkommen: der Niederschlag, den du bekommst, und der Mist, den du ausbringst. Jede Zahl trägt ihre Unsicherheit und erklärt sich selbst. Nichts hier sagt dir, was du tun sollst.",
+    "provenance": {
+      "headline": "Illustrativ – keine Simulation",
+      "detail": "Die Zahlen stammen aus einer fest hinterlegten Kennfläche für biologisch geführten Winterweizen auf Schluffboden im pannonischen Raum. Es läuft kein Modell, und gemessen wurde nichts. Sie zeigen die Form eines Zusammenhangs, nie eine Vorhersage für deinen Schlag."
+    },
+    "inputs": {
+      "rainfallLabel": "Niederschlag in der Vegetationszeit",
+      "rainfallHelp": "Regen von der Saat bis zur Ernte. Wie viel davon pflanzenverfügbar wird, entscheidet dein Boden – nicht die Menge allein.",
+      "manureLabel": "Rottemist vom Rind",
+      "manureHelp": "Ausgebrachte Frischmasse. Rund 5 kg Gesamtstickstoff je Tonne, davon etwa ein Drittel schon in dieser Saison pflanzenverfügbar. Der Rest baut Humus auf und wirkt in den Folgejahren.",
+      "availableN": "davon pflanzenverfügbar in dieser Saison",
+      "totalN": "Gesamtstickstoff ausgebracht",
+      "ceiling": "Über 34 t/ha liegt die Zufuhr über den 170 kg N/ha aus Wirtschaftsdünger, die das Aktionsprogramm Nitrat je Hektar und Jahr zulässt."
+    },
+    "seasons": {
+      "dry": "Trockenes Jahr",
+      "average": "Durchschnittsjahr",
+      "wet": "Feuchtes Jahr"
+    },
+    "outputs": {
+      "yield": "Kornertrag",
+      "protein": "Rohprotein",
+      "cover": "Maximale Bodenbedeckung",
+      "coverNote": "Anteil des Bodens, den der Bestand im Maximum beschattet (fCover).",
+      "height": "Wuchshöhe"
+    },
+    "diagnostics": {
+      "waterStressLabel": "Tage mit Wasserstress",
+      "waterStressNote": "Tage, an denen die pflanzenverfügbare Bodenfeuchte unter 40 % der nutzbaren Feldkapazität lag.",
+      "nDeficitLabel": "Tage mit Stickstoffmangel",
+      "nDeficitNote": "Tage, an denen der Bestand mehr Stickstoff gebraucht hätte, als Boden und Mist liefern konnten.",
+      "nExportLabel": "Stickstoff-Abfuhr über das Korn",
+      "nExportNote": "Aus Ertrag und Rohprotein gerechnet, mit dem Faktor 5,7.",
+      "nRemainingLabel": "Stickstoff-Verbleib im System",
+      "nRemainingNegative": "Das Korn führt mehr Stickstoff ab, als der Mist gebracht hat. Die Differenz stammt aus dem Bodenvorrat.",
+      "nRemainingPositive": "Der Rest bleibt im System: als Humus, in Ernteresten und als Vorrat für die Folgekultur."
+    },
+    "drivers": {
+      "why": "warum?",
+      "ariaWhy": "Warum steht {label} auf diesem Wert?",
+      "title": "Was diese Zahl bewegt hat",
+      "footnote": "Die Anteile stammen aus derselben Tabelle: ein Regler wird festgehalten, der andere an den Rand seines Bereichs geschoben.",
+      "water": "Wasserangebot",
+      "nitrogen": "Stickstoff aus dem Mist",
+      "waterReference": "150 mm",
+      "nitrogenReference": "einer Fläche ganz ohne Mist",
+      "raises": "Hebt den Wert – {delta} mehr als bei {reference}.",
+      "lowers": "Senkt den Wert – {delta} weniger als bei {reference}.",
+      "flat": "Kein messbarer Unterschied zu {reference}."
+    },
+    "bandAria": "Unsicherheitsband von {low} bis {high}",
+    "drawingAria": "Stilisierter Winterweizen, der auf die Einstellungen für Wasser und Mist reagiert",
+    "caption": "Dargestellt bei BBCH 75 – Milchreife. Die Zeichnung folgt den Zahlen daneben: Bestandesdichte aus der Bodenbedeckung, Farbe aus der Stickstoffversorgung, Hängen aus der Wasserversorgung, Wurzeltiefe aus den Tagen mit Wasserstress. Die hellen Punkte im Boden sind der pflanzenverfügbare Stickstoff.",
+    "closing": "Was der Regler bewusst nicht tut: eine Einstellung als die richtige markieren. Zwei Betriebe können dieselben Bänder lesen und sich unterschiedlich entscheiden – weil Boden, Fruchtfolge, Tierhaltung und Vermarktung unterschiedlich sind."
+  },
+  "contact": {
+    "title": "Früher Zugang",
+    "lead": "Es gibt noch keinen Login, weil dahinter noch nichts steht. Was es heute gibt: den Regler oben, ein offenes Repository und einen Plan.",
+    "body": "Wenn du Landwirtschaft betreibst, berätst oder erforschst – besonders in Österreich – schreib uns. Wir bauen Schlagverwaltung, Beobachtungen und Maßnahmen lieber entlang echter Praxis, als sie zu erraten und später neu zu machen.",
+    "subject": "Cropstar – früher Zugang",
+    "codeButton": "Code ansehen",
+    "privacy": "Kein Formular, kein Tracking, kein Newsletter. Eine Mail – und deine Adresse bleibt in unserem Postfach.",
+    "statusTitle": "Wo das Projekt wirklich steht",
+    "status": {
+      "nowTitle": "Diese Seite",
+      "nowBody": "Die Grundsätze – und ein handgebauter Beleg dafür, wie sie sich anfühlen.",
+      "nextTitle": "Als Nächstes: Texte zu regenerativer Praxis und Pflanzenmodellierung",
+      "nextBody": "Die Lernebene ist keine Phase am Ende. Sie entsteht mit allem anderen mit.",
+      "thenTitle": "Danach: Schläge, Beobachtungen und Maßnahmen",
+      "thenBody": "Feldgrenzen, Aufgaben und Dateneingabe – am Schreibtisch und in der Jackentasche.",
+      "laterTitle": "Später: Wetter, Satellitendaten und ein echtes Pflanzenmodell",
+      "laterBody": "Zuerst ein prozessbasiertes Basismodell. Ein gelerntes Modell nur dort, wo es dieses auf echten Beobachtungen schlägt."
+    }
+  },
+  "footer": {
+    "rights": "© {year} Cropstar – lizenziert unter AGPL-3.0. Deine Felddaten gehören dir.",
+    "source": "Quellcode",
+    "issues": "Fehler & Ideen"
+  },
+  "units": {
+    "mm": "mm",
+    "tPerHa": "t/ha",
+    "percent": "%",
+    "cm": "cm",
+    "kgN": "kg N/ha",
+    "days": "d"
+  }
+}

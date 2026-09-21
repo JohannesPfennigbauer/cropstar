@@ -1,0 +1,15 @@
+# Local verification of the production image only.
+# Deployment is Coolify pulling the published tag; TLS and routing belong to its proxy,
+# never to this file.
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: ghcr.io/johannespfennigbauer/cropstar-web:dev
+    init: true
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NUXT_PUBLIC_CONTACT_EMAIL: ${NUXT_PUBLIC_CONTACT_EMAIL:-hello@cropstar.at}
