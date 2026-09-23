@@ -18,8 +18,8 @@ const available = computed(() =>
 </script>
 
 <template>
-  <header class="sticky top-0 z-50 border-b border-default bg-default/85 backdrop-blur">
-    <div class="container-page flex h-16 items-center justify-between gap-4">
+  <header class="sticky top-0 z-50 bg-default/90 backdrop-blur-md">
+    <div class="container-page flex h-18 items-center justify-between gap-4">
       <a
         href="#top"
         class="flex items-center gap-2.5"
@@ -41,7 +41,7 @@ const available = computed(() =>
             fill="currentColor"
           />
         </svg>
-        <span class="text-lg font-semibold tracking-tight text-highlighted">Cropstar</span>
+        <span class="font-display text-xl font-semibold text-highlighted">Cropstar</span>
       </a>
 
       <nav class="hidden items-center gap-1 md:flex">
@@ -53,19 +53,20 @@ const available = computed(() =>
           variant="ghost"
           size="sm"
           :label="link.label"
+          class="font-display rounded-full"
         />
       </nav>
 
       <div class="flex items-center gap-2">
         <div
-          class="flex items-center rounded-md border border-default p-0.5"
+          class="flex items-center rounded-full border border-default p-0.5"
           :aria-label="t('language.label')"
         >
           <NuxtLink
             v-for="entry in available"
             :key="entry.code"
             :to="switchLocalePath(entry.code)"
-            class="rounded px-2 py-1 text-xs font-medium uppercase transition-colors"
+            class="rounded-full px-2 py-1 text-xs font-medium uppercase transition-colors"
             :class="entry.code === locale
               ? 'bg-elevated text-highlighted'
               : 'text-muted hover:text-highlighted'"
@@ -83,12 +84,6 @@ const available = computed(() =>
           icon="i-lucide-github"
           :aria-label="t('nav.github')"
           class="hidden sm:inline-flex"
-        />
-        <UButton
-          to="#contact"
-          color="primary"
-          size="sm"
-          :label="t('nav.earlyAccess')"
         />
       </div>
     </div>

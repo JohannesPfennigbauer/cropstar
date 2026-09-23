@@ -5,9 +5,9 @@
     "en": "English"
   },
   "nav": {
-    "about": "Approach",
+    "about": "About Cropstar",
     "explore": "Explore",
-    "contact": "Contact",
+    "contact": "Get involved",
     "github": "Cropstar on GitHub",
     "earlyAccess": "Early access"
   },
@@ -19,10 +19,11 @@
   },
   "hero": {
     "eyebrow": "Open source · Regenerative agriculture · Austria",
-    "title": "Understand your field. Decide for yourself.",
-    "lead": "Cropstar will not tell you which variety to sow, when to fertilise or what to spray. It shows you what changes when you change something — with the uncertainty and with the reasoning. So that you read your own ecosystem again, instead of trusting recommendations someone else made for you.",
-    "ctaPrimary": "Pull the levers",
-    "ctaSecondary": "What this is about",
+    "titleFirst": "Understand your field.",
+    "titleSecond": "Decide for yourself.",
+    "lead": "Cropstar will not tell you which variety to sow, when to fertilise or what to spray. It lays bare what is happening in your field, so you can interpret your own ecosystem. For anyone tired of blindly following decisions others made for them.",
+    "ctaPrimary": "Explore Cropstar",
+    "ctaSecondary": "Why Cropstar?",
     "facts": {
       "numbersLabel": "Every number carries",
       "numbersValue": "a band, a source and a reason",
@@ -35,45 +36,64 @@
   "independence": {
     "eyebrow": "Why Cropstar exists",
     "title": "Independence begins with understanding",
-    "p1": "Variety, seeding rate, fertilisation, crop protection — every one of those decisions comes with a recommendation attached. Usually from someone with something to sell. That is comfortable for as long as the season goes to plan. In the year it does not, nobody is standing beside you explaining why.",
-    "p2": "A resilient farm is not built out of recommendations. It is built out of understanding. Once you know how water, nitrogen, roots and soil life interact on your own field, you make decisions that hold up in the difficult year — and you reach yields that stay stable, in step with nature rather than against it.",
+    "p1": "Almost every decision in the field comes with a recommendation – often from someone with something to sell. That is convenient while the season follows the plan. When it does not, the question of why remains.",
+    "p2": "A resilient farm is built not on ready-made answers, but on understanding how water, nutrients, plants and soil interact.",
     "p3": "No software can replace that understanding, and Cropstar does not try. It wants to get the ball rolling: make relationships visible, play consequences through, keep a record of what you observed. The decision stays where it belongs."
   },
   "principles": {
-    "title": "Four rules we hold ourselves to",
-    "lead": "Most programs hand you an answer and hide the path to it. We do the opposite. These four rules are review criteria, not slogans: anything that breaks one of them does not ship.",
+    "eyebrow": "What follows from this",
+    "title": "What Cropstar deliberately does differently",
+    "lead": "Open in its development, transparent in its results and free from ready-made judgements.",
+    "openness": {
+      "title": "Developed openly, shaped together",
+      "body": "Open source and independent. Developed by and for people in agriculture."
+    },
     "numbers": {
       "title": "No bare numbers",
-      "body": "4.2 t/ha is a claim. 3.6 to 4.9 t/ha, computed from your weather and your soil, is information. Every value carries its uncertainty and its provenance — and says whether it was observed or computed."
+      "body": "Every value shows its context, uncertainty, provenance and the influences behind it."
     },
     "scenarios": {
-      "title": "Scenarios, not recommendations",
-      "body": "You define the variants; Cropstar puts them side by side. No ranking, no “optimal”, no pre-filled value. The trade-off between yield, quality, cost and what stays in the soil is yours."
+      "title": "Compare, don't judge",
+      "body": "Cropstar shows possibilities and consequences. The decision remains yours."
     },
     "why": {
       "title": "Always an answer to “why”",
-      "body": "Water stress, nitrogen deficit, BBCH stage: whatever gets displayed can name the drivers behind it. What cannot be explained is not shown in the first place."
+      "body": "Anything displayed also names the influences behind it. Otherwise, it is not shown."
     },
     "warnings": {
       "title": "Warnings describe, they never prescribe",
-      "body": "“Plant-available soil moisture has been below 40 % for twelve days.” Not “irrigate now.” You know your machinery, your soil and your contracts — the software does not."
+      "body": "Alerts describe what is happening. What you make of it remains your decision."
     }
   },
   "explore": {
-    "eyebrow": "Learning by doing",
-    "title": "Change one thing. Watch what moves.",
+    "eyebrow": "Interactive illustration",
+    "title": "Water and nitrogen in interaction",
     "lead": "Two levers as they actually occur in the field: the rain you get, and the manure you spread. Every number carries its uncertainty and explains itself. Nothing here tells you what to do.",
     "provenance": {
-      "headline": "Illustrative — not a simulation",
-      "detail": "These numbers come from a hard-coded response surface for organically managed winter wheat on a silt loam in the Pannonian lowland. No model runs, and nothing was measured. They show the shape of a relationship, never a prediction for your field."
+      "headline": "Highly simplified — not a complete simulation",
+      "detail": "This illustration focuses solely on how water and nitrogen availability might interact in winter wheat. A real ecosystem simulation would also need to account for temperature, radiation, soil structure, root dynamics, disease and management history, among other factors. The numbers come from a hard-coded response surface; no model runs in the background."
     },
     "inputs": {
+      "title": "Inputs",
+      "help": "Understand the inputs",
+      "weatherSoilTitle": "Weather and soil",
+      "nutrientsTitle": "Nutrients",
       "rainfallLabel": "Growing-season precipitation",
       "rainfallHelp": "Rain from sowing to harvest. How much of it becomes plant-available is decided by your soil — not by the amount alone.",
+      "waterStorageLabel": "Soil water storage",
+      "waterStorageHelp": "Higher storage buffers dry periods. Here it is a simplified stand-in for available water capacity and rooting.",
+      "waterStorage": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High"
+      },
+      "soilNitrogenLabel": "Available soil nitrogen",
+      "soilNitrogenHelp": "Plant-available stock at the start of the season. A soil analysis would be a better source than an estimate.",
       "manureLabel": "Rotted cattle manure",
       "manureHelp": "Fresh matter applied. Around 5 kg of total nitrogen per tonne, of which roughly a third becomes plant-available this season. The rest builds humus and works in later years.",
       "availableN": "of it plant-available this season",
-      "totalN": "total nitrogen applied",
+      "totalAvailableN": "total plant-available",
+      "totalN": "total N in manure",
       "ceiling": "Above 34 t/ha the supply exceeds the 170 kg N/ha from livestock manure that the nitrate action programme permits per hectare and year."
     },
     "seasons": {
@@ -82,6 +102,7 @@
       "wet": "Wet year"
     },
     "outputs": {
+      "title": "Results",
       "yield": "Grain yield",
       "protein": "Crude protein",
       "cover": "Peak ground cover",
@@ -96,44 +117,55 @@
       "nExportLabel": "Nitrogen removed in the grain",
       "nExportNote": "Derived from yield and crude protein, using a factor of 5.7.",
       "nRemainingLabel": "Nitrogen left in the system",
-      "nRemainingNegative": "The grain removes more nitrogen than the manure delivered. The difference came out of the soil stock.",
-      "nRemainingPositive": "The remainder stays in the system: as humus, in crop residues, and as a reserve for the following crop."
+      "nRemainingNote": "Balance: {manure} + {soil} − {export} = {remaining}."
     },
     "drivers": {
       "why": "why?",
       "ariaWhy": "Why is {label} at this value?",
-      "title": "What moved this number",
-      "footnote": "The shares are read off the same table: one lever is held still while the other is pushed to the edge of its range.",
-      "water": "Water supply",
-      "nitrogen": "Nitrogen from the manure",
-      "waterReference": "150 mm",
-      "nitrogenReference": "a field with no manure at all",
+      "title": "Why do these results change?",
+      "sharedIntro": "The four results respond differently to water and nitrogen. Each bar shows which influence explains more of the difference from its lower reference – not which one is more important or better.",
+      "waterShort": "water",
+      "nitrogenShort": "nitrogen",
+      "explanations": {
+        "yield": "Yield needs both: water sustains growth and grain filling, while nitrogen enables the crop to build leaves and grain.",
+        "protein": "Protein responds especially strongly to available nitrogen. More water may increase yield faster than nitrogen uptake, diluting the protein share.",
+        "cover": "Water and nitrogen promote leaf area and stand density. When either is scarce, the canopy closes later or remains patchy.",
+        "height": "Adequate water maintains the pressure needed for cell expansion; nitrogen supports new tissue. Limits to either supply slow height growth."
+      },
+      "footnote": "The shares combine rain and soil storage as water supply, and soil and manure as nitrogen supply. One supply is set to its lower reference while the other stays constant.",
+      "water": "Water supply from rain and soil",
+      "nitrogen": "Nitrogen from soil and manure",
+      "waterReference": "150 mm on a low-storage soil",
+      "nitrogenReference": "a field without available soil nitrogen or manure",
       "raises": "Raises it — {delta} more than at {reference}.",
       "lowers": "Lowers it — {delta} less than at {reference}.",
       "flat": "No measurable difference against {reference}."
     },
     "bandAria": "Uncertainty band from {low} to {high}",
-    "drawingAria": "Stylised winter wheat reacting to the water and manure settings",
+    "drawingAria": "Stylised winter wheat responding to water and nitrogen availability",
     "caption": "Drawn at BBCH 75 — medium milk. The drawing follows the figures beside it: tiller number from ground cover, colour from nitrogen supply, droop from water supply, rooting depth from the days spent short of water. The pale dots in the soil are plant-available nitrogen.",
     "closing": "Note what the toy deliberately refuses to do: mark one setting as the right one. Two farms can read the same bands and decide differently — because soil, rotation, livestock and marketing differ."
   },
   "contact": {
-    "title": "Early access",
-    "lead": "There is no sign-in yet, because there is nothing behind it yet. What exists today: the levers above, an open repository and a plan.",
-    "body": "If you farm, advise or research — especially in Austria — write to us. We would rather build plot management, observations and field records around real practice than guess at them and rebuild later.",
-    "subject": "Cropstar early access",
-    "codeButton": "Read the code",
+    "eyebrow": "Get involved",
+    "title": "Build together. Understand relationships more deeply.",
+    "lead": "We connect observations from practice with soil, weather, crop development, satellite data and models. The result is a tool that helps farmers understand their ecosystem more deeply over time.",
+    "body": "It is developed together with farms — and open to further perspectives from farming, advisory services and research.",
+    "subject": "Build together",
+    "contactButton": "Build together",
+    "codeButton": "View source code",
     "privacy": "No form, no tracking, no mailing list. Plain email — and your address stays in our inbox.",
-    "statusTitle": "Where the project actually stands",
+    "roadmapEyebrow": "Our stages",
+    "statusTitle": "The path ahead",
     "status": {
-      "nowTitle": "This page",
-      "nowBody": "The principles — and a hand-built demonstration of what they feel like.",
-      "nextTitle": "Next: writing on regenerative practice and crop modelling",
-      "nextBody": "The teaching layer is not a phase at the end. It grows alongside everything else.",
-      "thenTitle": "Then: plots, observations and field records",
-      "thenBody": "Field boundaries, tasks and data entry — at the desk and in your jacket pocket.",
-      "laterTitle": "Later: weather, satellite retrievals and a real crop model",
-      "laterBody": "A process-based baseline first. A learned model only where it beats that baseline on real observations."
+      "nowTitle": "Capture the status quo together",
+      "nowBody": "Together with farms, we capture workflows, decisions and sources of information.",
+      "nextTitle": "Capture the field as a story",
+      "nextBody": "Plots, observations and field records become a traceable history of each field.",
+      "thenTitle": "Make relationships visible",
+      "thenBody": "Weather, soil and satellite data reveal developments and their causes.",
+      "laterTitle": "Explore and understand relationships",
+      "laterBody": "A crop model helps explore how water, nutrients, weather, rotations and mixed cropping interact."
     }
   },
   "footer": {

@@ -35,13 +35,17 @@ export interface Outcome {
   waterStressDays: number
   /** Days on which crop N demand exceeded supply. */
   nDeficitDays: number
-  /** N released from the manure within this season, kg N/ha. */
+  /** Total plant-available N from manure and the initial soil stock, kg N/ha. */
   availableN: number
+  /** N released from the manure within this season, kg N/ha. */
+  availableManureN: number
+  /** Initial plant-available soil N, kg N/ha. */
+  soilNitrogen: number
   /** Total N applied with the manure, kg N/ha. */
   totalN: number
   /** N leaving the field in the grain, kg N/ha. */
   nExportedInGrain: number
-  /** Total N applied minus N exported in grain. Negative means the soil stock paid. */
+  /** Total manure N plus entered soil N minus grain export, kg N/ha. */
   nRemaining: number
   /** True once total manure N passes the ceiling in the nitrate action programme. */
   exceedsManureCeiling: boolean
@@ -52,10 +56,18 @@ export interface Outcome {
   rootDepthCm: number
 }
 
-export const PROVENANCE_REVISION = 'toy-2026-09'
+export type SoilWaterStorage = 'low' | 'medium' | 'high'
+
+export const PROVENANCE_REVISION = 'toy-2026-09-soil'
 
 export const RAINFALL_INPUT = { min: 150, max: 750, step: 10 } as const
 export const MANURE_INPUT = { min: 0, max: 50, step: 1 } as const
+export const SOIL_N_INPUT = { min: 0, max: 80, step: 5 } as const
+export const SOIL_WATER_STORAGE_FACTORS: Record<SoilWaterStorage, number> = {
+  low: 0.82,
+  medium: 1,
+  high: 1.12
+}
 
 /** Rotted cattle manure, fresh matter. */
 export const MANURE_TOTAL_N_PER_TONNE = 5.0
@@ -218,20 +230,32 @@ function estimate(
   }
 }
 
-export function illustrativeOutcome(rainfallMm: number, manureTonnes: number): Outcome {
+export function illustrativeOutcome(
+  rainfallMm: number,
+  manureTonnes: number,
+  soilWaterStorage: SoilWaterStorage = 'medium',
+  soilNitrogenKg: number = 0
+): Outcome {
   const rain = clamp(rainfallMm, RAINFALL_INPUT.min, RAINFALL_INPUT.max)
+  const effectiveRain = clamp(
+    rain * SOIL_WATER_STORAGE_FACTORS[soilWaterStorage],
+    RAINFALL_INPUT.min,
+    RAINFALL_INPUT.max
+  )
   const manure = clamp(manureTonnes, MANURE_INPUT.min, MANURE_INPUT.max)
+  const soilNitrogen = clamp(soilNitrogenKg, SOIL_N_INPUT.min, SOIL_N_INPUT.max)
 
-  const availableN = availableNitrogenFrom(manure)
+  const availableManureN = availableNitrogenFrom(manure)
+  const availableN = availableManureN + soilNitrogen
   const totalN = totalNitrogenFrom(manure)
 
-  const grainYield = estimate(YIELD_GRID, rain, availableN, { precision: 1, baseSpread: 0.13 })
-  const grainProtein = estimate(PROTEIN_GRID, rain, availableN, { precision: 1, baseSpread: 0.06 })
-  const groundCover = estimate(COVER_GRID, rain, availableN, { precision: 2, baseSpread: 0.08 })
-  const plantHeight = estimate(HEIGHT_GRID, rain, availableN, { precision: 0, baseSpread: 0.09 })
+  const grainYield = estimate(YIELD_GRID, effectiveRain, availableN, { precision: 1, baseSpread: 0.13 })
+  const grainProtein = estimate(PROTEIN_GRID, effectiveRain, availableN, { precision: 1, baseSpread: 0.06 })
+  const groundCover = estimate(COVER_GRID, effectiveRain, availableN, { precision: 2, baseSpread: 0.08 })
+  const plantHeight = estimate(HEIGHT_GRID, effectiveRain, availableN, { precision: 0, baseSpread: 0.09 })
 
-  const waterStressDays = Math.round(interpolate(WATER_STRESS_GRID, rain, availableN))
-  const nDeficitDays = Math.round(interpolate(N_DEFICIT_GRID, rain, availableN))
+  const waterStressDays = Math.round(interpolate(WATER_STRESS_GRID, effectiveRain, availableN))
+  const nDeficitDays = Math.round(interpolate(N_DEFICIT_GRID, effectiveRain, availableN))
 
   const nExportedInGrain
     = (grainYield.value * 1000 * (grainProtein.value / 100)) / PROTEIN_TO_N
@@ -249,9 +273,11 @@ export function illustrativeOutcome(rainfallMm: number, manureTonnes: number): O
     waterStressDays,
     nDeficitDays,
     availableN,
+    availableManureN,
+    soilNitrogen,
     totalN,
     nExportedInGrain,
-    nRemaining: totalN - nExportedInGrain,
+    nRemaining: totalN + soilNitrogen - nExportedInGrain,
     exceedsManureCeiling: totalN > MANURE_N_CEILING,
     canopyIndex,
     waterIndex,

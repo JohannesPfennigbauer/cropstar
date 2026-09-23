@@ -23,7 +23,6 @@ useHead(() => ({
     <main>
       <LandingHero />
       <LandingIndependence />
-      <LandingPrinciples />
       <LandingExplore />
       <LandingContact />
     </main>

@@ -27,6 +27,22 @@ describe('manure to nitrogen conversion', () => {
 })
 
 describe('illustrativeOutcome', () => {
+  it('shows more water stress on soils with lower water storage', () => {
+    const lowStorage = illustrativeOutcome(450, 25, 'low')
+    const highStorage = illustrativeOutcome(450, 25, 'high')
+
+    expect(lowStorage.waterStressDays).toBeGreaterThan(highStorage.waterStressDays)
+    expect(lowStorage.grainYield.value).toBeLessThan(highStorage.grainYield.value)
+  })
+
+  it('shows less nitrogen stress with a larger available soil nitrogen stock', () => {
+    const depleted = illustrativeOutcome(450, 10, 'medium', 0)
+    const supplied = illustrativeOutcome(450, 10, 'medium', 60)
+
+    expect(depleted.nDeficitDays).toBeGreaterThan(supplied.nDeficitDays)
+    expect(depleted.grainProtein.value).toBeLessThan(supplied.grainProtein.value)
+  })
+
   it('reproduces the table exactly at its nodes', () => {
     expect(illustrativeOutcome(450, tonnesForAvailableN(40)).grainYield.value)
       .toBeCloseTo(3.9, 6)

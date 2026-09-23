@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import type { Driver, Estimate } from '~/utils/illustrative-response'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   label: string
   estimate: Estimate
   unit: string
   domainMin: number
   domainMax: number
   note?: string
-}>()
+  showWhy?: boolean
+  compact?: boolean
+}>(), {
+  showWhy: true,
+  compact: false
+})
 
 const { t } = useI18n()
 const { format, withUnit } = useFigures()
@@ -40,13 +45,32 @@ function driverDetail(driver: Driver): string {
 </script>
 
 <template>
-  <div class="rounded-lg border border-default bg-default p-4">
+  <div
+    class="rounded-lg border border-default bg-default"
+    :class="compact ? 'px-4 py-3' : 'p-4'"
+  >
     <div class="flex items-start justify-between gap-2">
       <p class="text-sm font-medium text-muted">
         {{ label }}
       </p>
 
-      <UPopover :ui="{ content: 'w-80 p-4' }">
+      <p
+        v-if="compact"
+        class="flex shrink-0 items-baseline gap-1.5"
+      >
+        <span class="tabular text-2xl font-semibold text-highlighted">
+          {{ format(estimate.value, estimate.precision) }}
+        </span>
+        <span
+          v-if="unit"
+          class="text-xs text-muted"
+        >{{ unit }}</span>
+      </p>
+
+      <UPopover
+        v-else-if="showWhy"
+        :ui="{ content: 'w-80 p-4' }"
+      >
         <UButton
           size="xs"
           variant="ghost"
@@ -91,7 +115,11 @@ function driverDetail(driver: Driver): string {
       </UPopover>
     </div>
 
-    <p class="mt-1 flex items-baseline gap-1.5">
+    <p
+      v-if="!compact"
+      class="flex items-baseline gap-1.5"
+      :class="compact ? 'mt-0.5' : 'mt-1'"
+    >
       <span class="tabular text-3xl font-semibold text-highlighted">
         {{ format(estimate.value, estimate.precision) }}
       </span>
@@ -102,7 +130,8 @@ function driverDetail(driver: Driver): string {
     </p>
 
     <div
-      class="relative mt-3 h-2 w-full rounded-full bg-elevated"
+      class="relative h-2 w-full rounded-full bg-elevated"
+      :class="compact ? 'mt-2' : 'mt-3'"
       role="img"
       :aria-label="t('explore.bandAria', {
         low: format(estimate.low, estimate.precision),
@@ -119,7 +148,10 @@ function driverDetail(driver: Driver): string {
       />
     </div>
 
-    <p class="tabular mt-2 text-xs text-muted">
+    <p
+      class="tabular text-xs text-muted"
+      :class="compact ? 'mt-1.5' : 'mt-2'"
+    >
       {{ bandText }}
     </p>
     <p

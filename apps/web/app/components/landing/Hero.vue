@@ -1,29 +1,31 @@
 <script setup lang="ts">
 const { t } = useI18n()
-
-const facts = computed(() => [
-  { label: t('hero.facts.numbersLabel'), value: t('hero.facts.numbersValue') },
-  { label: t('hero.facts.decisionLabel'), value: t('hero.facts.decisionValue') },
-  { label: t('hero.facts.opennessLabel'), value: t('hero.facts.opennessValue') }
-])
 </script>
 
 <template>
   <section
     id="top"
-    class="relative overflow-hidden"
+    class="relative flex min-h-[42rem] overflow-hidden sm:min-h-[calc(100vh-9rem)]"
   >
-    <div class="container-page grid gap-12 pb-20 pt-16 sm:pt-24 lg:grid-cols-12 lg:gap-16">
-      <div class="lg:col-span-7 xl:col-span-8">
-        <p class="text-sm font-semibold uppercase tracking-wider text-primary">
+    <img
+      src="/images/landing/fields/sunrise-farmland.jpg"
+      alt=""
+      class="absolute inset-0 size-full object-cover object-center"
+    >
+    <div class="absolute inset-0 bg-[linear-gradient(90deg,rgba(52,55,47,.88)_0%,rgba(52,55,47,.62)_48%,rgba(82,103,73,.12)_82%)]" />
+
+    <div class="container-page relative flex flex-1 items-end py-12 sm:py-14">
+      <div class="max-w-4xl">
+        <p class="text-sm font-semibold uppercase tracking-wider text-white/80">
           {{ t('hero.eyebrow') }}
         </p>
 
-        <h1 class="mt-4 text-4xl font-semibold tracking-tight text-highlighted sm:text-6xl xl:text-7xl">
-          {{ t('hero.title') }}
+        <h1 class="mt-4 max-w-4xl text-5xl font-semibold leading-[1.05] text-white sm:text-6xl xl:text-7xl">
+          <span>{{ t('hero.titleFirst') }}</span>
+          <span class="block">{{ t('hero.titleSecond') }}</span>
         </h1>
 
-        <p class="mt-6 max-w-3xl text-lg leading-relaxed text-muted sm:text-xl">
+        <p class="mt-6 max-w-2xl text-lg leading-relaxed text-white/85 sm:text-xl">
           {{ t('hero.lead') }}
         </p>
 
@@ -34,31 +36,18 @@ const facts = computed(() => [
             color="primary"
             trailing-icon="i-lucide-arrow-down"
             :label="t('hero.ctaPrimary')"
+            class="rounded-full"
           />
           <UButton
             to="#about"
             size="lg"
             color="neutral"
-            variant="outline"
+            variant="link"
             :label="t('hero.ctaSecondary')"
+            class="text-white hover:text-white/80"
           />
         </div>
       </div>
-
-      <dl class="grid content-center gap-6 lg:col-span-5 xl:col-span-4">
-        <div
-          v-for="fact in facts"
-          :key="fact.label"
-          class="rounded-xl border border-default bg-muted/40 px-6 py-5"
-        >
-          <dt class="text-sm text-muted">
-            {{ fact.label }}
-          </dt>
-          <dd class="mt-1 text-lg font-medium text-highlighted">
-            {{ fact.value }}
-          </dd>
-        </div>
-      </dl>
     </div>
   </section>
 </template>

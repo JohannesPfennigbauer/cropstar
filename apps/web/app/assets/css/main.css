@@ -1,40 +1,68 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+@import "@fontsource-variable/fredoka";
+@import "@fontsource-variable/nunito";
 
 @theme static {
-  /* Leaf — primary. Desaturated enough to sit next to real data without shouting. */
-  --color-leaf-50: #f2f9ef;
-  --color-leaf-100: #e1f1da;
-  --color-leaf-200: #c3e3b7;
-  --color-leaf-300: #98cd87;
-  --color-leaf-400: #6bb158;
-  --color-leaf-500: #4a9439;
-  --color-leaf-600: #37762b;
-  --color-leaf-700: #2d5d25;
-  --color-leaf-800: #274a21;
-  --color-leaf-900: #223e1f;
-  --color-leaf-950: #0e220e;
+  /* Four source colours; all lighter UI states are mixtures of these. */
+  --color-paper: #f5f2e9;
+  --color-charcoal: #34372f;
+  --color-leaf: #526749;
+  --color-soil: #9a6b4d;
 
-  /* Soil — accent for anything below the ground line. */
-  --color-soil-50: #fbf7ef;
-  --color-soil-100: #f5ecd8;
-  --color-soil-200: #ead6ae;
-  --color-soil-300: #dcb87c;
-  --color-soil-400: #d09c52;
-  --color-soil-500: #c78538;
-  --color-soil-600: #b06c2d;
-  --color-soil-700: #925327;
-  --color-soil-800: #784326;
-  --color-soil-900: #643922;
-  --color-soil-950: #391d10;
+  --color-leaf-50: color-mix(in srgb, var(--color-leaf) 8%, var(--color-paper));
+  --color-leaf-100: color-mix(in srgb, var(--color-leaf) 16%, var(--color-paper));
+  --color-leaf-200: color-mix(in srgb, var(--color-leaf) 28%, var(--color-paper));
+  --color-leaf-300: color-mix(in srgb, var(--color-leaf) 45%, var(--color-paper));
+  --color-leaf-400: color-mix(in srgb, var(--color-leaf) 72%, var(--color-paper));
+  --color-leaf-500: var(--color-leaf);
+  --color-leaf-600: color-mix(in srgb, var(--color-leaf) 82%, var(--color-charcoal));
+  --color-leaf-700: color-mix(in srgb, var(--color-leaf) 64%, var(--color-charcoal));
+  --color-leaf-800: color-mix(in srgb, var(--color-leaf) 42%, var(--color-charcoal));
+  --color-leaf-900: color-mix(in srgb, var(--color-leaf) 22%, var(--color-charcoal));
+  --color-leaf-950: var(--color-charcoal);
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  --color-soil-50: color-mix(in srgb, var(--color-soil) 8%, var(--color-paper));
+  --color-soil-100: color-mix(in srgb, var(--color-soil) 16%, var(--color-paper));
+  --color-soil-200: color-mix(in srgb, var(--color-soil) 28%, var(--color-paper));
+  --color-soil-300: color-mix(in srgb, var(--color-soil) 45%, var(--color-paper));
+  --color-soil-400: color-mix(in srgb, var(--color-soil) 72%, var(--color-paper));
+  --color-soil-500: var(--color-soil);
+  --color-soil-600: color-mix(in srgb, var(--color-soil) 82%, var(--color-charcoal));
+  --color-soil-700: color-mix(in srgb, var(--color-soil) 64%, var(--color-charcoal));
+  --color-soil-800: color-mix(in srgb, var(--color-soil) 42%, var(--color-charcoal));
+  --color-soil-900: color-mix(in srgb, var(--color-soil) 22%, var(--color-charcoal));
+  --color-soil-950: var(--color-charcoal);
+
+  --font-sans: "Nunito Variable", "Trebuchet MS", sans-serif;
+  --font-display: "Fredoka Variable", "Trebuchet MS", sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", "JetBrains Mono", Menlo, Consolas, monospace;
 }
 
 :root {
   --ui-radius: 0.5rem;
+  --ui-bg: var(--color-paper);
+  --ui-bg-muted: color-mix(in srgb, var(--color-leaf) 5%, var(--color-paper));
+  --ui-bg-elevated: color-mix(in srgb, var(--color-charcoal) 4%, var(--color-paper));
+  --ui-bg-accented: color-mix(in srgb, var(--color-leaf) 12%, var(--color-paper));
+  --ui-bg-inverted: var(--color-charcoal);
+  --ui-text-dimmed: color-mix(in srgb, var(--color-charcoal) 55%, var(--color-paper));
+  --ui-text-muted: color-mix(in srgb, var(--color-charcoal) 72%, var(--color-paper));
+  --ui-text-toned: color-mix(in srgb, var(--color-charcoal) 84%, var(--color-paper));
+  --ui-text: var(--color-charcoal);
+  --ui-text-highlighted: var(--color-charcoal);
+  --ui-text-inverted: var(--color-paper);
+  --ui-border: color-mix(in srgb, var(--color-charcoal) 18%, var(--color-paper));
+  --ui-border-muted: color-mix(in srgb, var(--color-charcoal) 10%, var(--color-paper));
+  --ui-border-accented: color-mix(in srgb, var(--color-charcoal) 30%, var(--color-paper));
+  --ui-border-inverted: var(--color-charcoal);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: 0;
 }
 
 /* Every landing section shares this container so the page uses wide desktops properly. */
@@ -54,6 +82,12 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
+}
+
+@media (min-width: 48rem) {
+  html {
+    font-size: 80%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
