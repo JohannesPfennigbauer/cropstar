@@ -1,13 +1,15 @@
 <script setup lang="ts">
 const { locale, locales, t } = useI18n()
 const switchLocalePath = useSwitchLocalePath()
+const localePath = useLocalePath()
 const { repositoryUrl } = useRuntimeConfig().public
 
-const links = [
-  { label: t('nav.about'), to: '#about' },
-  { label: t('nav.explore'), to: '#explore' },
-  { label: t('nav.contact'), to: '#contact' }
-]
+const links = computed(() => [
+  { label: t('nav.about'), to: { path: localePath('/'), hash: '#about' } },
+  { label: t('nav.explore'), to: { path: localePath('/'), hash: '#explore' } },
+  { label: t('nav.blog'), to: localePath('/blog') },
+  { label: t('nav.contact'), to: { path: localePath('/'), hash: '#contact' } }
+])
 
 const available = computed(() =>
   (locales.value as Array<{ code: typeof locale.value, name?: string }>).map(entry => ({
@@ -20,8 +22,8 @@ const available = computed(() =>
 <template>
   <header class="sticky top-0 z-50 bg-default/90 backdrop-blur-md">
     <div class="container-page flex h-18 items-center justify-between gap-4">
-      <a
-        href="#top"
+      <NuxtLink
+        :to="{ path: localePath('/'), hash: '#top' }"
         class="flex items-center gap-2.5"
       >
         <svg
@@ -42,12 +44,12 @@ const available = computed(() =>
           />
         </svg>
         <span class="font-display text-xl font-semibold text-highlighted">Cropstar</span>
-      </a>
+      </NuxtLink>
 
       <nav class="hidden items-center gap-1 md:flex">
         <UButton
           v-for="link in links"
-          :key="link.to"
+          :key="link.label"
           :to="link.to"
           color="neutral"
           variant="ghost"

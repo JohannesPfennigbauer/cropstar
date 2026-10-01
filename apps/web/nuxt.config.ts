@@ -1,5 +1,7 @@
+import { fileURLToPath } from 'node:url'
+
 export default defineNuxtConfig({
-  modules: ['@nuxt/ui', '@nuxt/eslint', '@nuxtjs/i18n'],
+  modules: ['@nuxt/ui', '@nuxt/eslint', '@nuxtjs/i18n', '@nuxt/content'],
   devtools: { enabled: true },
 
   app: {
@@ -8,6 +10,11 @@ export default defineNuxtConfig({
     }
   },
   css: ['~/assets/css/main.css'],
+
+  content: {
+    // node:sqlite avoids compiling better-sqlite3 on Alpine.
+    experimental: { sqliteConnector: 'native' }
+  },
 
   runtimeConfig: {
     public: {
@@ -25,12 +32,22 @@ export default defineNuxtConfig({
   routeRules: {
     '/': { prerender: true },
     '/en': { prerender: true },
+    '/blog/**': { prerender: true },
+    '/en/blog/**': { prerender: true },
     '/app/**': { ssr: false }
   },
   compatibilityDate: '2025-07-15',
 
   nitro: {
-    preset: 'node-server'
+    preset: 'node-server',
+    // Post routes are discovered by following links from the blog indexes.
+    prerender: {
+      routes: ['/blog', '/en/blog'],
+      crawlLinks: true
+    },
+    publicAssets: [
+      { dir: fileURLToPath(new URL('../../content/media', import.meta.url)), baseURL: '/media' }
+    ]
   },
 
   typescript: {

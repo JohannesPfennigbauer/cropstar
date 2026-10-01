@@ -19,5 +19,10 @@ export function useFigures() {
     return unit ? `${format(value, precision)} ${unit}` : format(value, precision)
   }
 
-  return { format, withUnit }
+  // Content dates are calendar days stored as UTC midnight.
+  function formatDate(value: string | Date): string {
+    return new Intl.DateTimeFormat(tag.value, { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(value))
+  }
+
+  return { format, withUnit, formatDate }
 }

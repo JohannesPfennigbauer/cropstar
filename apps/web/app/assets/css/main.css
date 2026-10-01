@@ -2,6 +2,7 @@
 @import "@nuxt/ui";
 @import "@fontsource-variable/fredoka";
 @import "@fontsource-variable/nunito";
+@plugin "@tailwindcss/typography";
 
 @theme static {
   /* Four source colours; all lighter UI states are mixtures of these. */
@@ -107,4 +108,21 @@ html {
 .tabular {
   font-variant-numeric: tabular-nums;
   font-family: var(--font-mono);
+}
+
+.prose-cropstar {
+  --tw-prose-body: var(--ui-text-toned);
+  --tw-prose-headings: var(--ui-text-highlighted);
+  --tw-prose-lead: var(--ui-text-muted);
+  --tw-prose-links: var(--color-leaf-700);
+  --tw-prose-bold: var(--ui-text-highlighted);
+  --tw-prose-counters: var(--ui-text-dimmed);
+  --tw-prose-bullets: var(--color-leaf-300);
+  --tw-prose-hr: var(--ui-border);
+  --tw-prose-quotes: var(--ui-text-highlighted);
+  --tw-prose-quote-borders: var(--color-soil-300);
+  --tw-prose-captions: var(--ui-text-dimmed);
+  --tw-prose-code: var(--ui-text-highlighted);
+  --tw-prose-th-borders: var(--ui-border-accented);
+  --tw-prose-td-borders: var(--ui-border);
 }

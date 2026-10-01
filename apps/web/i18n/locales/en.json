@@ -7,6 +7,7 @@
   "nav": {
     "about": "About Cropstar",
     "explore": "Explore",
+    "blog": "Blog",
     "contact": "Get involved",
     "github": "Cropstar on GitHub",
     "earlyAccess": "Early access"
@@ -148,7 +149,8 @@
   },
   "contact": {
     "eyebrow": "Get involved",
-    "title": "Build together. Understand relationships more deeply.",
+    "titleLine1": "Build together.",
+    "titleLine2": "Learn together.",
     "lead": "We connect observations from practice with soil, weather, crop development, satellite data and models. The result is a tool that helps farmers understand their ecosystem more deeply over time.",
     "body": "It is developed together with farms — and open to further perspectives from farming, advisory services and research.",
     "subject": "Build together",
@@ -161,7 +163,7 @@
       "nowTitle": "Capture the status quo together",
       "nowBody": "Together with farms, we capture workflows, decisions and sources of information.",
       "nextTitle": "Capture the field as a story",
-      "nextBody": "Plots, observations and field records become a traceable history of each field.",
+      "nextBody": "Observations and field records become a traceable history of each field.",
       "thenTitle": "Make relationships visible",
       "thenBody": "Weather, soil and satellite data reveal developments and their causes.",
       "laterTitle": "Explore and understand relationships",
@@ -172,6 +174,36 @@
     "rights": "© {year} Cropstar — licensed AGPL-3.0. Your field data is yours.",
     "source": "Source",
     "issues": "Issues & ideas"
+  },
+  "blog": {
+    "seo": {
+      "title": "Blog — Cropstar",
+      "description": "Posts on regenerative practice and crop modelling: what happens in the soil, why, and how sure we are."
+    },
+    "eyebrow": "Blog",
+    "title": "Regenerative practice and crop models",
+    "lead": "What happens in the soil and the crop, why it happens, and how sure we are about it.",
+    "empty": "No posts yet. Coming soon.",
+    "back": "All posts",
+    "draft": "Draft",
+    "byline": "By {authors}",
+    "updated": "updated {date}",
+    "sources": "Sources",
+    "onlyIn": "This post is only available in {language}.",
+    "machineTranslated": "This post was machine-translated.",
+    "readOriginal": "Read the original ({language})",
+    "languages": {
+      "de": "German",
+      "en": "English"
+    },
+    "topics": {
+      "practice": "Regenerative practice",
+      "modeling": "Crop modelling"
+    },
+    "illustration": {
+      "inputs": "Held fixed: {manure} rotted manure, {soilNitrogen} available soil nitrogen, medium water storage. The numbers come from a hard-coded response surface for winter wheat.",
+      "revision": "Revision: {revision}."
+    }
   },
   "units": {
     "mm": "mm",

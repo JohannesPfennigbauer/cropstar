@@ -7,6 +7,7 @@
   "nav": {
     "about": "Über Cropstar",
     "explore": "Entdecken",
+    "blog": "Blog",
     "contact": "Mitmachen",
     "github": "Cropstar auf GitHub",
     "earlyAccess": "Früher Zugang"
@@ -148,7 +149,8 @@
   },
   "contact": {
     "eyebrow": "Mitmachen",
-    "title": "Gemeinsam entwickeln. Zusammenhänge besser verstehen.",
+    "titleLine1": "Gemeinsam entwickeln.",
+    "titleLine2": "Und verstehen.",
     "lead": "Wir verbinden Beobachtungen aus der Praxis mit Boden, Wetter, Pflanzenentwicklung, Satellitendaten und Modellen. So entsteht ein Werkzeug, mit dem Landwirtinnen und Landwirte ihr Ökosystem immer besser verstehen können.",
     "body": "Entwickelt wird gemeinsam mit landwirtschaftlichen Betrieben – und offen für weitere Perspektiven aus Landwirtschaft, Beratung und Forschung.",
     "subject": "Cropstar gemeinsam entwickeln",
@@ -161,9 +163,9 @@
       "nowTitle": "Den Status quo gemeinsam erfassen",
       "nowBody": "Gemeinsam mit Betrieben erfassen wir Arbeitsabläufe, Entscheidungen und Informationsquellen.",
       "nextTitle": "Das Feld als Geschichte erfassen",
-      "nextBody": "Schläge, Beobachtungen und Maßnahmen werden zur nachvollziehbaren Geschichte jedes Feldes.",
+      "nextBody": "Beobachtungen und Maßnahmen werden zur nachvollziehbaren Geschichte jedes Feldes.",
       "thenTitle": "Zusammenhänge sichtbar machen",
-      "thenBody": "Wetter, Boden und Satellitendaten machen Entwicklungen und ihre Ursachen sichtbar.",
+      "thenBody": "Wetter-, Boden- und Satellitendaten machen Entwicklungen und ihre Ursachen sichtbar.",
       "laterTitle": "Zusammenhänge durchspielen und verstehen",
       "laterBody": "Ein Pflanzenmodell hilft, das Zusammenspiel von Wasser, Nährstoffen, Wetter, Fruchtfolgen und Mischkulturen zu erkunden."
     }
@@ -172,6 +174,36 @@
     "rights": "© {year} Cropstar – lizenziert unter AGPL-3.0. Deine Felddaten gehören dir.",
     "source": "Quellcode",
     "issues": "Fehler & Ideen"
+  },
+  "blog": {
+    "seo": {
+      "title": "Blog – Cropstar",
+      "description": "Beiträge über regenerative Praxis und Pflanzenmodellierung: was im Boden passiert, warum, und wie sicher wir das wissen."
+    },
+    "eyebrow": "Blog",
+    "title": "Regenerative Praxis und Pflanzenmodelle",
+    "lead": "Was im Boden und im Bestand passiert, warum es passiert und wie sicher wir das wissen.",
+    "empty": "Noch keine Beiträge. Bald geht's los.",
+    "back": "Alle Beiträge",
+    "draft": "Entwurf",
+    "byline": "Von {authors}",
+    "updated": "aktualisiert am {date}",
+    "sources": "Quellen",
+    "onlyIn": "Diesen Beitrag gibt es nur auf {language}.",
+    "machineTranslated": "Dieser Beitrag wurde maschinell übersetzt.",
+    "readOriginal": "Original lesen ({language})",
+    "languages": {
+      "de": "Deutsch",
+      "en": "Englisch"
+    },
+    "topics": {
+      "practice": "Regenerative Praxis",
+      "modeling": "Pflanzenmodellierung"
+    },
+    "illustration": {
+      "inputs": "Fest angenommen: {manure} Rottemist, {soilNitrogen} verfügbarer Bodenstickstoff, mittlerer Wasserspeicher. Die Zahlen stammen aus einer fest hinterlegten Kennfläche für Winterweizen.",
+      "revision": "Stand: {revision}."
+    }
   },
   "units": {
     "mm": "mm",

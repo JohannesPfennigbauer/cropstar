@@ -28,7 +28,8 @@ const status = computed(() =>
             {{ t('contact.eyebrow') }}
           </p>
           <h2 class="mt-4 text-4xl font-semibold text-highlighted sm:text-5xl">
-            {{ t('contact.title') }}
+            {{ t('contact.titleLine1') }}<br>
+            {{ t('contact.titleLine2') }}
           </h2>
           <p class="mt-6 text-lg leading-relaxed text-muted">
             {{ t('contact.lead') }}
