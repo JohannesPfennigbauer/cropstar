@@ -4,7 +4,7 @@ import type { DropdownMenuItem } from '@nuxt/ui'
 const { t } = useI18n()
 const localePath = useLocalePath()
 const route = useRoute()
-const { me, farm, signOut } = useAuth()
+const { me, farm, selectFarm, signOut } = useAuth()
 const { years, selected: harvestYear, load: loadHarvestYears } = useHarvestYear()
 
 await loadHarvestYears()
@@ -13,7 +13,8 @@ watch(() => farm.value?.id, () => loadHarvestYears())
 const navigation = computed(() => [
   { label: t('app.nav.home'), to: localePath('/app'), exact: true },
   { label: t('app.nav.plots'), to: localePath('/app/plots'), exact: false },
-  { label: t('app.nav.tasks'), to: localePath('/app/tasks'), exact: false }
+  { label: t('app.nav.tasks'), to: localePath('/app/tasks'), exact: false },
+  { label: t('app.nav.farm'), to: localePath('/app/farm'), exact: false }
 ])
 
 function isActive(item: { to: string, exact: boolean }) {
@@ -37,9 +38,15 @@ async function onSignOut() {
 
 const userMenu = computed<DropdownMenuItem[][]>(() => [
   [
-    { label: me.value?.user.email ?? '', type: 'label' },
-    ...(farm.value ? [{ label: farm.value.name, icon: 'i-lucide-tractor', type: 'label' as const, class: 'sm:hidden' }] : [])
+    { label: me.value?.user.email ?? '', type: 'label' }
   ],
+  // On phones the header has no farm switcher; switching lives here instead.
+  (me.value?.memberships ?? []).map(m => ({
+    label: m.farm.name,
+    icon: m.farm.id === farm.value?.id ? 'i-lucide-check' : 'i-lucide-tractor',
+    class: 'sm:hidden',
+    onSelect: () => selectFarm(m.farm.id)
+  })),
   navigation.value.map(item => ({ label: item.label, to: item.to, class: 'md:hidden' })),
   [{ label: t('app.nav.account'), icon: 'i-lucide-user-cog', to: localePath('/app/account') }],
   [{ label: t('app.nav.signOut'), icon: 'i-lucide-log-out', onSelect: onSignOut }]
@@ -57,18 +64,7 @@ const userMenu = computed<DropdownMenuItem[][]>(() => [
           >
             <CropstarLogo compact />
           </NuxtLink>
-          <span
-            v-if="farm"
-            class="flex min-w-0 items-center gap-1.5 rounded-full bg-elevated px-3 py-1 text-sm font-medium text-highlighted max-sm:hidden"
-            data-testid="current-farm"
-          >
-            <UIcon
-              name="i-lucide-tractor"
-              class="size-4 shrink-0 text-primary"
-              :aria-label="t('app.nav.farm')"
-            />
-            <span class="truncate">{{ farm.name }}</span>
-          </span>
+          <AppFarmSwitcher />
         </div>
 
         <nav class="hidden items-center gap-1 md:flex">

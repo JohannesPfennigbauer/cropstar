@@ -24,6 +24,15 @@ of several Farms, a Farm has several members.
 What a member may do on a Farm: **Admin** (de: _Admin_), **Worker** (de: _Mitarbeiter_)
 or **Advisor** (de: _Berater_).
 
+**Invitation** (de: _Einladung_):
+A single-use, expiring link with which an Admin lets one person join a Farm in a given
+Role. Whoever holds the link can accept it; it can be revoked until then.
+_Avoid_: Invite code, Zugangscode
+
+**Former Member** (de: _ehemaliges Mitglied_):
+How work is attributed once the person who did it has deleted their account. The record
+stays; only the person behind it is gone.
+
 **Instance Operator** (de: _Instanz-Betreiber_):
 Whoever runs a Cropstar installation. Configures the instance; is not a Role on any Farm.
 _Avoid_: Admin (that is a Role on a Farm), Superuser

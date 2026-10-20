@@ -27,7 +27,9 @@ from cropstar_api.auth.provider import (
     Identity,
 )
 from cropstar_api.db import Db
-from cropstar_api.models import Farm, Membership, Role
+from cropstar_api.invitations import find_invitation, redeem_invitation
+from cropstar_api.memberships import FarmMembers, plan_account_deletion
+from cropstar_api.models import Farm, Membership, Role, User
 
 router = APIRouter(tags=["auth"])
 
@@ -48,7 +50,13 @@ class AuthConfig(BaseModel):
 class RegisterRequest(BaseModel):
     email: EmailStr
     password: NewPassword
-    farm_name: FarmName
+    # A new Farm for the new User; not needed when joining one by invitation.
+    farm_name: FarmName | None = None
+    invitation_token: Annotated[str, Field(max_length=200)] | None = None
+
+
+class AccountDeletion(BaseModel):
+    password: AnyPassword
 
 
 class SignInRequest(BaseModel):
@@ -107,19 +115,27 @@ def read_auth_config(settings: AppSettings, mailer: AppMailer) -> AuthConfig:
 def register(
     body: RegisterRequest, response: Response, db: Db, auth: PasswordAuth, settings: AppSettings
 ) -> Me:
-    """Create a User and their first Farm with them as its Admin, then sign them in."""
-    if not settings.registration_open:
+    """Create a User and sign them in. With an invitation they join that Farm, even when
+    open registration is closed; otherwise they get a new Farm with them as its Admin."""
+    invitation = find_invitation(db, body.invitation_token) if body.invitation_token else None
+    if invitation is None and not settings.registration_open:
         raise HTTPException(status.HTTP_403_FORBIDDEN, detail="registration_closed")
+    if invitation is None and body.farm_name is None:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, detail="farm_name_required")
     try:
         identity = auth.register(db, body.email, body.password)
     except EmailTakenError:
         raise HTTPException(status.HTTP_409_CONFLICT, detail="email_taken") from None
-    farm = Farm(name=body.farm_name)
-    db.add(farm)
-    db.flush()
-    db.add(Membership(farm_id=farm.id, user_id=identity.user_id, role=Role.ADMIN))
+    if invitation is not None:
+        redeem_invitation(db, invitation, identity.user_id)
+    else:
+        assert body.farm_name is not None
+        farm = Farm(name=body.farm_name)
+        db.add(farm)
+        db.flush()
+        db.add(Membership(farm_id=farm.id, user_id=identity.user_id, role=Role.ADMIN))
     set_session_cookie(response, auth.open_session(db, identity), settings)
-    return _me(db, identity)
+    return me_of(db, identity)
 
 
 @router.post("/auth/sign-in", operation_id="signIn")
@@ -131,7 +147,7 @@ def sign_in(
         # The same answer for an unknown email and a wrong password.
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="invalid_credentials")
     set_session_cookie(response, auth.open_session(db, identity), settings)
-    return _me(db, identity)
+    return me_of(db, identity)
 
 
 @router.post(
@@ -205,16 +221,56 @@ def complete_password_reset(body: PasswordResetCompletion, db: Db, auth: Passwor
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="invalid_or_expired_token")
 
 
+@router.delete(
+    "/me",
+    operation_id="deleteAccount",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+)
+def delete_account(
+    body: AccountDeletion,
+    response: Response,
+    identity: CurrentIdentity,
+    db: Db,
+    auth: PasswordAuth,
+    settings: AppSettings,
+) -> None:
+    """Delete the signed-in User. Farms they are the only member of go with them; their
+    recorded work elsewhere stays, attributed to a former member."""
+    if auth.authenticate(db, identity.email, body.password) is None:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail="wrong_password")
+    memberships = db.scalars(select(Membership).where(Membership.user_id == identity.user_id))
+    farms = []
+    for own in memberships:
+        roles = dict(
+            db.execute(
+                select(Membership.user_id, Membership.role).where(Membership.farm_id == own.farm_id)
+            ).all()
+        )
+        farm = db.get_one(Farm, own.farm_id)
+        farms.append(FarmMembers(farm.id, farm.name, roles))
+    plan = plan_account_deletion(identity.user_id, farms)
+    if plan.blocking_farms:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT, detail={"code": "last_admin", "farms": plan.blocking_farms}
+        )
+    for farm_id in plan.farms_to_delete:
+        db.delete(db.get_one(Farm, farm_id))
+    db.delete(db.get_one(User, identity.user_id))
+    db.flush()
+    clear_session_cookie(response, settings)
+
+
 @router.get("/me", operation_id="getMe")
 def read_me(identity: CurrentIdentity, db: Db) -> Me:
     """The signed-in User and the Farms they are a member of."""
-    return _me(db, identity)
+    return me_of(db, identity)
 
 
 # ── Helpers ─────────────────────────────────────────────────────────────────
 
 
-def _me(db: DbSession, identity: Identity) -> Me:
+def me_of(db: DbSession, identity: Identity) -> Me:
     memberships = db.scalars(
         select(Membership)
         .options(joinedload(Membership.farm))

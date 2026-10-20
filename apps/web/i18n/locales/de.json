@@ -275,7 +275,9 @@
       "haveAccount": "Schon ein Konto?",
       "signIn": "Anmelden",
       "closedTitle": "Registrierung geschlossen",
-      "closed": "Auf dieser Cropstar-Instanz kann man sich nicht selbst registrieren. Bitte die Person, die deinen Betrieb verwaltet, um eine Einladung."
+      "closed": "Auf dieser Cropstar-Instanz kann man sich nicht selbst registrieren. Bitte die Person, die deinen Betrieb verwaltet, um eine Einladung.",
+      "joinTitle": "Konto anlegen",
+      "joinSubmit": "Konto anlegen und beitreten"
     },
     "forgot": {
       "title": "Passwort vergessen",
@@ -301,7 +303,12 @@
       "changePassword": "Passwort ändern",
       "changePasswordLead": "Andere Geräte, auf denen du angemeldet bist, werden dabei abgemeldet.",
       "submit": "Passwort ändern",
-      "changed": "Passwort geändert."
+      "changed": "Passwort geändert.",
+      "deleteTitle": "Konto löschen",
+      "deleteLead": "Löscht dein Konto endgültig. Betriebe, in denen du das einzige Mitglied bist, werden mitgelöscht. In anderen Betrieben bleibt deine Arbeit im Protokoll, als „ehemaliges Mitglied“.",
+      "delete": "Konto löschen",
+      "deleted": "Dein Konto wurde gelöscht.",
+      "handOver": "Du bist der letzte Admin von: {farms}. Mach dort zuerst jemand anderen zum Admin."
     },
     "errors": {
       "invalid_credentials": "E-Mail oder Passwort stimmen nicht.",
@@ -438,6 +445,90 @@
         "harvest_year_locked": "Das Erntejahr ist gesperrt."
       },
       "newHint": "Was steht an? Titel genügt, alles andere ist optional."
+    },
+    "roles": {
+      "admin": "Admin",
+      "worker": "Mitarbeiter",
+      "advisor": "Berater"
+    },
+    "farm": {
+      "title": "Betrieb",
+      "masterData": "Stammdaten",
+      "amaNumber": "AMA-Betriebsnummer",
+      "amaNumberHelp": "Nur für Admins sichtbar.",
+      "amaNumberDigits": "Nur Ziffern.",
+      "members": "Mitglieder",
+      "rolesLead": "Admins verwalten Betrieb und Mitglieder. Mitarbeiter planen und erledigen Aufgaben. Berater sehen alles und schlagen Aufgaben vor, erledigen aber nichts.",
+      "you": "du",
+      "joined": "dabei seit {date}",
+      "role": "Rolle",
+      "leave": "Austreten",
+      "remove": "Entfernen",
+      "leaveTitle": "Betrieb verlassen?",
+      "leaveLead": "Du verlierst den Zugriff auf {farm}. Deine erledigten Aufgaben bleiben im Protokoll.",
+      "removeTitle": "Mitglied entfernen?",
+      "removeLead": "{email} verliert sofort den Zugriff. Ihre Aufgaben bleiben, sind aber niemandem mehr zugewiesen.",
+      "left": "Du hast den Betrieb verlassen.",
+      "invitations": "Einladungen",
+      "invitationsLead": "Ein Einladungslink gilt für eine Person und läuft ab. Wer den Link hat, kann damit beitreten – gib ihn nur der richtigen Person.",
+      "validity": "Gültig",
+      "validDays": "{n} Tag | {n} Tage",
+      "createInvite": "Link erstellen",
+      "inviteEmail": "Per E-Mail senden an (optional)",
+      "inviteEmailHelp": "Der Link geht zusätzlich an diese Adresse.",
+      "inviteEmailed": "Einladung per E-Mail verschickt.",
+      "linkTitle": "Einladungslink",
+      "linkOnce": "Kopiere ihn jetzt – aus Sicherheitsgründen wird er nur einmal angezeigt.",
+      "copy": "Kopieren",
+      "copied": "Link kopiert.",
+      "validUntil": "gültig bis {date}",
+      "expired": "abgelaufen",
+      "revoke": "Widerrufen",
+      "dangerZone": "Gefahrenzone",
+      "deleteLead": "Löscht den Betrieb mit allen Feldstücken, Schlägen, Aufgaben und Mitgliedschaften – endgültig. Tippe zur Bestätigung den Namen des Betriebs ein.",
+      "typeName": "Name des Betriebs",
+      "delete": "Betrieb löschen",
+      "deleted": "Betrieb gelöscht.",
+      "manage": "Betrieb verwalten",
+      "switch": "Betrieb wechseln",
+      "none": "Kein Betrieb",
+      "createTitle": "Neuer Betrieb",
+      "createLead": "Du wirst Admin des neuen Betriebs und kannst danach andere einladen.",
+      "create": "Anlegen",
+      "created": "{name} angelegt.",
+      "noneTitle": "Du bist in keinem Betrieb",
+      "noneLead": "Lege einen Betrieb an, oder öffne den Einladungslink, den du bekommen hast.",
+      "errors": {
+        "last_admin": "Ein Betrieb braucht immer mindestens einen Admin. Mach zuerst jemand anderen zum Admin.",
+        "last_member": "Du bist das einzige Mitglied. Lösche den Betrieb stattdessen.",
+        "confirmation_mismatch": "Der eingegebene Name stimmt nicht.",
+        "forbidden_for_role": "Das dürfen nur Admins.",
+        "member_not_found": "Dieses Mitglied gibt es nicht mehr.",
+        "invitation_not_found": "Diese Einladung gibt es nicht mehr."
+      }
+    },
+    "invite": {
+      "title": "Einladung",
+      "lead": "Du bist eingeladen, {farm} als {role} beizutreten.",
+      "by": "Eingeladen von {email}",
+      "validUntil": "Gültig bis {date}",
+      "notFound": "Diesen Einladungslink gibt es nicht. Prüfe, ob er vollständig ist.",
+      "state": {
+        "expired": "Diese Einladung ist abgelaufen. Bitte um einen neuen Link.",
+        "revoked": "Diese Einladung wurde widerrufen.",
+        "used": "Diese Einladung wurde schon verwendet."
+      },
+      "signedInAs": "Angemeldet als {email}",
+      "join": "{farm} beitreten",
+      "joined": "Willkommen bei {farm}!",
+      "register": "Konto anlegen und beitreten",
+      "signIn": "Ich habe schon ein Konto",
+      "errors": {
+        "already_member": "Du bist schon Mitglied dieses Betriebs.",
+        "invitation_expired": "Diese Einladung ist abgelaufen.",
+        "invitation_revoked": "Diese Einladung wurde widerrufen.",
+        "invitation_used": "Diese Einladung wurde schon verwendet."
+      }
     }
   }
 }

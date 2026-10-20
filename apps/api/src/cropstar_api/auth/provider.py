@@ -42,7 +42,7 @@ def normalize_email(email: str) -> str:
     return email.strip().lower()
 
 
-def _hash_token(token: str) -> str:
+def hash_token(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
 
@@ -133,7 +133,7 @@ class PasswordAuthProvider:
         token = secrets.token_urlsafe(32)
         db.add(
             Session(
-                token_hash=_hash_token(token),
+                token_hash=hash_token(token),
                 user_id=identity.user_id,
                 expires_at=now + self.session_lifetime,
             )
@@ -145,19 +145,19 @@ class PasswordAuthProvider:
         row = db.execute(
             select(User.id, User.email)
             .join(Session, Session.user_id == User.id)
-            .where(Session.token_hash == _hash_token(token), Session.expires_at > self._clock())
+            .where(Session.token_hash == hash_token(token), Session.expires_at > self._clock())
         ).one_or_none()
         return Identity(row.id, row.email) if row else None
 
     def close_session(self, db: DbSession, token: str) -> None:
-        db.execute(delete(Session).where(Session.token_hash == _hash_token(token)))
+        db.execute(delete(Session).where(Session.token_hash == hash_token(token)))
 
     def close_all_sessions(
         self, db: DbSession, user_id: uuid.UUID, except_token: str | None = None
     ) -> None:
         statement = delete(Session).where(Session.user_id == user_id)
         if except_token is not None:
-            statement = statement.where(Session.token_hash != _hash_token(except_token))
+            statement = statement.where(Session.token_hash != hash_token(except_token))
         db.execute(statement)
 
     # ── Password reset ──────────────────────────────────────────────────────
@@ -169,7 +169,7 @@ class PasswordAuthProvider:
         token = secrets.token_urlsafe(32)
         db.add(
             PasswordResetToken(
-                token_hash=_hash_token(token),
+                token_hash=hash_token(token),
                 user_id=user.id,
                 expires_at=self._clock() + self._reset_token_lifetime,
             )
@@ -182,7 +182,7 @@ class PasswordAuthProvider:
         reset = db.scalar(
             select(PasswordResetToken)
             .where(
-                PasswordResetToken.token_hash == _hash_token(token),
+                PasswordResetToken.token_hash == hash_token(token),
                 PasswordResetToken.used_at.is_(None),
                 PasswordResetToken.expires_at > now,
             )

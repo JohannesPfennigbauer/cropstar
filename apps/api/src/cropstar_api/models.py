@@ -45,7 +45,10 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(320), unique=True)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
-    memberships: Mapped[list["Membership"]] = relationship(back_populates="user")
+    # The database cascades deletes; the ORM must not try to blank the keys first.
+    memberships: Mapped[list["Membership"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan", passive_deletes=True
+    )
 
 
 class PasswordCredential(Base):
@@ -94,9 +97,13 @@ class Farm(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(200))
+    # Sensitive: shown to Admins only.
+    ama_farm_number: Mapped[str | None] = mapped_column(String(20))
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
-    memberships: Mapped[list["Membership"]] = relationship(back_populates="farm")
+    memberships: Mapped[list["Membership"]] = relationship(
+        back_populates="farm", cascade="all, delete-orphan", passive_deletes=True
+    )
 
 
 class Role(enum.StrEnum):
@@ -126,6 +133,31 @@ class Membership(Base):
 
     farm: Mapped[Farm] = relationship(back_populates="memberships")
     user: Mapped[User] = relationship(back_populates="memberships")
+
+
+class Invitation(Base):
+    """A single-use, expiring link to join a Farm in a Role. Only a hash of it is stored."""
+
+    __tablename__ = "invitations"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    farm_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("farms.id", ondelete="CASCADE"), index=True
+    )
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    role: Mapped[Role] = mapped_column(_pg_enum(Role, "role"))
+    # Where the link was emailed to, if it was; anyone holding the link may accept it.
+    email: Mapped[str | None] = mapped_column(String(320))
+    created_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
+    created_at: Mapped[datetime]
+    expires_at: Mapped[datetime]
+    revoked_at: Mapped[datetime | None]
+    accepted_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
+    accepted_at: Mapped[datetime | None]
 
 
 # Geometry is stored as AMA delivers it: MGI / Austria Lambert. The API converts to WGS84.

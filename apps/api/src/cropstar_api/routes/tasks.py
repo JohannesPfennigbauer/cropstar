@@ -13,8 +13,8 @@ from sqlalchemy.orm import Session as DbSession
 
 from cropstar_api.db import Db
 from cropstar_api.farms import FarmMembership
-from cropstar_api.models import Membership, Priority, Role, Task, TaskStatus, User
-from cropstar_api.policy import Action, Actor, can_be_assigned
+from cropstar_api.models import Membership, Priority, Task, TaskStatus, User
+from cropstar_api.policy import Action, Actor
 from cropstar_api.tasks.lifecycle import (
     ForbiddenError,
     InvalidAssigneeError,
@@ -38,12 +38,6 @@ Description = Annotated[str, StringConstraints(strip_whitespace=True, max_length
 class PersonOut(BaseModel):
     id: uuid.UUID
     email: str
-
-
-class MemberOut(BaseModel):
-    user: PersonOut
-    role: Role
-    assignable: bool
 
 
 class TaskOut(BaseModel):
@@ -100,24 +94,6 @@ class TaskUpdate(BaseModel):
 
 
 # ── Routes ──────────────────────────────────────────────────────────────────
-
-
-@router.get("/members", operation_id="listMembers")
-def list_members(membership: FarmMembership, db: Db) -> list[MemberOut]:
-    rows = db.execute(
-        select(User, Membership.role)
-        .join(Membership, Membership.user_id == User.id)
-        .where(Membership.farm_id == membership.farm_id)
-        .order_by(User.email)
-    ).all()
-    return [
-        MemberOut(
-            user=PersonOut(id=user.id, email=user.email),
-            role=role,
-            assignable=can_be_assigned(role),
-        )
-        for user, role in rows
-    ]
 
 
 @router.get("/tasks", operation_id="listTasks")

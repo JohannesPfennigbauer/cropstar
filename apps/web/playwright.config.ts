@@ -25,7 +25,8 @@ export default defineConfig({
       env: {
         CROPSTAR_HOST: '127.0.0.1',
         CROPSTAR_PORT: String(API_PORT),
-        CROPSTAR_DATABASE_URL: DATABASE_URL
+        CROPSTAR_DATABASE_URL: DATABASE_URL,
+        CROPSTAR_PUBLIC_BASE_URL: `http://localhost:${WEB_PORT}`
       },
       reuseExistingServer: !process.env.CI
     },

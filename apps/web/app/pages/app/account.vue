@@ -8,6 +8,28 @@ const { t } = useI18n()
 const api = useApi()
 const toast = useToast()
 const { me } = useAuth()
+const localePath = useLocalePath()
+
+const deletion = reactive({ password: '' })
+const deleting = ref(false)
+const deletionError = ref<string | null>(null)
+
+async function deleteAccount() {
+  deleting.value = true
+  deletionError.value = null
+  const { response, error } = await api.DELETE('/api/me', { body: { password: deletion.password } })
+  deleting.value = false
+  if (response.status === 204) {
+    me.value = null
+    toast.add({ title: t('app.account.deleted'), color: 'neutral', icon: 'i-lucide-trash-2' })
+    await navigateTo(localePath('/'))
+    return
+  }
+  const detail = (error as { detail?: unknown } | undefined)?.detail
+  deletionError.value = typeof detail === 'object' && detail && 'farms' in detail
+    ? t('app.account.handOver', { farms: (detail as { farms: string[] }).farms.join(', ') })
+    : t(`app.errors.${apiErrorCode(error)}`)
+}
 
 useSeoMeta({ title: () => t('app.account.title') })
 
@@ -97,6 +119,40 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
           :label="t('app.account.submit')"
         />
       </UForm>
+    </UCard>
+
+    <UCard class="mt-8 ring-error/40">
+      <h2 class="text-lg font-semibold text-error">
+        {{ t('app.account.deleteTitle') }}
+      </h2>
+      <p class="mt-1 text-sm text-muted">
+        {{ t('app.account.deleteLead') }}
+      </p>
+      <div class="mt-4 flex flex-col gap-2 sm:flex-row">
+        <UInput
+          v-model="deletion.password"
+          type="password"
+          autocomplete="current-password"
+          :placeholder="t('app.fields.currentPassword')"
+          :aria-label="t('app.fields.currentPassword')"
+          class="w-full sm:w-72"
+        />
+        <UButton
+          color="error"
+          icon="i-lucide-trash-2"
+          :disabled="!deletion.password"
+          :loading="deleting"
+          :label="t('app.account.delete')"
+          @click="deleteAccount"
+        />
+      </div>
+      <UAlert
+        v-if="deletionError"
+        class="mt-4"
+        color="error"
+        variant="subtle"
+        :description="deletionError"
+      />
     </UCard>
   </div>
 </template>

@@ -275,7 +275,9 @@
       "haveAccount": "Already have an account?",
       "signIn": "Sign in",
       "closedTitle": "Registration is closed",
-      "closed": "This Cropstar instance does not allow signing up yourself. Ask whoever manages your farm for an invitation."
+      "closed": "This Cropstar instance does not allow signing up yourself. Ask whoever manages your farm for an invitation.",
+      "joinTitle": "Create your account",
+      "joinSubmit": "Create account and join"
     },
     "forgot": {
       "title": "Forgot your password",
@@ -301,7 +303,12 @@
       "changePassword": "Change password",
       "changePasswordLead": "Other devices you are signed in on will be signed out.",
       "submit": "Change password",
-      "changed": "Password changed."
+      "changed": "Password changed.",
+      "deleteTitle": "Delete account",
+      "deleteLead": "Deletes your account for good. Farms where you are the only member are deleted with it. On other farms your work stays on record, as a “former member”.",
+      "delete": "Delete account",
+      "deleted": "Your account was deleted.",
+      "handOver": "You are the last admin of: {farms}. Make someone else admin there first."
     },
     "errors": {
       "invalid_credentials": "Email or password is not correct.",
@@ -438,6 +445,90 @@
         "harvest_year_locked": "The harvest year is locked."
       },
       "newHint": "What needs doing? A title is enough; everything else is optional."
+    },
+    "roles": {
+      "admin": "Admin",
+      "worker": "Worker",
+      "advisor": "Advisor"
+    },
+    "farm": {
+      "title": "Farm",
+      "masterData": "Details",
+      "amaNumber": "AMA farm number",
+      "amaNumberHelp": "Visible to admins only.",
+      "amaNumberDigits": "Digits only.",
+      "members": "Members",
+      "rolesLead": "Admins manage the farm and its members. Workers plan and complete tasks. Advisors see everything and suggest tasks, but complete nothing.",
+      "you": "you",
+      "joined": "member since {date}",
+      "role": "Role",
+      "leave": "Leave",
+      "remove": "Remove",
+      "leaveTitle": "Leave this farm?",
+      "leaveLead": "You lose access to {farm}. The work you completed stays on record.",
+      "removeTitle": "Remove member?",
+      "removeLead": "{email} loses access immediately. Their tasks stay, but are no longer assigned to anyone.",
+      "left": "You left the farm.",
+      "invitations": "Invitations",
+      "invitationsLead": "An invitation link works for one person and expires. Whoever has the link can join with it – only give it to the right person.",
+      "validity": "Valid for",
+      "validDays": "{n} day | {n} days",
+      "createInvite": "Create link",
+      "inviteEmail": "Also email it to (optional)",
+      "inviteEmailHelp": "The link is sent to this address as well.",
+      "inviteEmailed": "Invitation emailed.",
+      "linkTitle": "Invitation link",
+      "linkOnce": "Copy it now – for security it is shown only once.",
+      "copy": "Copy",
+      "copied": "Link copied.",
+      "validUntil": "valid until {date}",
+      "expired": "expired",
+      "revoke": "Revoke",
+      "dangerZone": "Danger zone",
+      "deleteLead": "Deletes the farm with all its fields, plots, tasks and memberships – for good. Type the farm's name to confirm.",
+      "typeName": "Farm name",
+      "delete": "Delete farm",
+      "deleted": "Farm deleted.",
+      "manage": "Manage farm",
+      "switch": "Switch farm",
+      "none": "No farm",
+      "createTitle": "New farm",
+      "createLead": "You become the new farm's admin and can invite others afterwards.",
+      "create": "Create",
+      "created": "{name} created.",
+      "noneTitle": "You are not on any farm",
+      "noneLead": "Create a farm, or open the invitation link you received.",
+      "errors": {
+        "last_admin": "A farm always needs at least one admin. Make someone else admin first.",
+        "last_member": "You are the only member. Delete the farm instead.",
+        "confirmation_mismatch": "The name you typed does not match.",
+        "forbidden_for_role": "Only admins can do that.",
+        "member_not_found": "This member no longer exists.",
+        "invitation_not_found": "This invitation no longer exists."
+      }
+    },
+    "invite": {
+      "title": "Invitation",
+      "lead": "You are invited to join {farm} as {role}.",
+      "by": "Invited by {email}",
+      "validUntil": "Valid until {date}",
+      "notFound": "This invitation link does not exist. Check that it is complete.",
+      "state": {
+        "expired": "This invitation has expired. Ask for a new link.",
+        "revoked": "This invitation was revoked.",
+        "used": "This invitation has already been used."
+      },
+      "signedInAs": "Signed in as {email}",
+      "join": "Join {farm}",
+      "joined": "Welcome to {farm}!",
+      "register": "Create an account and join",
+      "signIn": "I already have an account",
+      "errors": {
+        "already_member": "You are already a member of this farm.",
+        "invitation_expired": "This invitation has expired.",
+        "invitation_revoked": "This invitation was revoked.",
+        "invitation_used": "This invitation has already been used."
+      }
     }
   }
 }
