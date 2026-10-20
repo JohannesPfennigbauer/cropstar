@@ -1,6 +1,6 @@
 import enum
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Any, ClassVar
 
@@ -14,6 +14,7 @@ from sqlalchemy import (
     Numeric,
     SmallInteger,
     String,
+    Text,
     UniqueConstraint,
     func,
 )
@@ -104,6 +105,11 @@ class Role(enum.StrEnum):
     ADVISOR = "advisor"
 
 
+def _pg_enum(enum_type: type[enum.StrEnum], name: str) -> Enum:
+    # Store the lower-case values, not the Python member names.
+    return Enum(enum_type, name=name, values_callable=lambda members: [m.value for m in members])
+
+
 class Membership(Base):
     """The link between one User and one Farm, carrying exactly one Role."""
 
@@ -115,9 +121,7 @@ class Membership(Base):
     user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), primary_key=True, index=True
     )
-    role: Mapped[Role] = mapped_column(
-        Enum(Role, name="role", values_callable=lambda roles: [r.value for r in roles])
-    )
+    role: Mapped[Role] = mapped_column(_pg_enum(Role, "role"))
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     farm: Mapped[Farm] = relationship(back_populates="memberships")
@@ -173,3 +177,44 @@ class Plot(Base):
     )
 
     field: Mapped[Field] = relationship(back_populates="plots")
+
+
+class TaskStatus(enum.StrEnum):
+    OPEN = "open"
+    DONE = "done"
+    DISCARDED = "discarded"
+
+
+class Priority(enum.StrEnum):
+    NONE = "none"
+    LOW = "low"
+    NORMAL = "normal"
+    HIGH = "high"
+
+
+class Task(Base):
+    """Any piece of work on a Farm that someone intends to do or has done."""
+
+    __tablename__ = "tasks"
+    __table_args__ = (Index("ix_tasks_farm_id_status", "farm_id", "status"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    farm_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("farms.id", ondelete="CASCADE"))
+    title: Mapped[str] = mapped_column(String(200))
+    description: Mapped[str | None] = mapped_column(Text)
+    due_date: Mapped[date | None]
+    priority: Mapped[Priority] = mapped_column(_pg_enum(Priority, "priority"))
+    status: Mapped[TaskStatus] = mapped_column(_pg_enum(TaskStatus, "task_status"))
+    # People references survive account deletion as NULL: shown as "former member".
+    assignee_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
+    created_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
+    created_at: Mapped[datetime]
+    updated_at: Mapped[datetime]
+    completed_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
+    completed_at: Mapped[datetime | None]

@@ -233,7 +233,8 @@
       "signOut": "Sign out",
       "farm": "Farm",
       "userMenu": "User menu",
-      "plots": "Plots"
+      "plots": "Plots",
+      "tasks": "Tasks"
     },
     "home": {
       "title": "Welcome to {farm}",
@@ -353,6 +354,90 @@
       "grassland": "Grassland",
       "permanent": "Permanent crops",
       "other": "Landscape elements and other"
+    },
+    "tasks": {
+      "title": "Tasks",
+      "new": "New task",
+      "newTitle": "New task",
+      "editTitle": "Task",
+      "create": "Create",
+      "save": "Save",
+      "cancel": "Cancel",
+      "created": "Task created.",
+      "saved": "Saved.",
+      "deleted": "Task deleted.",
+      "nobody": "Nobody",
+      "formerMember": "former member",
+      "overdue": "overdue",
+      "assigneeHelp": "Admins and workers can be responsible, because only they complete tasks.",
+      "doneHelp": "For work that already happened and is only being recorded.",
+      "createdBy": "Created",
+      "completedBy": "Done",
+      "emptyTitle": "No tasks",
+      "empty": "Nothing to do right now – or the filters are too strict.",
+      "deleteTitle": "Delete for good?",
+      "deleteWarning": "Deleting cannot be undone; the task disappears without a trace. Discarding takes it off the list, but you can restore it at any time.",
+      "discardInstead": "Discard instead",
+      "deleteForever": "Delete for good",
+      "fields": {
+        "title": "Title",
+        "description": "Description",
+        "dueDate": "Due",
+        "priority": "Priority",
+        "assignee": "Responsible",
+        "done": "Already done"
+      },
+      "priority": {
+        "none": "None",
+        "low": "Low",
+        "normal": "Normal",
+        "high": "High"
+      },
+      "status": {
+        "open": "Open",
+        "done": "Done",
+        "discarded": "Discarded"
+      },
+      "actions": {
+        "complete": "Done",
+        "reopen": "Reopen",
+        "discard": "Discard",
+        "restore": "Restore",
+        "delete": "Delete"
+      },
+      "did": {
+        "complete": "Marked as done.",
+        "reopen": "Reopened.",
+        "discard": "Discarded.",
+        "restore": "Restored."
+      },
+      "filters": {
+        "status": {
+          "open": "Open",
+          "done": "Done",
+          "discarded": "Discarded",
+          "all": "All"
+        },
+        "anyone": "Everyone",
+        "me": "Assigned to me",
+        "unassigned": "Unassigned",
+        "anyPriority": "Any priority",
+        "due": {
+          "all": "Any date",
+          "overdue": "Overdue",
+          "week": "Next 7 days",
+          "none": "No date"
+        }
+      },
+      "errors": {
+        "invalid_assignee": "This person cannot be responsible.",
+        "forbidden_for_role": "Your role on this farm does not allow that.",
+        "only_admin_or_creator": "Only admins and whoever created the task can delete it.",
+        "invalid_transition": "The task has changed in the meantime. Reload the list.",
+        "task_not_found": "This task no longer exists.",
+        "harvest_year_locked": "The harvest year is locked."
+      },
+      "newHint": "What needs doing? A title is enough; everything else is optional."
     }
   }
 }

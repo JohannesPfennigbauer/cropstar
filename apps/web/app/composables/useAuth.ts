@@ -12,7 +12,8 @@ export function useAuth() {
   const api = useApi()
   const me = useState<Me | null | undefined>('auth:me', () => undefined)
 
-  const farm = computed(() => me.value?.memberships[0]?.farm ?? null)
+  const membership = computed(() => me.value?.memberships[0] ?? null)
+  const farm = computed(() => membership.value?.farm ?? null)
 
   async function refresh(): Promise<Me | null> {
     const { data, response } = await api.GET('/api/me')
@@ -51,5 +52,5 @@ export function useAuth() {
     me.value = null
   }
 
-  return { me, farm, refresh, ensure, signIn, register, signOut }
+  return { me, membership, farm, refresh, ensure, signIn, register, signOut }
 }

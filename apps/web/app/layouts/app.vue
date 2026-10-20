@@ -12,7 +12,8 @@ watch(() => farm.value?.id, () => loadHarvestYears())
 
 const navigation = computed(() => [
   { label: t('app.nav.home'), to: localePath('/app'), exact: true },
-  { label: t('app.nav.plots'), to: localePath('/app/plots'), exact: false }
+  { label: t('app.nav.plots'), to: localePath('/app/plots'), exact: false },
+  { label: t('app.nav.tasks'), to: localePath('/app/tasks'), exact: false }
 ])
 
 function isActive(item: { to: string, exact: boolean }) {

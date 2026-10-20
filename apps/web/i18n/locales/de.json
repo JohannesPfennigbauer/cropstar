@@ -233,7 +233,8 @@
       "signOut": "Abmelden",
       "farm": "Betrieb",
       "userMenu": "Benutzermenü",
-      "plots": "Schläge"
+      "plots": "Schläge",
+      "tasks": "Aufgaben"
     },
     "home": {
       "title": "Willkommen bei {farm}",
@@ -353,6 +354,90 @@
       "grassland": "Grünland",
       "permanent": "Dauerkulturen",
       "other": "Landschaftselemente und Sonstiges"
+    },
+    "tasks": {
+      "title": "Aufgaben",
+      "new": "Neue Aufgabe",
+      "newTitle": "Neue Aufgabe",
+      "editTitle": "Aufgabe",
+      "create": "Anlegen",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "created": "Aufgabe angelegt.",
+      "saved": "Gespeichert.",
+      "deleted": "Aufgabe gelöscht.",
+      "nobody": "Niemand",
+      "formerMember": "ehemaliges Mitglied",
+      "overdue": "überfällig",
+      "assigneeHelp": "Zuständig sein können Admins und Mitarbeiter, weil nur sie Aufgaben erledigen.",
+      "doneHelp": "Für Arbeit, die schon passiert ist und nur festgehalten wird.",
+      "createdBy": "Angelegt",
+      "completedBy": "Erledigt",
+      "emptyTitle": "Keine Aufgaben",
+      "empty": "Hier ist gerade nichts zu tun – oder die Filter sind zu streng.",
+      "deleteTitle": "Endgültig löschen?",
+      "deleteWarning": "Löschen kann nicht rückgängig gemacht werden, die Aufgabe verschwindet spurlos. Verwerfen nimmt sie aus der Liste, du kannst sie aber jederzeit wiederherstellen.",
+      "discardInstead": "Lieber verwerfen",
+      "deleteForever": "Endgültig löschen",
+      "fields": {
+        "title": "Titel",
+        "description": "Beschreibung",
+        "dueDate": "Fällig am",
+        "priority": "Priorität",
+        "assignee": "Zuständig",
+        "done": "Bereits erledigt"
+      },
+      "priority": {
+        "none": "Keine",
+        "low": "Niedrig",
+        "normal": "Normal",
+        "high": "Hoch"
+      },
+      "status": {
+        "open": "Offen",
+        "done": "Erledigt",
+        "discarded": "Verworfen"
+      },
+      "actions": {
+        "complete": "Erledigt",
+        "reopen": "Wieder öffnen",
+        "discard": "Verwerfen",
+        "restore": "Wiederherstellen",
+        "delete": "Löschen"
+      },
+      "did": {
+        "complete": "Als erledigt markiert.",
+        "reopen": "Wieder geöffnet.",
+        "discard": "Verworfen.",
+        "restore": "Wiederhergestellt."
+      },
+      "filters": {
+        "status": {
+          "open": "Offen",
+          "done": "Erledigt",
+          "discarded": "Verworfen",
+          "all": "Alle"
+        },
+        "anyone": "Alle Personen",
+        "me": "Mir zugewiesen",
+        "unassigned": "Niemand zugewiesen",
+        "anyPriority": "Jede Priorität",
+        "due": {
+          "all": "Jedes Datum",
+          "overdue": "Überfällig",
+          "week": "Nächste 7 Tage",
+          "none": "Ohne Datum"
+        }
+      },
+      "errors": {
+        "invalid_assignee": "Diese Person kann nicht zuständig sein.",
+        "forbidden_for_role": "Das darf deine Rolle in diesem Betrieb nicht.",
+        "only_admin_or_creator": "Löschen dürfen nur Admins und wer die Aufgabe angelegt hat.",
+        "invalid_transition": "Die Aufgabe wurde inzwischen geändert. Lade die Liste neu.",
+        "task_not_found": "Diese Aufgabe gibt es nicht mehr.",
+        "harvest_year_locked": "Das Erntejahr ist gesperrt."
+      },
+      "newHint": "Was steht an? Titel genügt, alles andere ist optional."
     }
   }
 }

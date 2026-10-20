@@ -64,8 +64,10 @@ def _empty_tables(request: pytest.FixtureRequest) -> Iterator[None]:
 
 @pytest.fixture
 def db(engine: Engine) -> Iterator[Session]:
-    with Session(engine, expire_on_commit=False) as session, session.begin():
+    """A session for arranging and inspecting data; commit when the API must see it."""
+    with Session(engine, expire_on_commit=False) as session:
         yield session
+        session.rollback()
 
 
 class RecordingMailer:
