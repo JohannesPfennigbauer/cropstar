@@ -79,18 +79,6 @@ class PlotCollection(BaseModel):
     features: list[PlotFeature]
 
 
-@router.get("/harvest-years", operation_id="listHarvestYears")
-def list_harvest_years(membership: FarmMembership, db: Db) -> list[int]:
-    """Harvest Years the Farm has Fields in, most recent first."""
-    years = db.scalars(
-        select(Field.harvest_year)
-        .where(Field.farm_id == membership.farm_id)
-        .distinct()
-        .order_by(Field.harvest_year.desc())
-    )
-    return list(years)
-
-
 @router.get("/fields", operation_id="listFields")
 def list_fields(membership: FarmMembership, db: Db, harvest_year: HarvestYear) -> FieldCollection:
     plot_count = select(func.count(Plot.id)).where(Plot.field_id == Field.id).scalar_subquery()

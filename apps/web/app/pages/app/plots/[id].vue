@@ -7,6 +7,7 @@ const route = useRoute()
 const localePath = useLocalePath()
 const { farm } = useAuth()
 const { hectares, day } = useFormat()
+const { lockOf } = useHarvestYear()
 const today = todayIso()
 
 const plotId = computed(() => String(route.params.id))
@@ -49,6 +50,8 @@ async function changed() {
     if (data) editing.value = data
   }
 }
+
+const locked = computed(() => plot.value ? lockOf(plot.value.properties.harvest_year) !== null : false)
 
 const editorOpen = ref(false)
 const editing = ref<NonNullable<typeof tasks.value>[number] | null>(null)
@@ -100,6 +103,10 @@ useSeoMeta({ title })
         </template>
         · {{ t('app.harvestYear.option', { year: plot.properties.harvest_year }) }}
       </p>
+      <AppLockNotice
+        :year="plot.properties.harvest_year"
+        class="mt-4"
+      />
 
       <div class="mt-6 grid gap-6 lg:grid-cols-[22rem_1fr]">
         <div class="space-y-6">
@@ -148,6 +155,8 @@ useSeoMeta({ title })
                 variant="soft"
                 icon="i-lucide-plus"
                 :label="t('app.plots.newTask')"
+                :disabled="locked"
+                :title="locked ? t('app.harvestYear.locked', { year: plot.properties.harvest_year }) : undefined"
                 data-testid="new-plot-task"
                 @click="openEditor(null)"
               />

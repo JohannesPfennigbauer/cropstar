@@ -322,7 +322,14 @@
     },
     "harvestYear": {
       "label": "Harvest year",
-      "option": "Harvest year {year}"
+      "option": "Harvest year {year}",
+      "lockedTitle": "Harvest year · locked",
+      "locked": "Harvest year {year} is locked",
+      "lockedBy": "Locked by {person} on {date}.",
+      "lockedHint": "Everything that refers to this harvest year – fields, plots, tasks and operations – is read-only.",
+      "unlockHintAdmin": "You can unlock it again under Farm.",
+      "unlockHint": "An admin can unlock it again under Farm.",
+      "lockedAreas": "Harvest year {year} is locked. New tasks can no longer refer to its fields and plots."
     },
     "map": {
       "ortho": "Aerial",
@@ -517,7 +524,19 @@
         "confirmation_mismatch": "The name you typed does not match.",
         "forbidden_for_role": "Only admins can do that.",
         "member_not_found": "This member no longer exists.",
-        "invitation_not_found": "This invitation no longer exists."
+        "invitation_not_found": "This invitation no longer exists.",
+        "harvest_year_not_found": "This farm has no such harvest year."
+      },
+      "harvestYears": {
+        "title": "Harvest years",
+        "lead": "Lock a harvest year once the season is closed: everything that refers to it then stays unchanged. You can unlock it any time.",
+        "open": "Open",
+        "lock": "Lock",
+        "unlock": "Unlock",
+        "lockedBy": "Locked by {person} · {date}",
+        "didLock": "Harvest year {year} locked.",
+        "didUnlock": "Harvest year {year} unlocked.",
+        "empty": "No harvest years yet – they arrive with the field import."
       }
     },
     "invite": {

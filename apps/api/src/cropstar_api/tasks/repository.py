@@ -3,7 +3,15 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
-from cropstar_api.models import Field, Membership, OperationType, Plot, Role, Task
+from cropstar_api.models import (
+    Field,
+    HarvestYearLock,
+    Membership,
+    OperationType,
+    Plot,
+    Role,
+    Task,
+)
 
 
 class SqlTaskRepository:
@@ -45,3 +53,10 @@ class SqlTaskRepository:
 
     def operation_type_exists(self, code: str) -> bool:
         return self._db.get(OperationType, code) is not None
+
+    def locked_years(self, farm_id: uuid.UUID) -> frozenset[int]:
+        return frozenset(
+            self._db.scalars(
+                select(HarvestYearLock.harvest_year).where(HarvestYearLock.farm_id == farm_id)
+            )
+        )

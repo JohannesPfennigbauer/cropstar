@@ -322,7 +322,14 @@
     },
     "harvestYear": {
       "label": "Erntejahr",
-      "option": "Erntejahr {year}"
+      "option": "Erntejahr {year}",
+      "lockedTitle": "Erntejahr · gesperrt",
+      "locked": "Erntejahr {year} ist gesperrt",
+      "lockedBy": "Gesperrt von {person} am {date}.",
+      "lockedHint": "Alles, was sich auf dieses Erntejahr bezieht – Feldstücke, Schläge, Aufgaben und Maßnahmen –, ist nur noch lesbar.",
+      "unlockHintAdmin": "Du kannst es unter Betrieb wieder entsperren.",
+      "unlockHint": "Ein Admin kann es unter Betrieb wieder entsperren.",
+      "lockedAreas": "Erntejahr {year} ist gesperrt. Neue Aufgaben können sich nicht mehr auf seine Feldstücke und Schläge beziehen."
     },
     "map": {
       "ortho": "Orthofoto",
@@ -517,7 +524,19 @@
         "confirmation_mismatch": "Der eingegebene Name stimmt nicht.",
         "forbidden_for_role": "Das dürfen nur Admins.",
         "member_not_found": "Dieses Mitglied gibt es nicht mehr.",
-        "invitation_not_found": "Diese Einladung gibt es nicht mehr."
+        "invitation_not_found": "Diese Einladung gibt es nicht mehr.",
+        "harvest_year_not_found": "Dieses Erntejahr gibt es in diesem Betrieb nicht."
+      },
+      "harvestYears": {
+        "title": "Erntejahre",
+        "lead": "Sperre ein Erntejahr, wenn die Saison abgeschlossen ist: Dann bleibt alles, was sich darauf bezieht, unverändert. Entsperren geht jederzeit.",
+        "open": "Offen",
+        "lock": "Sperren",
+        "unlock": "Entsperren",
+        "lockedBy": "Gesperrt von {person} · {date}",
+        "didLock": "Erntejahr {year} gesperrt.",
+        "didUnlock": "Erntejahr {year} entsperrt.",
+        "empty": "Noch keine Erntejahre – sie entstehen mit dem Import der Feldstücke."
       }
     },
     "invite": {

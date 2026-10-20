@@ -140,6 +140,26 @@ async function revoke(id: string) {
   await refreshInvitations()
 }
 
+// ── Harvest Years ────────────────────────────────────────────────────────
+const { entries: harvestYears, load: loadHarvestYears } = useHarvestYear()
+const lockBusy = ref<number | null>(null)
+
+async function setLock(year: number, lock: boolean) {
+  lockBusy.value = year
+  const params = { params: { path: { ...path.value, year } } }
+  const { data, error } = lock
+    ? await api.PUT('/api/farms/{farm_id}/harvest-years/{year}/lock', params)
+    : await api.DELETE('/api/farms/{farm_id}/harvest-years/{year}/lock', params)
+  lockBusy.value = null
+  if (!data) return failed(error)
+  await loadHarvestYears()
+  toast.add({
+    title: t(lock ? 'app.farm.harvestYears.didLock' : 'app.farm.harvestYears.didUnlock', { year }),
+    color: 'success',
+    icon: lock ? 'i-lucide-lock' : 'i-lucide-lock-open'
+  })
+}
+
 // ── Danger zone ──────────────────────────────────────────────────────────
 const confirmName = ref('')
 async function deleteFarm() {
@@ -260,6 +280,62 @@ async function deleteFarm() {
             />
           </li>
         </ul>
+      </UCard>
+
+      <UCard>
+        <h2 class="text-lg font-semibold text-highlighted">
+          {{ t('app.farm.harvestYears.title') }}
+        </h2>
+        <p class="mt-1 text-sm text-muted">
+          {{ t('app.farm.harvestYears.lead') }}
+        </p>
+        <ul
+          v-if="harvestYears.length"
+          class="mt-4 divide-y divide-default"
+        >
+          <li
+            v-for="entry in harvestYears"
+            :key="entry.year"
+            class="flex flex-wrap items-center gap-3 py-3"
+            data-testid="harvest-year-row"
+          >
+            <UIcon
+              :name="entry.lock ? 'i-lucide-lock' : 'i-lucide-wheat'"
+              class="size-4 shrink-0"
+              :class="entry.lock ? 'text-highlighted' : 'text-dimmed'"
+            />
+            <span class="min-w-0 flex-1">
+              <span class="block text-sm font-medium text-highlighted">
+                {{ t('app.harvestYear.option', { year: entry.year }) }}
+              </span>
+              <span class="text-xs text-muted">
+                {{ entry.lock
+                  ? t('app.farm.harvestYears.lockedBy', {
+                    person: entry.lock.locked_by?.email ?? t('app.tasks.formerMember'),
+                    date: moment(entry.lock.locked_at)
+                  })
+                  : t('app.farm.harvestYears.open') }}
+              </span>
+            </span>
+            <UButton
+              v-if="isAdmin"
+              size="sm"
+              color="neutral"
+              :variant="entry.lock ? 'outline' : 'soft'"
+              :icon="entry.lock ? 'i-lucide-lock-open' : 'i-lucide-lock'"
+              :label="entry.lock ? t('app.farm.harvestYears.unlock') : t('app.farm.harvestYears.lock')"
+              :loading="lockBusy === entry.year"
+              :data-testid="entry.lock ? 'unlock-year' : 'lock-year'"
+              @click="setLock(entry.year, !entry.lock)"
+            />
+          </li>
+        </ul>
+        <p
+          v-else
+          class="mt-4 text-sm text-muted"
+        >
+          {{ t('app.farm.harvestYears.empty') }}
+        </p>
       </UCard>
 
       <UCard v-if="isAdmin">

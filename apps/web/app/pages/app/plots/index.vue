@@ -79,6 +79,10 @@ function openPlot(id: string) {
         />
         {{ t('app.plots.provenance', { year: harvestYear }) }}
       </p>
+      <AppLockNotice
+        :year="harvestYear"
+        class="mt-3"
+      />
 
       <div class="mt-5 min-h-0 flex-1 space-y-5 overflow-y-auto pr-1">
         <div

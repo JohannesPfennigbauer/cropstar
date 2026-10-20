@@ -213,6 +213,23 @@ class Plot(Base):
     field: Mapped[Field] = relationship(back_populates="plots")
 
 
+class HarvestYearLock(Base):
+    """A closed season: while it exists, everything referring to the Harvest Year is read-only."""
+
+    __tablename__ = "harvest_year_locks"
+
+    farm_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("farms.id", ondelete="CASCADE"), primary_key=True
+    )
+    harvest_year: Mapped[int] = mapped_column(SmallInteger, primary_key=True)
+    locked_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
+    locked_at: Mapped[datetime]
+
+    locked_by: Mapped[User | None] = relationship()
+
+
 class TaskStatus(enum.StrEnum):
     OPEN = "open"
     DONE = "done"

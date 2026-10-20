@@ -26,6 +26,7 @@ class InMemoryTasks:
         self.roles: dict[tuple[uuid.UUID, uuid.UUID], Role] = {}
         self.all_fields: list[Field] = []
         self.all_plots: list[Plot] = []
+        self.locks: set[tuple[uuid.UUID, int]] = set()
 
     def get(self, farm_id: uuid.UUID, task_id: uuid.UUID) -> Task | None:
         task = self.tasks.get(task_id)
@@ -48,6 +49,9 @@ class InMemoryTasks:
 
     def operation_type_exists(self, code: str) -> bool:
         return code in {"tillage", "sowing", "fertilisation", "harvest"}
+
+    def locked_years(self, farm_id: uuid.UUID) -> frozenset[int]:
+        return frozenset(year for farm, year in self.locks if farm == farm_id)
 
     def add_field(self, farm_id: uuid.UUID, year: int, number: int) -> Field:
         field = Field(id=uuid.uuid4(), farm_id=farm_id, harvest_year=year, number=number)

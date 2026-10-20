@@ -144,6 +144,11 @@ const PRIORITY_COLOR = { high: 'error', normal: 'warning', low: 'neutral', none:
       />
     </div>
 
+    <AppLockNotice
+      :year="harvestYear"
+      class="mt-4"
+    />
+
     <div class="mt-6 flex flex-wrap items-center gap-2">
       <div
         class="flex rounded-full border border-default p-0.5 text-sm"

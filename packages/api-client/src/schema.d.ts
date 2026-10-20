@@ -356,26 +356,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/farms/{farm_id}/harvest-years": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Harvest Years
-         * @description Harvest Years the Farm has Fields in, most recent first.
-         */
-        get: operations["listHarvestYears"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/farms/{farm_id}/fields": {
         parameters: {
             query?: never;
@@ -422,6 +402,47 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/farms/{farm_id}/harvest-years": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Harvest Years
+         * @description Harvest Years the Farm has Fields in, most recent first, with their locks.
+         */
+        get: operations["listHarvestYears"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/farms/{farm_id}/harvest-years/{year}/lock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Lock Harvest Year
+         * @description Freezes everything referring to the Harvest Year. Locking it again keeps the first lock.
+         */
+        put: operations["lockHarvestYear"];
+        post?: never;
+        /** Unlock Harvest Year */
+        delete: operations["unlockHarvestYear"];
         options?: never;
         head?: never;
         patch?: never;
@@ -684,6 +705,12 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** HarvestYearOut */
+        HarvestYearOut: {
+            /** Year */
+            year: number;
+            lock: components["schemas"]["LockOut"] | null;
+        };
         /** InvitationCreate */
         InvitationCreate: {
             role: components["schemas"]["Role"];
@@ -768,6 +795,15 @@ export interface components {
              * @constant
              */
             service: "cropstar-api";
+        };
+        /** LockOut */
+        LockOut: {
+            locked_by: components["schemas"]["PersonOut"] | null;
+            /**
+             * Locked At
+             * Format: date-time
+             */
+            locked_at: string;
         };
         /** Me */
         Me: {
@@ -1853,37 +1889,6 @@ export interface operations {
             };
         };
     };
-    listHarvestYears: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                farm_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": number[];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     listFields: {
         parameters: {
             query: {
@@ -1969,6 +1974,101 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlotFeature"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listHarvestYears: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HarvestYearOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    lockHarvestYear: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                year: number;
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HarvestYearOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unlockHarvestYear: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                year: number;
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HarvestYearOut"];
                 };
             };
             /** @description Validation Error */

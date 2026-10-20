@@ -1,11 +1,16 @@
 import { expect, test } from '@playwright/test'
 import { seedDemoAdmin, signIn } from './support'
 
-test('plan an Operation on two Plots, record one, find it in the Plot\'s log', async ({ page }) => {
-  const { email, password } = seedDemoAdmin('e2e-operations')
+test('plots, an Operation on two of them, its log, and a locked season', async ({ page }) => {
+  const { email, password } = seedDemoAdmin('e2e-happy-path')
   await signIn(page, email, password)
 
-  await page.getByRole('link', { name: 'Aufgaben' }).click()
+  // The seeded Plots are on the list and on the map.
+  await page.getByRole('link', { name: 'Schläge', exact: true }).click()
+  await expect(page.getByRole('link', { name: /Winterroggen/ })).toBeVisible()
+  await expect(page.locator('canvas.maplibregl-canvas')).toBeVisible()
+
+  await page.getByRole('link', { name: 'Aufgaben', exact: true }).click()
   await page.getByTestId('new-task').click()
   const editor = page.getByRole('dialog', { name: 'Neue Aufgabe' })
   await editor.getByLabel('Titel').fill('Gülle ausbringen')
@@ -35,8 +40,26 @@ test('plan an Operation on two Plots, record one, find it in the Plot\'s log', a
   await completion.getByTestId('record-operations').click()
   await expect(row.getByTestId('operation-badge')).toHaveText('Düngung · 1/2')
 
-  await page.getByRole('link', { name: 'Schläge' }).click()
+  await page.getByRole('link', { name: 'Schläge', exact: true }).click()
   await page.getByRole('link', { name: /Winterroggen/ }).click()
   await expect(page.getByTestId('operation-log')).toContainText('Düngung · Gülle ausbringen')
   await expect(page.getByTestId('operation-log')).toContainText('Schleppschuh, 18 m³/ha')
+  const plotPage = page.url()
+
+  // The season is closed: everything referring to it becomes read-only.
+  await page.getByRole('link', { name: 'Betrieb', exact: true }).click()
+  await page.getByTestId('lock-year').click()
+  await expect(page.getByTestId('harvest-year-row')).toContainText(`Gesperrt von ${email}`)
+
+  await page.goto(plotPage)
+  await expect(page.getByTestId('lock-notice')).toBeVisible()
+  await expect(page.getByTestId('new-plot-task')).toBeDisabled()
+
+  await page.getByRole('link', { name: 'Aufgaben', exact: true }).click()
+  await expect(row.getByTestId('task-toggle')).toBeDisabled()
+  await row.getByText('Gülle ausbringen').click()
+  const locked = page.getByRole('dialog', { name: 'Aufgabe' })
+  await expect(locked.getByTestId('lock-notice')).toBeVisible()
+  await expect(locked.getByLabel('Titel')).toBeDisabled()
+  await expect(locked.getByRole('button', { name: 'Speichern' })).toHaveCount(0)
 })

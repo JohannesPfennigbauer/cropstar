@@ -899,54 +899,6 @@
         }
       }
     },
-    "/api/farms/{farm_id}/harvest-years": {
-      "get": {
-        "tags": [
-          "areas"
-        ],
-        "summary": "List Harvest Years",
-        "description": "Harvest Years the Farm has Fields in, most recent first.",
-        "operationId": "listHarvestYears",
-        "parameters": [
-          {
-            "name": "farm_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Farm Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "integer"
-                  },
-                  "title": "Response Listharvestyears"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/farms/{farm_id}/fields": {
       "get": {
         "tags": [
@@ -1091,6 +1043,161 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PlotFeature"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/farms/{farm_id}/harvest-years": {
+      "get": {
+        "tags": [
+          "harvest years"
+        ],
+        "summary": "List Harvest Years",
+        "description": "Harvest Years the Farm has Fields in, most recent first, with their locks.",
+        "operationId": "listHarvestYears",
+        "parameters": [
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HarvestYearOut"
+                  },
+                  "title": "Response Listharvestyears"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/farms/{farm_id}/harvest-years/{year}/lock": {
+      "put": {
+        "tags": [
+          "harvest years"
+        ],
+        "summary": "Lock Harvest Year",
+        "description": "Freezes everything referring to the Harvest Year. Locking it again keeps the first lock.",
+        "operationId": "lockHarvestYear",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "maximum": 2200,
+              "minimum": 1990,
+              "title": "Year"
+            }
+          },
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HarvestYearOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "harvest years"
+        ],
+        "summary": "Unlock Harvest Year",
+        "operationId": "unlockHarvestYear",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "maximum": 2200,
+              "minimum": 1990,
+              "title": "Year"
+            }
+          },
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HarvestYearOut"
                 }
               }
             }
@@ -2180,6 +2287,30 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "HarvestYearOut": {
+        "properties": {
+          "year": {
+            "type": "integer",
+            "title": "Year"
+          },
+          "lock": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LockOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "year",
+          "lock"
+        ],
+        "title": "HarvestYearOut"
+      },
       "InvitationCreate": {
         "properties": {
           "role": {
@@ -2375,6 +2506,31 @@
           "service"
         ],
         "title": "Liveness"
+      },
+      "LockOut": {
+        "properties": {
+          "locked_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "locked_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Locked At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "locked_by",
+          "locked_at"
+        ],
+        "title": "LockOut"
       },
       "Me": {
         "properties": {

@@ -5,7 +5,7 @@ const { t } = useI18n()
 const localePath = useLocalePath()
 const route = useRoute()
 const { me, farm, selectFarm, signOut } = useAuth()
-const { years, selected: harvestYear, load: loadHarvestYears } = useHarvestYear()
+const { years, selected: harvestYear, load: loadHarvestYears, lockOf } = useHarvestYear()
 
 await loadHarvestYears()
 watch(() => farm.value?.id, () => loadHarvestYears())
@@ -27,7 +27,12 @@ const harvestYearModel = computed({
   set: (year: number | undefined) => { harvestYear.value = year ?? null }
 })
 
-const yearItems = computed(() => years.value.map(year => ({ label: String(year), value: year })))
+const yearItems = computed(() => years.value.map(year => ({
+  label: String(year),
+  value: year,
+  icon: lockOf(year) ? 'i-lucide-lock' : undefined
+})))
+const selectedLocked = computed(() => lockOf(harvestYear.value) !== null)
 
 useSeoMeta({ robots: 'noindex, nofollow' })
 
@@ -84,11 +89,11 @@ const userMenu = computed<DropdownMenuItem[][]>(() => [
             v-if="years.length"
             v-model="harvestYearModel"
             :items="yearItems"
-            icon="i-lucide-wheat"
+            :icon="selectedLocked ? 'i-lucide-lock' : 'i-lucide-wheat'"
             size="sm"
             class="w-28"
             :aria-label="t('app.harvestYear.label')"
-            :title="t('app.harvestYear.label')"
+            :title="selectedLocked ? t('app.harvestYear.lockedTitle') : t('app.harvestYear.label')"
             data-testid="harvest-year"
           />
           <LocaleSwitch />

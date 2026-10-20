@@ -29,7 +29,8 @@ def get(client: TestClient, path: str) -> Any:
 
 
 def test_harvest_years_lists_years_with_fields(client: TestClient, demo_farm_id: str) -> None:
-    assert get(client, f"/api/farms/{demo_farm_id}/harvest-years") == [DEMO_HARVEST_YEAR]
+    years = get(client, f"/api/farms/{demo_farm_id}/harvest-years")
+    assert years == [{"year": DEMO_HARVEST_YEAR, "lock": None}]
 
 
 def test_plots_come_as_wgs84_geojson_with_their_declared_attributes(

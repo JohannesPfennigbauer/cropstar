@@ -20,11 +20,12 @@ const props = defineProps<{
 const open = defineModel<boolean>('open', { required: true })
 const emit = defineEmits<{ changed: [] }>()
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 const api = useApi()
 const toast = useToast()
 const { membership } = useAuth()
 const { moment } = useFormat()
+const { lockOf } = useHarvestYear()
 
 const NOBODY = 'nobody'
 const GENERAL = 'general'
@@ -55,7 +56,7 @@ function emptyState() {
     assignee: props.task?.assignee?.id ?? NOBODY,
     areas: props.task
       ? [...props.task.fields.map(f => `field:${f.id}`), ...props.task.plots.map(p => `plot:${p.id}`)]
-      : (props.presetPlotIds ?? []).map(id => `plot:${id}`),
+      : areasLocked.value ? [] : (props.presetPlotIds ?? []).map(id => `plot:${id}`),
     operation_type: props.task?.operation_type ?? GENERAL,
     planned_details: props.task?.planned_details ?? '',
     done: false
@@ -64,6 +65,8 @@ function emptyState() {
 
 // A Task's areas all come from one Harvest Year: the Task's own, else the one in view.
 const areaYear = computed(() => props.task?.harvest_year ?? props.harvestYear)
+// A new Task cannot refer to a Locked Harvest Year, so it offers no areas and no Operations.
+const areasLocked = computed(() => !props.task && lockOf(areaYear.value) !== null)
 
 const { data: areaOptions } = useAsyncData(
   () => `task-areas-${props.farmId}-${areaYear.value}`,
@@ -121,7 +124,7 @@ const areaItems = computed(() => {
   ]
 })
 
-const errorCode = ref<ApiErrorCode | 'invalid_assignee' | null>(null)
+const errorCode = ref<string | null>(null)
 const busy = ref(false)
 const confirmingDelete = ref(false)
 
@@ -147,9 +150,10 @@ function person(value: Schemas['PersonOut'] | null) {
   return value?.email ?? t('app.tasks.formerMember')
 }
 
+// Task rules answer with their own codes; those with a translation are shown as such.
 function codeOf(error: unknown) {
   const detail = (error as { detail?: unknown } | undefined)?.detail
-  return detail === 'invalid_assignee' ? 'invalid_assignee' : apiErrorCode(error)
+  return typeof detail === 'string' && te(`app.tasks.errors.${detail}`) ? detail : apiErrorCode(error)
 }
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
@@ -269,8 +273,23 @@ async function remove() {
         </div>
       </div>
 
+      <AppLockNotice
+        v-if="!confirmingDelete && task?.harvest_year"
+        :year="task.harvest_year"
+        class="mb-4"
+      />
+      <UAlert
+        v-if="!confirmingDelete && areasLocked"
+        color="neutral"
+        variant="subtle"
+        icon="i-lucide-lock"
+        :description="t('app.harvestYear.lockedAreas', { year: areaYear })"
+        class="mb-4"
+        data-testid="areas-locked"
+      />
+
       <UForm
-        v-else
+        v-if="!confirmingDelete"
         id="task-form"
         :schema="schema"
         :state="state"
@@ -289,7 +308,7 @@ async function remove() {
           />
         </UFormField>
         <UFormField
-          v-if="!task"
+          v-if="!task && !areasLocked"
           :label="t('app.operations.kind')"
           :help="isOperation ? t('app.operations.kindHelp') : undefined"
           name="operation_type"
@@ -335,7 +354,7 @@ async function remove() {
           </UFormField>
         </div>
         <UFormField
-          v-if="areaYear !== null"
+          v-if="areaYear !== null && !areasLocked"
           :label="t('app.tasks.fields.areas')"
           :help="t('app.tasks.areasHelp', { year: areaYear })"
           name="areas"

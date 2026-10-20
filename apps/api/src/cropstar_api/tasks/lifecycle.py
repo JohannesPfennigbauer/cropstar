@@ -42,6 +42,8 @@ class TaskRepository(Protocol):
 
     def operation_type_exists(self, code: str) -> bool: ...
 
+    def locked_years(self, farm_id: uuid.UUID) -> frozenset[int]: ...
+
 
 class TaskError(Exception):
     code = "task_error"
@@ -142,15 +144,11 @@ def _utcnow() -> datetime:
     return datetime.now(UTC)
 
 
-def facts(task: Task) -> TaskFacts:
-    # Nothing is locked yet; Locked Harvest Years arrive with their own issue.
-    return TaskFacts(created_by=task.created_by_id)
-
-
 class TaskLifecycle:
     def __init__(self, repository: TaskRepository, clock: Callable[[], datetime] = _utcnow):
         self._repository = repository
         self._clock = clock
+        self._locked: dict[uuid.UUID, frozenset[int]] = {}
 
     # ── Tasks ───────────────────────────────────────────────────────────────
 
@@ -180,7 +178,7 @@ class TaskLifecycle:
             planned_details=new.planned_details,
         )
         task.operations = []
-        self._set_areas(task, new.field_ids, new.plot_ids)
+        self._set_areas(actor, Action.CREATE_TASK, task, new.field_ids, new.plot_ids)
         if task.operation_type is None:
             if new.done:
                 self._mark_done(task, actor, now)
@@ -207,7 +205,7 @@ class TaskLifecycle:
             plot_ids = frozenset(changes.get("plot_ids", {p.id for p in task.plots}))
             if task.operation_type is not None:
                 self._check_operation_areas(field_ids, plot_ids)
-            self._set_areas(task, field_ids, plot_ids)
+            self._set_areas(actor, Action.EDIT_TASK, task, field_ids, plot_ids)
         if "planned_details" in changes and task.operation_type is not None:
             # Open Operations follow the Task's plan unless they were adjusted on their own.
             for operation in task.operations:
@@ -246,7 +244,7 @@ class TaskLifecycle:
         return [
             action
             for action in TASK_ACTIONS
-            if decide(actor, action, facts(task)) and self._can_transition(task, action)
+            if decide(actor, action, self._facts(task)) and self._can_transition(task, action)
         ]
 
     # ── Operations ──────────────────────────────────────────────────────────
@@ -316,7 +314,7 @@ class TaskLifecycle:
         return [
             action
             for action in OPERATION_ACTIONS
-            if decide(actor, action, facts(task))
+            if decide(actor, action, self._facts(task))
             and (action not in _TRANSITIONS or _TRANSITIONS[action][0] is operation.status)
         ]
 
@@ -433,8 +431,23 @@ class TaskLifecycle:
             raise TaskNotFoundError(str(task_id))
         return task
 
-    def _require(self, actor: Actor, action: Action, task: Task | None) -> None:
-        decision = decide(actor, action, facts(task) if task else None)
+    def _facts(self, task: Task, harvest_year: int | None = None) -> TaskFacts:
+        """`harvest_year` is where the Task is about to move; it must not be locked either."""
+        locked = self._locked_years(task.farm_id)
+        return TaskFacts(
+            created_by=task.created_by_id,
+            harvest_year_locked=task.harvest_year in locked or harvest_year in locked,
+        )
+
+    def _locked_years(self, farm_id: uuid.UUID) -> frozenset[int]:
+        if farm_id not in self._locked:
+            self._locked[farm_id] = self._repository.locked_years(farm_id)
+        return self._locked[farm_id]
+
+    def _require(
+        self, actor: Actor, action: Action, task: Task | None, harvest_year: int | None = None
+    ) -> None:
+        decision = decide(actor, action, self._facts(task, harvest_year) if task else None)
         if not decision:
             assert decision.denial is not None
             raise ForbiddenError(decision.denial)
@@ -448,7 +461,12 @@ class TaskLifecycle:
             raise OperationNeedsPlotsError("an Operation needs a Plot")
 
     def _set_areas(
-        self, task: Task, field_ids: frozenset[uuid.UUID], plot_ids: frozenset[uuid.UUID]
+        self,
+        actor: Actor,
+        action: Action,
+        task: Task,
+        field_ids: frozenset[uuid.UUID],
+        plot_ids: frozenset[uuid.UUID],
     ) -> None:
         fields = self._repository.fields(task.farm_id, field_ids) if field_ids else []
         plots = self._repository.plots(task.farm_id, plot_ids) if plot_ids else []
@@ -459,6 +477,7 @@ class TaskLifecycle:
         }
         if len(years) > 1:
             raise MixedHarvestYearsError(f"Harvest Years {sorted(years)}")
+        self._require(actor, action, task, next(iter(years), None))
         if task.operation_type is not None:
             self._sync_operations(task, plots)
         task.fields = sorted(fields, key=lambda field: field.number)
