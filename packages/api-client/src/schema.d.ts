@@ -860,6 +860,28 @@ export interface components {
              * @default false
              */
             done: boolean;
+            /**
+             * Field Ids
+             * @default []
+             */
+            field_ids: string[];
+            /**
+             * Plot Ids
+             * @default []
+             */
+            plot_ids: string[];
+        };
+        /** TaskFieldRef */
+        TaskFieldRef: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Number */
+            number: number;
+            /** Name */
+            name: string | null;
         };
         /** TaskOut */
         TaskOut: {
@@ -891,8 +913,29 @@ export interface components {
             completed_by: components["schemas"]["PersonOut"] | null;
             /** Completed At */
             completed_at: string | null;
+            /** Harvest Year */
+            harvest_year: number | null;
+            /** Fields */
+            fields: components["schemas"]["TaskFieldRef"][];
+            /** Plots */
+            plots: components["schemas"]["TaskPlotRef"][];
             /** Allowed Actions */
             allowed_actions: components["schemas"]["Action"][];
+        };
+        /** TaskPlotRef */
+        TaskPlotRef: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Number */
+            number: number;
+            /** Field Number */
+            field_number: number;
+            /** Land Use Name */
+            land_use_name: string;
+            land_use_category: components["schemas"]["LandUseCategory"];
         };
         /**
          * TaskStatus
@@ -901,7 +944,8 @@ export interface components {
         TaskStatus: "open" | "done" | "discarded";
         /**
          * TaskUpdate
-         * @description Only the fields sent are changed; send null to clear an optional field.
+         * @description Only the fields sent are changed; send null to clear an optional field. Sending
+         *     `field_ids` or `plot_ids` replaces that set of areas.
          */
         TaskUpdate: {
             /** Title */
@@ -913,6 +957,10 @@ export interface components {
             priority?: components["schemas"]["Priority"] | null;
             /** Assignee Id */
             assignee_id?: string | null;
+            /** Field Ids */
+            field_ids?: string[] | null;
+            /** Plot Ids */
+            plot_ids?: string[] | null;
         };
         /** UserOut */
         UserOut: {
@@ -1787,6 +1835,10 @@ export interface operations {
                 due_before?: string | null;
                 /** @description Only Tasks without a due date */
                 without_due?: boolean;
+                /** @description Tasks of this Harvest Year plus all Tasks without one */
+                harvest_year?: number | null;
+                /** @description Only Tasks on this Plot */
+                plot_id?: string | null;
             };
             header?: never;
             path: {

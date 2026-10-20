@@ -274,3 +274,138 @@ def test_work_of_a_deleted_account_stays_on_record(farm: Farm, db: Session) -> N
     assert task["status"] == "done"
     assert (task["created_by"], task["completed_by"]) == (None, None)
     assert task["completed_at"] is not None
+
+
+# ── Fields and Plots ────────────────────────────────────────────────────────
+
+
+@dataclass
+class Areas:
+    field_2027: str
+    plot_2027_a: str
+    plot_2027_b: str
+    field_2026: str
+    plot_2026: str
+    elsewhere_plot: str
+
+
+def _square(x: float, y: float) -> str:
+    """A 100 m square in the AMA CRS, as EWKT."""
+    ring = f"{x} {y}, {x + 100} {y}, {x + 100} {y + 100}, {x} {y + 100}, {x} {y}"
+    return f"SRID=31287;MULTIPOLYGON((({ring})))"
+
+
+@pytest.fixture
+def areas(farm: Farm, db: Session) -> Areas:
+    from cropstar_api.models import Field, Plot
+
+    stranger_farm = farm.stranger.client.get("/api/me").json()["memberships"][0]["farm"]["id"]
+
+    def field(farm_id: str, year: int, number: int) -> Field:
+        created = Field(
+            farm_id=farm_id,
+            harvest_year=year,
+            number=number,
+            name=f"Feld {number}",
+            land_use_code="A",
+            land_use_name="ACKERLAND",
+            declared_area_ha=1,
+            geometry=_square(600_000 + number * 200, 500_000 + year),
+        )
+        db.add(created)
+        db.flush()
+        return created
+
+    def plot(parent: Field, number: int, code: str, name: str) -> Plot:
+        created = Plot(
+            field_id=parent.id,
+            number=number,
+            land_use_code=code,
+            land_use_name=name,
+            declared_area_ha=0.5,
+            geometry=parent.geometry,
+        )
+        db.add(created)
+        db.flush()
+        return created
+
+    f2027 = field(farm.id, 2027, 1)
+    f2026 = field(farm.id, 2026, 1)
+    result = Areas(
+        field_2027=str(f2027.id),
+        plot_2027_a=str(plot(f2027, 1, "142", "WINTERROGGEN").id),
+        plot_2027_b=str(plot(f2027, 2, "771", "GRÜNBRACHE").id),
+        field_2026=str(f2026.id),
+        plot_2026=str(plot(f2026, 1, "307", "SONNENBLUMEN").id),
+        elsewhere_plot=str(plot(field(stranger_farm, 2027, 9), 1, "142", "WINTERROGGEN").id),
+    )
+    db.commit()
+    return result
+
+
+def test_tasks_refer_to_fields_and_plots_of_one_harvest_year(farm: Farm, areas: Areas) -> None:
+    task = create(
+        farm.worker,
+        farm,
+        field_ids=[areas.field_2027],
+        plot_ids=[areas.plot_2027_b, areas.plot_2027_a],
+    )
+
+    assert task["harvest_year"] == 2027
+    assert [(f["number"], f["name"]) for f in task["fields"]] == [(1, "Feld 1")]
+    assert [
+        (p["field_number"], p["number"], p["land_use_name"], p["land_use_category"])
+        for p in task["plots"]
+    ] == [
+        (1, 1, "WINTERROGGEN", "cereals"),
+        (1, 2, "GRÜNBRACHE", "fallow"),
+    ]
+
+
+def test_harvest_years_cannot_be_mixed_and_areas_stay_on_their_farm(
+    farm: Farm, areas: Areas
+) -> None:
+    mixed = farm.admin.client.post(
+        tasks_url(farm),
+        json={"title": "Zaun", "field_ids": [areas.field_2026], "plot_ids": [areas.plot_2027_a]},
+    )
+    foreign = farm.admin.client.post(
+        tasks_url(farm), json={"title": "Zaun", "plot_ids": [areas.elsewhere_plot]}
+    )
+
+    assert (mixed.status_code, mixed.json()["detail"]) == (422, "mixed_harvest_years")
+    assert (foreign.status_code, foreign.json()["detail"]) == (422, "area_not_found")
+
+
+def test_changing_areas_moves_the_task_between_harvest_years(farm: Farm, areas: Areas) -> None:
+    task = create(farm.admin, farm, plot_ids=[areas.plot_2027_a])
+
+    moved = farm.admin.client.patch(
+        tasks_url(farm, f"/{task['id']}"), json={"plot_ids": [areas.plot_2026]}
+    ).json()
+    assert (moved["harvest_year"], [p["land_use_name"] for p in moved["plots"]]) == (
+        2026,
+        ["SONNENBLUMEN"],
+    )
+
+    cleared = farm.admin.client.patch(
+        tasks_url(farm, f"/{task['id']}"), json={"plot_ids": None}
+    ).json()
+    assert (cleared["harvest_year"], cleared["plots"]) == (None, [])
+
+
+def test_list_by_harvest_year_includes_tasks_without_one(farm: Farm, areas: Areas) -> None:
+    create(farm.admin, farm, title="2027", plot_ids=[areas.plot_2027_a])
+    create(farm.admin, farm, title="2026", plot_ids=[areas.plot_2026])
+    create(farm.admin, farm, title="allgemein")
+    create(farm.admin, farm, title="Feldstück 2027", field_ids=[areas.field_2027])
+
+    def titles(**params: Any) -> list[str]:
+        return sorted(
+            t["title"] for t in farm.admin.client.get(tasks_url(farm), params=params).json()
+        )
+
+    assert titles(harvest_year=2027) == ["2027", "Feldstück 2027", "allgemein"]
+    assert titles(harvest_year=2026) == ["2026", "allgemein"]
+    assert titles(plot_id=areas.plot_2027_a) == ["2027"]
+    assert titles() == ["2026", "2027", "Feldstück 2027", "allgemein"]

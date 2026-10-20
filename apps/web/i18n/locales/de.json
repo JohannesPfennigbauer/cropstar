@@ -345,10 +345,11 @@
       "source": "Quelle",
       "sourceValue": "AMA-Mehrfachantrag {year}",
       "tasks": "Aufgaben",
-      "tasksSoon": "Hier siehst du bald die offenen Aufgaben für diesen Schlag.",
       "log": "Maßnahmenprotokoll",
       "logSoon": "Hier steht bald, was auf diesem Schlag passiert ist: Bodenbearbeitung, Aussaat, Düngung, Ernte.",
-      "category": "Kategorie"
+      "category": "Kategorie",
+      "newTask": "Neue Aufgabe",
+      "noTasks": "Keine offenen Aufgaben für diesen Schlag."
     },
     "landUseCategory": {
       "cereals": "Getreide",
@@ -392,7 +393,8 @@
         "dueDate": "Fällig am",
         "priority": "Priorität",
         "assignee": "Zuständig",
-        "done": "Bereits erledigt"
+        "done": "Bereits erledigt",
+        "areas": "Flächen"
       },
       "priority": {
         "none": "Keine",
@@ -442,9 +444,17 @@
         "only_admin_or_creator": "Löschen dürfen nur Admins und wer die Aufgabe angelegt hat.",
         "invalid_transition": "Die Aufgabe wurde inzwischen geändert. Lade die Liste neu.",
         "task_not_found": "Diese Aufgabe gibt es nicht mehr.",
-        "harvest_year_locked": "Das Erntejahr ist gesperrt."
+        "harvest_year_locked": "Das Erntejahr ist gesperrt.",
+        "mixed_harvest_years": "Alle Flächen einer Aufgabe müssen aus demselben Erntejahr sein.",
+        "area_not_found": "Eine der Flächen gibt es in diesem Betrieb nicht."
       },
-      "newHint": "Was steht an? Titel genügt, alles andere ist optional."
+      "newHint": "Was steht an? Titel genügt, alles andere ist optional.",
+      "fieldsGroup": "Feldstücke",
+      "plotsGroup": "Schläge",
+      "plotRef": "Schlag {field}.{plot}",
+      "wholeFarm": "Ganzer Betrieb",
+      "searchAreas": "Suchen …",
+      "areasHelp": "Feldstücke und Schläge aus dem Erntejahr {year}. Ohne Fläche gilt die Aufgabe für den ganzen Betrieb."
     },
     "roles": {
       "admin": "Admin",

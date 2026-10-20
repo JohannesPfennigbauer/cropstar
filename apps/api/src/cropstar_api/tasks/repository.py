@@ -1,9 +1,9 @@
 import uuid
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
-from cropstar_api.models import Membership, Role, Task
+from cropstar_api.models import Field, Membership, Plot, Role, Task
 
 
 class SqlTaskRepository:
@@ -25,5 +25,20 @@ class SqlTaskRepository:
         return self._db.scalar(
             select(Membership.role).where(
                 Membership.farm_id == farm_id, Membership.user_id == user_id
+            )
+        )
+
+    def fields(self, farm_id: uuid.UUID, ids: frozenset[uuid.UUID]) -> list[Field]:
+        return list(
+            self._db.scalars(select(Field).where(Field.farm_id == farm_id, Field.id.in_(ids)))
+        )
+
+    def plots(self, farm_id: uuid.UUID, ids: frozenset[uuid.UUID]) -> list[Plot]:
+        return list(
+            self._db.scalars(
+                select(Plot)
+                .join(Field, Plot.field_id == Field.id)
+                .options(joinedload(Plot.field))
+                .where(Field.farm_id == farm_id, Plot.id.in_(ids))
             )
         )

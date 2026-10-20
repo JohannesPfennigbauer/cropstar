@@ -6,6 +6,7 @@ from typing import Any, ClassVar
 
 from geoalchemy2 import Geometry, WKBElement
 from sqlalchemy import (
+    Column,
     DateTime,
     Enum,
     ForeignKey,
@@ -14,6 +15,7 @@ from sqlalchemy import (
     Numeric,
     SmallInteger,
     String,
+    Table,
     Text,
     UniqueConstraint,
     func,
@@ -224,11 +226,29 @@ class Priority(enum.StrEnum):
     HIGH = "high"
 
 
+task_fields = Table(
+    "task_fields",
+    Base.metadata,
+    Column("task_id", ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True),
+    Column("field_id", ForeignKey("fields.id", ondelete="CASCADE"), primary_key=True, index=True),
+)
+
+task_plots = Table(
+    "task_plots",
+    Base.metadata,
+    Column("task_id", ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True),
+    Column("plot_id", ForeignKey("plots.id", ondelete="CASCADE"), primary_key=True, index=True),
+)
+
+
 class Task(Base):
     """Any piece of work on a Farm that someone intends to do or has done."""
 
     __tablename__ = "tasks"
-    __table_args__ = (Index("ix_tasks_farm_id_status", "farm_id", "status"),)
+    __table_args__ = (
+        Index("ix_tasks_farm_id_status", "farm_id", "status"),
+        Index("ix_tasks_farm_id_harvest_year", "farm_id", "harvest_year"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     farm_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("farms.id", ondelete="CASCADE"))
@@ -250,3 +270,8 @@ class Task(Base):
         ForeignKey("users.id", ondelete="SET NULL")
     )
     completed_at: Mapped[datetime | None]
+    # Derived from the Fields and Plots below: set exactly when the Task refers to areas.
+    harvest_year: Mapped[int | None] = mapped_column(SmallInteger)
+
+    fields: Mapped[list[Field]] = relationship(secondary=task_fields, order_by=Field.number)
+    plots: Mapped[list[Plot]] = relationship(secondary=task_plots)

@@ -8,17 +8,21 @@ from typing import Annotated, Literal
 
 from fastapi import APIRouter, HTTPException, Query, Response, status
 from pydantic import BaseModel, StringConstraints, field_validator
-from sqlalchemy import case, nulls_last, select
+from sqlalchemy import case, nulls_last, or_, select
 from sqlalchemy.orm import Session as DbSession
+from sqlalchemy.orm import selectinload
 
 from cropstar_api.db import Db
 from cropstar_api.farms import FarmMembership
-from cropstar_api.models import Membership, Priority, Task, TaskStatus, User
+from cropstar_api.land_use import LandUseCategory, land_use_category
+from cropstar_api.models import Membership, Plot, Priority, Task, TaskStatus, User, task_plots
 from cropstar_api.policy import Action, Actor
 from cropstar_api.tasks.lifecycle import (
+    AreaNotFoundError,
     ForbiddenError,
     InvalidAssigneeError,
     InvalidTransitionError,
+    MixedHarvestYearsError,
     NewTask,
     TaskError,
     TaskLifecycle,
@@ -40,6 +44,20 @@ class PersonOut(BaseModel):
     email: str
 
 
+class TaskFieldRef(BaseModel):
+    id: uuid.UUID
+    number: int
+    name: str | None
+
+
+class TaskPlotRef(BaseModel):
+    id: uuid.UUID
+    number: int
+    field_number: int
+    land_use_name: str
+    land_use_category: LandUseCategory
+
+
 class TaskOut(BaseModel):
     id: uuid.UUID
     title: str
@@ -54,6 +72,10 @@ class TaskOut(BaseModel):
     updated_at: datetime
     completed_by: PersonOut | None
     completed_at: datetime | None
+    # Set exactly when the Task refers to Fields or Plots, all of this Harvest Year.
+    harvest_year: int | None
+    fields: list[TaskFieldRef]
+    plots: list[TaskPlotRef]
     allowed_actions: list[Action]
 
 
@@ -64,6 +86,8 @@ class TaskCreate(BaseModel):
     priority: Priority = Priority.NONE
     assignee_id: uuid.UUID | None = None
     done: bool = False
+    field_ids: list[uuid.UUID] = []
+    plot_ids: list[uuid.UUID] = []
 
     @field_validator("description")
     @classmethod
@@ -72,13 +96,16 @@ class TaskCreate(BaseModel):
 
 
 class TaskUpdate(BaseModel):
-    """Only the fields sent are changed; send null to clear an optional field."""
+    """Only the fields sent are changed; send null to clear an optional field. Sending
+    `field_ids` or `plot_ids` replaces that set of areas."""
 
     title: Title | None = None
     description: Description | None = None
     due_date: date | None = None
     priority: Priority | None = None
     assignee_id: uuid.UUID | None = None
+    field_ids: list[uuid.UUID] | None = None
+    plot_ids: list[uuid.UUID] | None = None
 
     @field_validator("title", "priority")
     @classmethod
@@ -107,8 +134,23 @@ def list_tasks(
     priority: Annotated[list[Priority] | None, Query()] = None,
     due_before: Annotated[date | None, Query(description="Due on or before this date")] = None,
     without_due: Annotated[bool, Query(description="Only Tasks without a due date")] = False,
+    harvest_year: Annotated[
+        int | None,
+        Query(description="Tasks of this Harvest Year plus all Tasks without one"),
+    ] = None,
+    plot_id: Annotated[uuid.UUID | None, Query(description="Only Tasks on this Plot")] = None,
 ) -> list[TaskOut]:
-    query = select(Task).where(Task.farm_id == membership.farm_id)
+    query = (
+        select(Task)
+        .where(Task.farm_id == membership.farm_id)
+        .options(selectinload(Task.fields), selectinload(Task.plots).joinedload(Plot.field))
+    )
+    if harvest_year is not None:
+        query = query.where(or_(Task.harvest_year == harvest_year, Task.harvest_year.is_(None)))
+    if plot_id is not None:
+        query = query.where(
+            Task.id.in_(select(task_plots.c.task_id).where(task_plots.c.plot_id == plot_id))
+        )
     if status_:
         query = query.where(Task.status.in_(status_))
     if assignee == "me":
@@ -136,9 +178,11 @@ def list_tasks(
 @router.post("/tasks", operation_id="createTask", status_code=status.HTTP_201_CREATED)
 def create_task(body: TaskCreate, membership: FarmMembership, db: Db) -> TaskOut:
     with _domain_errors():
-        task = _lifecycle(db).create(
-            _actor(membership), membership.farm_id, NewTask(**body.model_dump())
+        fields = body.model_dump(exclude={"field_ids", "plot_ids"})
+        new = NewTask(
+            **fields, field_ids=frozenset(body.field_ids), plot_ids=frozenset(body.plot_ids)
         )
+        task = _lifecycle(db).create(_actor(membership), membership.farm_id, new)
     return _out(db, membership, [task])[0]
 
 
@@ -155,6 +199,9 @@ def update_task(
     task_id: uuid.UUID, body: TaskUpdate, membership: FarmMembership, db: Db
 ) -> TaskOut:
     changes = {name: getattr(body, name) for name in body.model_fields_set}
+    for areas in ("field_ids", "plot_ids"):
+        if areas in changes:
+            changes[areas] = changes[areas] or []
     with _domain_errors():
         task = _lifecycle(db).edit(_actor(membership), membership.farm_id, task_id, changes)
     return _out(db, membership, [task])[0]
@@ -215,7 +262,7 @@ def _domain_errors() -> Iterator[None]:
         raise HTTPException(status.HTTP_403_FORBIDDEN, detail=error.code) from None
     except InvalidTransitionError as error:
         raise HTTPException(status.HTTP_409_CONFLICT, detail=error.code) from None
-    except InvalidAssigneeError as error:
+    except (InvalidAssigneeError, AreaNotFoundError, MixedHarvestYearsError) as error:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, detail=error.code) from None
     except TaskError as error:  # pragma: no cover - every subclass is mapped above
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=error.code) from None
@@ -252,6 +299,18 @@ def _out(db: DbSession, membership: Membership, tasks: list[Task]) -> list[TaskO
             updated_at=task.updated_at,
             completed_by=people.get(task.completed_by_id) if task.completed_by_id else None,
             completed_at=task.completed_at,
+            harvest_year=task.harvest_year,
+            fields=[TaskFieldRef(id=f.id, number=f.number, name=f.name) for f in task.fields],
+            plots=[
+                TaskPlotRef(
+                    id=p.id,
+                    number=p.number,
+                    field_number=p.field.number,
+                    land_use_name=p.land_use_name,
+                    land_use_category=land_use_category(p.land_use_code),
+                )
+                for p in task.plots
+            ],
             allowed_actions=lifecycle.allowed_actions(actor, task),
         )
         for task in tasks

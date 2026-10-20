@@ -1212,6 +1212,43 @@
               "title": "Without Due"
             },
             "description": "Only Tasks without a due date"
+          },
+          {
+            "name": "harvest_year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Tasks of this Harvest Year plus all Tasks without one",
+              "title": "Harvest Year"
+            },
+            "description": "Tasks of this Harvest Year plus all Tasks without one"
+          },
+          {
+            "name": "plot_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only Tasks on this Plot",
+              "title": "Plot Id"
+            },
+            "description": "Only Tasks on this Plot"
           }
         ],
         "responses": {
@@ -2468,6 +2505,24 @@
             "type": "boolean",
             "title": "Done",
             "default": false
+          },
+          "field_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Field Ids",
+            "default": []
+          },
+          "plot_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Plot Ids",
+            "default": []
           }
         },
         "type": "object",
@@ -2475,6 +2530,37 @@
           "title"
         ],
         "title": "TaskCreate"
+      },
+      "TaskFieldRef": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "number",
+          "name"
+        ],
+        "title": "TaskFieldRef"
       },
       "TaskOut": {
         "properties": {
@@ -2568,6 +2654,31 @@
             ],
             "title": "Completed At"
           },
+          "harvest_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Harvest Year"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/TaskFieldRef"
+            },
+            "type": "array",
+            "title": "Fields"
+          },
+          "plots": {
+            "items": {
+              "$ref": "#/components/schemas/TaskPlotRef"
+            },
+            "type": "array",
+            "title": "Plots"
+          },
           "allowed_actions": {
             "items": {
               "$ref": "#/components/schemas/Action"
@@ -2590,9 +2701,45 @@
           "updated_at",
           "completed_by",
           "completed_at",
+          "harvest_year",
+          "fields",
+          "plots",
           "allowed_actions"
         ],
         "title": "TaskOut"
+      },
+      "TaskPlotRef": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "field_number": {
+            "type": "integer",
+            "title": "Field Number"
+          },
+          "land_use_name": {
+            "type": "string",
+            "title": "Land Use Name"
+          },
+          "land_use_category": {
+            "$ref": "#/components/schemas/LandUseCategory"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "number",
+          "field_number",
+          "land_use_name",
+          "land_use_category"
+        ],
+        "title": "TaskPlotRef"
       },
       "TaskStatus": {
         "type": "string",
@@ -2663,11 +2810,41 @@
               }
             ],
             "title": "Assignee Id"
+          },
+          "field_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Field Ids"
+          },
+          "plot_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plot Ids"
           }
         },
         "type": "object",
         "title": "TaskUpdate",
-        "description": "Only the fields sent are changed; send null to clear an optional field."
+        "description": "Only the fields sent are changed; send null to clear an optional field. Sending\n`field_ids` or `plot_ids` replaces that set of areas."
       },
       "UserOut": {
         "properties": {

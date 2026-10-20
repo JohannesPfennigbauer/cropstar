@@ -345,10 +345,11 @@
       "source": "Source",
       "sourceValue": "AMA application {year}",
       "tasks": "Tasks",
-      "tasksSoon": "The open tasks for this plot will show up here.",
       "log": "Operation log",
       "logSoon": "What happened on this plot will be recorded here: tillage, sowing, fertilisation, harvest.",
-      "category": "Category"
+      "category": "Category",
+      "newTask": "New task",
+      "noTasks": "No open tasks for this plot."
     },
     "landUseCategory": {
       "cereals": "Cereals",
@@ -392,7 +393,8 @@
         "dueDate": "Due",
         "priority": "Priority",
         "assignee": "Responsible",
-        "done": "Already done"
+        "done": "Already done",
+        "areas": "Areas"
       },
       "priority": {
         "none": "None",
@@ -442,9 +444,17 @@
         "only_admin_or_creator": "Only admins and whoever created the task can delete it.",
         "invalid_transition": "The task has changed in the meantime. Reload the list.",
         "task_not_found": "This task no longer exists.",
-        "harvest_year_locked": "The harvest year is locked."
+        "harvest_year_locked": "The harvest year is locked.",
+        "mixed_harvest_years": "All areas of a task must be from the same harvest year.",
+        "area_not_found": "One of the areas does not exist on this farm."
       },
-      "newHint": "What needs doing? A title is enough; everything else is optional."
+      "newHint": "What needs doing? A title is enough; everything else is optional.",
+      "fieldsGroup": "Fields",
+      "plotsGroup": "Plots",
+      "plotRef": "Plot {field}.{plot}",
+      "wholeFarm": "Whole farm",
+      "searchAreas": "Search …",
+      "areasHelp": "Fields and plots of harvest year {year}. Without an area, the task is for the whole farm."
     },
     "roles": {
       "admin": "Admin",

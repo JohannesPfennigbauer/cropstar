@@ -11,6 +11,7 @@ const { t } = useI18n()
 const api = useApi()
 const toast = useToast()
 const { farm } = useAuth()
+const { selected: harvestYear } = useHarvestYear()
 const { day } = useFormat()
 
 useSeoMeta({ title: () => t('app.tasks.title') })
@@ -41,12 +42,13 @@ const { data: tasks, refresh, status: loading } = await useAsyncData('tasks', as
         due_before: due.value === 'overdue'
           ? addDaysIso(today, -1)
           : due.value === 'week' ? addDaysIso(today, 7) : undefined,
-        without_due: due.value === 'none' || undefined
+        without_due: due.value === 'none' || undefined,
+        harvest_year: harvestYear.value ?? undefined
       }
     }
   })
   return data ?? []
-}, { watch: [() => farm.value?.id, status, assignee, priority, due] })
+}, { watch: [() => farm.value?.id, status, assignee, priority, due, harvestYear] })
 
 const statusTabs = computed(() => (['open', 'done', 'discarded', 'all'] as const)
   .map(value => ({ label: t(`app.tasks.filters.status.${value}`), value })))
@@ -225,6 +227,7 @@ const PRIORITY_COLOR = { high: 'error', normal: 'warning', low: 'neutral', none:
               />
               {{ task.assignee.email }}
             </span>
+            <AppTaskAreas :task="task" />
             <span
               v-if="task.description"
               class="flex items-center gap-1"
@@ -255,6 +258,7 @@ const PRIORITY_COLOR = { high: 'error', normal: 'warning', low: 'neutral', none:
       :farm-id="farm.id"
       :task="editing"
       :members="members ?? []"
+      :harvest-year="harvestYear"
       @changed="refresh()"
     />
   </div>

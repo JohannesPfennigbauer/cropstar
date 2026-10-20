@@ -12,6 +12,10 @@ const props = defineProps<{
   /** The Task to edit; null creates a new one. */
   task: Task | null
   members: Member[]
+  /** Which Harvest Year's Fields and Plots to offer when the Task has none yet. */
+  harvestYear: number | null
+  /** Plots preselected for a new Task, e.g. when created from a Plot's page. */
+  presetPlotIds?: string[]
 }>()
 const open = defineModel<boolean>('open', { required: true })
 const emit = defineEmits<{ changed: [] }>()
@@ -31,6 +35,7 @@ const schema = computed(() => z.object({
   due_date: z.string(),
   priority: z.enum(['none', 'low', 'normal', 'high']),
   assignee: z.string(),
+  areas: z.array(z.string()),
   done: z.boolean()
 }))
 type Schema = z.output<typeof schema.value>
@@ -42,9 +47,45 @@ function emptyState() {
     due_date: props.task?.due_date ?? '',
     priority: props.task?.priority ?? 'none' as Schemas['Priority'],
     assignee: props.task?.assignee?.id ?? NOBODY,
+    areas: props.task
+      ? [...props.task.fields.map(f => `field:${f.id}`), ...props.task.plots.map(p => `plot:${p.id}`)]
+      : (props.presetPlotIds ?? []).map(id => `plot:${id}`),
     done: false
   }
 }
+
+// A Task's areas all come from one Harvest Year: the Task's own, else the one in view.
+const areaYear = computed(() => props.task?.harvest_year ?? props.harvestYear)
+
+const { data: areaOptions } = useAsyncData(
+  () => `task-areas-${props.farmId}-${areaYear.value}`,
+  async () => {
+    if (areaYear.value === null) return null
+    const params = { path: { farm_id: props.farmId }, query: { harvest_year: areaYear.value } }
+    const [fields, plots] = await Promise.all([
+      api.GET('/api/farms/{farm_id}/fields', { params }),
+      api.GET('/api/farms/{farm_id}/plots', { params })
+    ])
+    return { fields: fields.data?.features ?? [], plots: plots.data?.features ?? [] }
+  },
+  { watch: [areaYear, () => props.farmId] }
+)
+
+const areaItems = computed(() => {
+  if (!areaOptions.value) return []
+  return [
+    { type: 'label' as const, label: t('app.tasks.fieldsGroup'), value: 'group:fields' },
+    ...areaOptions.value.fields.map(f => ({
+      label: [t('app.plots.field', { number: f.properties.number }), f.properties.name].filter(Boolean).join(' · '),
+      value: `field:${f.id}`
+    })),
+    { type: 'label' as const, label: t('app.tasks.plotsGroup'), value: 'group:plots' },
+    ...areaOptions.value.plots.map(p => ({
+      label: `${t('app.tasks.plotRef', { field: p.properties.field.number, plot: p.properties.number })} · ${landUseLabel(p.properties.land_use_name)}`,
+      value: `plot:${p.id}`
+    }))
+  ]
+})
 
 const state = reactive(emptyState())
 const errorCode = ref<ApiErrorCode | 'invalid_assignee' | null>(null)
@@ -86,7 +127,9 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     description: event.data.description || null,
     due_date: event.data.due_date || null,
     priority: event.data.priority,
-    assignee_id: event.data.assignee === NOBODY ? null : event.data.assignee
+    assignee_id: event.data.assignee === NOBODY ? null : event.data.assignee,
+    field_ids: event.data.areas.filter(a => a.startsWith('field:')).map(a => a.slice(6)),
+    plot_ids: event.data.areas.filter(a => a.startsWith('plot:')).map(a => a.slice(5))
   }
   const path = { farm_id: props.farmId }
   const result = props.task
@@ -238,6 +281,23 @@ async function remove() {
             />
           </UFormField>
         </div>
+        <UFormField
+          v-if="areaYear !== null"
+          :label="t('app.tasks.fields.areas')"
+          :help="t('app.tasks.areasHelp', { year: areaYear })"
+          name="areas"
+        >
+          <USelectMenu
+            v-model="state.areas"
+            :items="areaItems"
+            value-key="value"
+            multiple
+            :search-input="{ placeholder: t('app.tasks.searchAreas') }"
+            :placeholder="t('app.tasks.wholeFarm')"
+            class="w-full"
+            data-testid="task-areas"
+          />
+        </UFormField>
         <UFormField
           :label="t('app.tasks.fields.assignee')"
           :help="t('app.tasks.assigneeHelp')"

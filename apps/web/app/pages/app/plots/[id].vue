@@ -6,7 +6,8 @@ const api = useApi()
 const route = useRoute()
 const localePath = useLocalePath()
 const { farm } = useAuth()
-const { hectares } = useFormat()
+const { hectares, day } = useFormat()
+const today = todayIso()
 
 const plotId = computed(() => String(route.params.id))
 
@@ -17,6 +18,26 @@ const { data: plot, status } = await useAsyncData(`plot-${plotId.value}`, async 
   })
   return data ?? null
 }, { watch: [plotId, () => farm.value?.id] })
+
+const { data: tasks, refresh: refreshTasks } = await useAsyncData(`plot-tasks-${plotId.value}`, async () => {
+  if (!farm.value) return []
+  const { data } = await api.GET('/api/farms/{farm_id}/tasks', {
+    params: { path: { farm_id: farm.value.id }, query: { plot_id: plotId.value, status: ['open'] } }
+  })
+  return data ?? []
+}, { watch: [plotId, () => farm.value?.id] })
+
+const { data: members } = await useAsyncData('members', async () => {
+  if (!farm.value) return []
+  return (await api.GET('/api/farms/{farm_id}/members', { params: { path: { farm_id: farm.value.id } } })).data ?? []
+}, { watch: [() => farm.value?.id] })
+
+const editorOpen = ref(false)
+const editing = ref<NonNullable<typeof tasks.value>[number] | null>(null)
+function openEditor(task: typeof editing.value) {
+  editing.value = task
+  editorOpen.value = true
+}
 
 const collection = computed(() => plot.value
   ? { type: 'FeatureCollection' as const, features: [plot.value] }
@@ -100,11 +121,49 @@ useSeoMeta({ title })
           </UCard>
 
           <UCard>
-            <h2 class="font-semibold text-highlighted">
-              {{ t('app.plots.tasks') }}
-            </h2>
-            <p class="mt-1 text-sm text-muted">
-              {{ t('app.plots.tasksSoon') }}
+            <div class="flex items-center justify-between gap-3">
+              <h2 class="font-semibold text-highlighted">
+                {{ t('app.plots.tasks') }}
+              </h2>
+              <UButton
+                size="sm"
+                variant="soft"
+                icon="i-lucide-plus"
+                :label="t('app.plots.newTask')"
+                data-testid="new-plot-task"
+                @click="openEditor(null)"
+              />
+            </div>
+            <ul
+              v-if="tasks?.length"
+              class="mt-3 divide-y divide-default"
+            >
+              <li
+                v-for="task in tasks"
+                :key="task.id"
+              >
+                <button
+                  type="button"
+                  class="w-full py-2 text-left"
+                  data-testid="plot-task"
+                  @click="openEditor(task)"
+                >
+                  <span class="block text-sm font-medium text-highlighted">{{ task.title }}</span>
+                  <span
+                    v-if="task.due_date"
+                    class="text-xs"
+                    :class="isOverdue(task, today) ? 'font-semibold text-error' : 'text-muted'"
+                  >
+                    {{ day(task.due_date) }}<template v-if="isOverdue(task, today)"> · {{ t('app.tasks.overdue') }}</template>
+                  </span>
+                </button>
+              </li>
+            </ul>
+            <p
+              v-else
+              class="mt-2 text-sm text-muted"
+            >
+              {{ t('app.plots.noTasks') }}
             </p>
           </UCard>
 
@@ -126,6 +185,17 @@ useSeoMeta({ title })
           />
         </section>
       </div>
+
+      <AppTaskEditor
+        v-if="farm"
+        v-model:open="editorOpen"
+        :farm-id="farm.id"
+        :task="editing"
+        :members="members ?? []"
+        :harvest-year="plot.properties.harvest_year"
+        :preset-plot-ids="[plot.id]"
+        @changed="refreshTasks()"
+      />
     </template>
   </div>
 </template>

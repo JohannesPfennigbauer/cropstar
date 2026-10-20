@@ -3,12 +3,14 @@ from datetime import UTC, date, datetime, timedelta
 
 import pytest
 
-from cropstar_api.models import Priority, Role, Task, TaskStatus
+from cropstar_api.models import Field, Plot, Priority, Role, Task, TaskStatus
 from cropstar_api.policy import Action, Actor
 from cropstar_api.tasks.lifecycle import (
+    AreaNotFoundError,
     ForbiddenError,
     InvalidAssigneeError,
     InvalidTransitionError,
+    MixedHarvestYearsError,
     NewTask,
     TaskLifecycle,
     TaskNotFoundError,
@@ -22,6 +24,8 @@ class InMemoryTasks:
     def __init__(self) -> None:
         self.tasks: dict[uuid.UUID, Task] = {}
         self.roles: dict[tuple[uuid.UUID, uuid.UUID], Role] = {}
+        self.all_fields: list[Field] = []
+        self.all_plots: list[Plot] = []
 
     def get(self, farm_id: uuid.UUID, task_id: uuid.UUID) -> Task | None:
         task = self.tasks.get(task_id)
@@ -35,6 +39,22 @@ class InMemoryTasks:
 
     def role_of(self, farm_id: uuid.UUID, user_id: uuid.UUID) -> Role | None:
         return self.roles.get((farm_id, user_id))
+
+    def fields(self, farm_id: uuid.UUID, ids: frozenset[uuid.UUID]) -> list[Field]:
+        return [f for f in self.all_fields if f.farm_id == farm_id and f.id in ids]
+
+    def plots(self, farm_id: uuid.UUID, ids: frozenset[uuid.UUID]) -> list[Plot]:
+        return [p for p in self.all_plots if p.field.farm_id == farm_id and p.id in ids]
+
+    def add_field(self, farm_id: uuid.UUID, year: int, number: int) -> Field:
+        field = Field(id=uuid.uuid4(), farm_id=farm_id, harvest_year=year, number=number)
+        self.all_fields.append(field)
+        return field
+
+    def add_plot(self, field: Field, number: int) -> Plot:
+        plot = Plot(id=uuid.uuid4(), field=field, field_id=field.id, number=number)
+        self.all_plots.append(plot)
+        return plot
 
 
 class Clock:
@@ -253,3 +273,64 @@ def test_allowed_actions_follow_role_and_status(
         Action.REOPEN_TASK,
         Action.DELETE_TASK,
     ]
+
+
+def test_a_task_takes_the_harvest_year_of_its_areas(
+    lifecycle: TaskLifecycle, repo: InMemoryTasks
+) -> None:
+    anna = member(repo, Role.WORKER)
+    field = repo.add_field(FARM, 2027, 1)
+    plot = repo.add_plot(field, 2)
+
+    task = lifecycle.create(
+        anna, FARM, NewTask("Zaun", field_ids=frozenset({field.id}), plot_ids=frozenset({plot.id}))
+    )
+
+    assert task.harvest_year == 2027
+    assert (task.fields, task.plots) == ([field], [plot])
+    assert lifecycle.create(anna, FARM, NewTask("Traktor")).harvest_year is None
+
+
+def test_areas_of_two_harvest_years_cannot_be_mixed(
+    lifecycle: TaskLifecycle, repo: InMemoryTasks
+) -> None:
+    anna = member(repo, Role.WORKER)
+    this_year = repo.add_plot(repo.add_field(FARM, 2027, 1), 1)
+    last_year = repo.add_field(FARM, 2026, 1)
+
+    with pytest.raises(MixedHarvestYearsError):
+        lifecycle.create(
+            anna,
+            FARM,
+            NewTask(
+                "Zaun", field_ids=frozenset({last_year.id}), plot_ids=frozenset({this_year.id})
+            ),
+        )
+    assert repo.tasks == {}
+
+
+def test_areas_must_belong_to_the_farm(lifecycle: TaskLifecycle, repo: InMemoryTasks) -> None:
+    anna = member(repo, Role.WORKER)
+    elsewhere = repo.add_plot(repo.add_field(OTHER_FARM, 2027, 1), 1)
+
+    for plot_ids in (frozenset({elsewhere.id}), frozenset({uuid.uuid4()})):
+        with pytest.raises(AreaNotFoundError):
+            lifecycle.create(anna, FARM, NewTask("Zaun", plot_ids=plot_ids))
+
+
+def test_editing_areas_moves_the_harvest_year(
+    lifecycle: TaskLifecycle, repo: InMemoryTasks
+) -> None:
+    anna = member(repo, Role.WORKER)
+    old = repo.add_field(FARM, 2026, 1)
+    new = repo.add_plot(repo.add_field(FARM, 2027, 1), 1)
+    task = lifecycle.create(anna, FARM, NewTask("Zaun", field_ids=frozenset({old.id})))
+
+    lifecycle.edit(anna, FARM, task.id, {"field_ids": [], "plot_ids": [new.id]})
+    assert (task.harvest_year, task.fields, task.plots) == (2027, [], [new])
+
+    lifecycle.edit(anna, FARM, task.id, {"title": "Zaun reparieren"})
+    assert task.plots == [new]
+
+    lifecycle.edit(anna, FARM, task.id, {"plot_ids": []})
+    assert (task.harvest_year, task.plots) == (None, [])
