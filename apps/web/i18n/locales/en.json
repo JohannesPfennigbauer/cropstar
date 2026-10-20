@@ -212,5 +212,19 @@
     "cm": "cm",
     "kgN": "kg N/ha",
     "days": "d"
+  },
+  "app": {
+    "status": {
+      "title": "System status",
+      "lead": "Whether the Cropstar app reaches its API and database.",
+      "api": "API",
+      "database": "Database",
+      "checking": "checking …",
+      "reachable": "reachable",
+      "reachableVersion": "reachable · version {version}",
+      "unreachable": "unreachable",
+      "notInstalled": "not installed",
+      "refresh": "Check again"
+    }
   }
 }

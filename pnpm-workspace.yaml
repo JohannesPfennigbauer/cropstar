@@ -1,5 +1,6 @@
 packages:
   - apps/*
+  - packages/*
 
 # pnpm 10 blocks lifecycle scripts by default; these are the ones Nuxt needs.
 onlyBuiltDependencies:

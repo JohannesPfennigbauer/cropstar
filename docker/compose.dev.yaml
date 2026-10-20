@@ -1,0 +1,23 @@
+name: cropstar-dev
+
+# Development database only: `just db-up`. The API and web app run on the host
+# (`just api-dev`, `just dev`). Not for production — the full stack is compose.yaml.
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    environment:
+      POSTGRES_USER: cropstar
+      POSTGRES_PASSWORD: cropstar
+      POSTGRES_DB: cropstar
+    ports:
+      - "127.0.0.1:${CROPSTAR_DB_PORT:-5432}:5432"
+    volumes:
+      - db-dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cropstar -d cropstar"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  db-dev:

@@ -23,8 +23,19 @@ logs
 !.vscode/settings.json
 .idea
 
+# Python
+.venv
+__pycache__/
+*.py[cod]
+.pytest_cache
+.mypy_cache
+.ruff_cache
+
 # Tooling caches
 .eslintcache
 coverage
+
+# Local planning documents (PRDs)
+plans/
 
 .github/skills/*

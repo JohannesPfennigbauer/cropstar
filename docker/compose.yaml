@@ -1,15 +1,52 @@
-# Local verification of the production image only.
-# Deployment is Coolify pulling the published tag; TLS and routing belong to its proxy,
-# never to this file.
+# The full self-hosted stack from a clean checkout: `just docker-up`.
+# Only the web app is published; the API is reached through its /api proxy and the
+# database stays on the internal network. TLS and routing belong to whatever fronts this
+# (Coolify's Traefik, in our deployment), never to this file.
+name: cropstar
+
 services:
   web:
     build:
       context: ..
-      dockerfile: docker/Dockerfile
+      dockerfile: docker/web.Dockerfile
     image: ghcr.io/johannespfennigbauer/cropstar-web:dev
     init: true
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${CROPSTAR_WEB_PORT:-3000}:3000"
     environment:
+      NUXT_API_BASE_URL: http://api:8000
       NUXT_PUBLIC_CONTACT_EMAIL: ${NUXT_PUBLIC_CONTACT_EMAIL:-hello@cropstar.at}
+    depends_on:
+      - api
+
+  api:
+    build:
+      context: ..
+      dockerfile: docker/api.Dockerfile
+    image: ghcr.io/johannespfennigbauer/cropstar-api:dev
+    init: true
+    restart: unless-stopped
+    environment:
+      CROPSTAR_DATABASE_URL: postgresql+psycopg://cropstar:${CROPSTAR_DB_PASSWORD:-cropstar}@db:5432/cropstar
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgis/postgis:17-3.5
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cropstar
+      POSTGRES_PASSWORD: ${CROPSTAR_DB_PASSWORD:-cropstar}
+      POSTGRES_DB: cropstar
+    volumes:
+      - db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cropstar -d cropstar"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  db:

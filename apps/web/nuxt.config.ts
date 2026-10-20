@@ -17,6 +17,8 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    // Server-only: where the /api proxy forwards to. Override with NUXT_API_BASE_URL.
+    apiBaseUrl: 'http://localhost:8000',
     public: {
       // Override with NUXT_PUBLIC_CONTACT_EMAIL / NUXT_PUBLIC_REPOSITORY_URL.
       contactEmail: 'hello@cropstar.at',
@@ -34,7 +36,8 @@ export default defineNuxtConfig({
     '/en': { prerender: true },
     '/blog/**': { prerender: true },
     '/en/blog/**': { prerender: true },
-    '/app/**': { ssr: false }
+    '/app/**': { ssr: false },
+    '/en/app/**': { ssr: false }
   },
   compatibilityDate: '2025-07-15',
 

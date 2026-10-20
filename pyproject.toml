@@ -1,0 +1,36 @@
+# uv workspace root. It is virtual: it ships nothing itself and only ties the Python
+# members together and holds the shared tooling configuration.
+[tool.uv.workspace]
+members = ["apps/api"]
+
+[tool.uv.sources]
+cropstar-api = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "cropstar-api",
+    "httpx2>=2.15.1",
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "ruff>=0.8",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["cropstar_api"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["apps/api/src", "apps/api/tests"]
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+testpaths = ["apps/api/tests"]
+addopts = ["--strict-markers"]

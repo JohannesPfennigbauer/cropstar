@@ -14,9 +14,12 @@ jobs:
     uses: ./.github/workflows/ci.yml
 
   publish:
-    name: Build and push image
+    name: Build and push ${{ matrix.image }} image
     needs: check
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image: [web, api]
     permissions:
       contents: read
       packages: write
@@ -34,7 +37,7 @@ jobs:
       - id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository }}-web
+          images: ghcr.io/${{ github.repository }}-${{ matrix.image }}
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
@@ -44,13 +47,19 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: .
-          file: docker/Dockerfile
+          file: docker/${{ matrix.image }}.Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
 
+  # Redeploys once, after both images are pushed.
+  deploy:
+    name: Trigger Coolify deployment
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
       # Set the repository variable COOLIFY_WEBHOOK_URL and the secret COOLIFY_TOKEN to
       # let Coolify redeploy the freshly pushed tag. Without them this step is skipped.
       - name: Trigger Coolify deployment

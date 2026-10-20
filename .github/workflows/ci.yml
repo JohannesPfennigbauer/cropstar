@@ -32,3 +32,64 @@ jobs:
       - run: pnpm test
 
       - run: pnpm build
+
+  api:
+    name: API lint, typecheck, test
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgis/postgis:17-3.5
+        env:
+          POSTGRES_USER: cropstar
+          POSTGRES_PASSWORD: cropstar
+          POSTGRES_DB: cropstar
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cropstar -d cropstar"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      CROPSTAR_TEST_DATABASE_URL: postgresql+psycopg://cropstar:cropstar@localhost:5432/cropstar_test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - run: uv sync --locked
+
+      - run: uv run ruff check .
+
+      - run: uv run ruff format --check .
+
+      - run: uv run mypy
+
+      - run: uv run pytest
+
+  api-client:
+    name: API client up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - uses: extractions/setup-just@v3
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: uv sync --locked
+
+      - run: just check-api-client
