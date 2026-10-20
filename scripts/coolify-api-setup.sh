@@ -300,10 +300,21 @@ COOLIFY_API_UUID=$(uuid_from "$COOLIFY_API_UUID")
 write_env COOLIFY_API_UUID "$COOLIFY_API_UUID"
 
 # ── 6 ─────────────────────────────────────────────────────────────────────
-stage "Coolify: point the web app at the API"
-step "Open the existing web application (cropstar-web) in the same environment."
-step "Environment Variables → add NUXT_API_BASE_URL = http://cropstar-api:8000"
-step "Redeploy the web application and wait until it is healthy."
+stage "Coolify: web application"
+say "If cropstar-web already exists in this environment, open it and only add"
+say "NUXT_API_BASE_URL below, then redeploy. Otherwise create it:"
+step "'+ New' → Docker Image → image ghcr.io/johannespfennigbauer/cropstar-web, tag latest."
+step "Same server/destination as the API and the database. Then on General:"
+note "      Name:              cropstar-web"
+note "      Domains:           https://cropstar.at,https://www.cropstar.at"
+note "      Ports Exposes:     3000"
+note "      Port Mappings:     leave empty"
+step "Environment Variables:"
+note "      NUXT_API_BASE_URL          = http://cropstar-api:8000"
+note "      NUXT_PUBLIC_I18N_BASE_URL  = $SITE"
+step "Health check: path /healthz, port 3000."
+step "On cropstar-api add CROPSTAR_PUBLIC_BASE_URL = $SITE (links in reset emails)."
+step "Deploy and wait until healthy; the TLS certificate can take a minute or two."
 ask COOLIFY_WEB_UUID "Paste the browser URL of the web application page:"
 COOLIFY_WEB_UUID=$(uuid_from "$COOLIFY_WEB_UUID")
 write_env COOLIFY_WEB_UUID "$COOLIFY_WEB_UUID"
@@ -324,7 +335,7 @@ until check_status; do
   pause "Press Enter to check again"
 done
 printf '  %s✓%s web → API → PostGIS works on %s\n' "$GREEN" "$RESET" "$SITE"
-open_url "$SITE/app"
+open_url "$SITE/app/status"
 step "The status page should show API, database, PostgreSQL and PostGIS in green."
 step "In Coolify, confirm the API and the database have no domain and no port mapping."
 pause

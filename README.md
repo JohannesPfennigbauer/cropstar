@@ -111,8 +111,8 @@ GitHub Actions builds both images on every push to `main` and publishes them to
 `ghcr.io/johannespfennigbauer/cropstar-web` and `ghcr.io/johannespfennigbauer/cropstar-api`.
 Coolify deploys those prebuilt tags. The application server never builds.
 
-First-time Coolify setup of the API and its PostGIS database — image visibility, the
-database, the API application, wiring the web app to it, and the deploy webhook — is
+First-time Coolify setup — image visibility, the PostGIS database, the API and web
+applications, and the deploy webhook — is
 scripted as an interactive walkthrough: `scripts/coolify-api-setup.sh`. The API reaches the
 database through Coolify's internal network; the web app reaches the API through the
 network alias `cropstar-api`. Database dumps are made by the operator's own `pg_dump` job.
