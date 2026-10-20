@@ -44,7 +44,7 @@ API:
 
 | Variable | Purpose |
 | --- | --- |
-| `CROPSTAR_DATABASE_URL` | SQLAlchemy URL of the PostGIS database (`postgresql+psycopg://…`) |
+| `CROPSTAR_DATABASE_URL` | URL of the PostGIS database; `postgres://…` as shown by Coolify works as-is |
 | `CROPSTAR_HOST`, `CROPSTAR_PORT` | Bind address of the API server (default `0.0.0.0:8000`) |
 | `CROPSTAR_TEST_DATABASE_URL` | Server the API tests create their throwaway database on |
 
@@ -96,6 +96,12 @@ just docker-health
 GitHub Actions builds both images on every push to `main` and publishes them to
 `ghcr.io/johannespfennigbauer/cropstar-web` and `ghcr.io/johannespfennigbauer/cropstar-api`.
 Coolify deploys those prebuilt tags. The application server never builds.
+
+First-time Coolify setup of the API and its PostGIS database — image visibility, the
+database, the API application, wiring the web app to it, and the deploy webhook — is
+scripted as an interactive walkthrough: `scripts/coolify-api-setup.sh`. The API reaches the
+database through Coolify's internal network; the web app reaches the API through the
+network alias `cropstar-api`. Database dumps are made by the operator's own `pg_dump` job.
 
 ## Licence
 
