@@ -46,7 +46,13 @@ API:
 | --- | --- |
 | `CROPSTAR_DATABASE_URL` | URL of the PostGIS database; `postgres://…` as shown by Coolify works as-is |
 | `CROPSTAR_HOST`, `CROPSTAR_PORT` | Bind address of the API server (default `0.0.0.0:8000`) |
+| `CROPSTAR_PUBLIC_BASE_URL` | Origin users reach Cropstar under, for links in emails (default `http://localhost:3000`) |
+| `CROPSTAR_REGISTRATION_OPEN` | `false` lets only invited people in (default `true`) |
+| `CROPSTAR_SESSION_LIFETIME_DAYS` | How long a sign-in lasts (default `30`) |
+| `CROPSTAR_COOKIE_SECURE` | Send the session cookie over HTTPS only (default `true`; browsers accept it on `http://localhost`) |
+| `CROPSTAR_SMTP_HOST`, `CROPSTAR_SMTP_PORT`, `CROPSTAR_SMTP_USERNAME`, `CROPSTAR_SMTP_PASSWORD`, `CROPSTAR_SMTP_FROM`, `CROPSTAR_SMTP_STARTTLS` | Optional email for password reset. Without a host, the Instance Operator resets passwords with `cropstar-api reset-password <email>` |
 | `CROPSTAR_TEST_DATABASE_URL` | Server the API tests create their throwaway database on |
+| `CROPSTAR_E2E_DATABASE_URL` | Database the browser tests run against (default: the development database) |
 
 The full-stack compose file additionally reads `CROPSTAR_DB_PASSWORD` and
 `CROPSTAR_WEB_PORT`.
@@ -64,15 +70,23 @@ The full-stack compose file additionally reads `CROPSTAR_DB_PASSWORD` and
 just install       # pnpm install + uv sync
 just db-up         # PostGIS on localhost:5432
 just api-dev       # migrate, then the API on http://localhost:8000 (docs at /api/docs)
-just dev           # web app on http://localhost:3000; /app shows API and database status
+just dev           # web app on http://localhost:3000; the farm app lives under /app
 just check         # lint, typecheck, test, API client check, build — same as CI
 ```
+
+`just e2e` builds the web app and runs the Playwright browser tests against it, a real API
+and the development database (they create throwaway users there). Install the browser once
+with `pnpm --filter @cropstar/web exec playwright install --with-deps chromium`.
+
+`/app` is the farm app behind sign-in; `/app/status` shows whether the API and database are
+reachable. Without email configured, reset a password with `just reset-password <email>`, or
+in a container with `cropstar-api reset-password <email>`.
 
 After changing the API, regenerate the typed client and commit it with the change:
 `just generate-api-client`. CI fails when the committed client is stale.
 
 Database migrations live in the API package (Alembic). Create one from `apps/api` with
-`uv run alembic revision -m "…" --rev-id 0002`; the API applies pending migrations when it
+`uv run alembic revision -m "…" --rev-id 0003`; the API applies pending migrations when it
 starts.
 
 ## Container

@@ -10,7 +10,8 @@
     "blog": "Blog",
     "contact": "Mitmachen",
     "github": "Cropstar auf GitHub",
-    "earlyAccess": "Früher Zugang"
+    "earlyAccess": "Früher Zugang",
+    "signIn": "Anmelden"
   },
   "seo": {
     "title": "Cropstar – Software, die erklärt statt vorschreibt",
@@ -225,6 +226,89 @@
       "unreachable": "nicht erreichbar",
       "notInstalled": "nicht installiert",
       "refresh": "Erneut prüfen"
+    },
+    "nav": {
+      "home": "Übersicht",
+      "account": "Konto",
+      "signOut": "Abmelden",
+      "farm": "Betrieb",
+      "userMenu": "Benutzermenü"
+    },
+    "home": {
+      "title": "Willkommen bei {farm}",
+      "lead": "Hier entsteht dein Betrieb in Cropstar: Schläge auf der Karte, Aufgaben und das Maßnahmenprotokoll für jeden Schlag.",
+      "comingNext": "Als Nächstes kommen deine Schläge auf die Karte."
+    },
+    "fields": {
+      "email": "E-Mail",
+      "password": "Passwort",
+      "newPassword": "Neues Passwort",
+      "currentPassword": "Aktuelles Passwort",
+      "repeatPassword": "Passwort wiederholen",
+      "farmName": "Name deines Betriebs"
+    },
+    "hints": {
+      "password": "Mindestens 8 Zeichen.",
+      "farmName": "So heißt dein Betrieb in Cropstar. Du kannst ihn später ändern."
+    },
+    "validation": {
+      "email": "Bitte gib eine gültige E-Mail-Adresse ein.",
+      "passwordLength": "Das Passwort braucht mindestens 8 Zeichen.",
+      "required": "Bitte ausfüllen.",
+      "passwordsDiffer": "Die Passwörter stimmen nicht überein."
+    },
+    "signIn": {
+      "title": "Anmelden",
+      "lead": "Melde dich an, um zu deinem Betrieb zu kommen.",
+      "submit": "Anmelden",
+      "forgot": "Passwort vergessen?",
+      "noAccount": "Noch kein Konto?",
+      "register": "Betrieb anlegen"
+    },
+    "register": {
+      "title": "Betrieb anlegen",
+      "lead": "Lege dein Konto und deinen Betrieb an. Du bist dann Admin deines Betriebs und kannst später weitere Personen einladen.",
+      "submit": "Konto und Betrieb anlegen",
+      "haveAccount": "Schon ein Konto?",
+      "signIn": "Anmelden",
+      "closedTitle": "Registrierung geschlossen",
+      "closed": "Auf dieser Cropstar-Instanz kann man sich nicht selbst registrieren. Bitte die Person, die deinen Betrieb verwaltet, um eine Einladung."
+    },
+    "forgot": {
+      "title": "Passwort vergessen",
+      "lead": "Gib die E-Mail-Adresse deines Kontos ein. Wir schicken dir einen Link, mit dem du ein neues Passwort festlegst.",
+      "submit": "Link senden",
+      "sentTitle": "E-Mail ist unterwegs",
+      "sent": "Wenn es zu {email} ein Konto gibt, kommt gleich eine E-Mail mit einem Link. Er gilt eine Stunde.",
+      "noEmailTitle": "Zurücksetzen per E-Mail ist hier nicht eingerichtet",
+      "noEmail": "Diese Cropstar-Instanz verschickt keine E-Mails. Die Person, die sie betreibt, kann dein Passwort für dich zurücksetzen.",
+      "back": "Zurück zur Anmeldung"
+    },
+    "reset": {
+      "title": "Neues Passwort festlegen",
+      "lead": "Danach meldest du dich mit dem neuen Passwort an. Alle anderen Anmeldungen werden beendet.",
+      "submit": "Passwort speichern",
+      "done": "Passwort geändert. Melde dich jetzt mit dem neuen Passwort an.",
+      "missingToken": "Dieser Link ist unvollständig. Fordere einen neuen an.",
+      "requestNew": "Neuen Link anfordern"
+    },
+    "account": {
+      "title": "Konto",
+      "signedInAs": "Angemeldet als {email}",
+      "changePassword": "Passwort ändern",
+      "changePasswordLead": "Andere Geräte, auf denen du angemeldet bist, werden dabei abgemeldet.",
+      "submit": "Passwort ändern",
+      "changed": "Passwort geändert."
+    },
+    "errors": {
+      "invalid_credentials": "E-Mail oder Passwort stimmen nicht.",
+      "email_taken": "Zu dieser E-Mail-Adresse gibt es schon ein Konto. Melde dich an oder setze dein Passwort zurück.",
+      "registration_closed": "Auf dieser Instanz ist die Registrierung geschlossen.",
+      "wrong_password": "Das aktuelle Passwort stimmt nicht.",
+      "invalid_or_expired_token": "Dieser Link ist abgelaufen oder wurde schon verwendet. Fordere einen neuen an.",
+      "email_not_configured": "Diese Instanz verschickt keine E-Mails.",
+      "not_signed_in": "Bitte melde dich an.",
+      "unknown": "Das hat nicht geklappt. Bitte versuch es noch einmal."
     }
   }
 }

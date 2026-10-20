@@ -20,6 +20,10 @@ dev:
 api-dev: api-migrate
     uv run uvicorn cropstar_api.app:create_app --factory --reload --port 8000
 
+# Reset a user's password and sign them out everywhere (Instance Operator)
+reset-password email:
+    uv run cropstar-api reset-password {{email}}
+
 # Upgrade the development database to the latest migration
 api-migrate:
     uv run cropstar-api migrate
@@ -52,6 +56,11 @@ typecheck:
 test:
     pnpm -r test
     uv run pytest
+
+# Browser tests against the production web build, a real API and PostGIS (needs `just db-up`).
+# First time: `pnpm --filter @cropstar/web exec playwright install --with-deps chromium`
+e2e: build
+    pnpm --filter @cropstar/web test:e2e
 
 # Regenerate the typed API client from the API's OpenAPI schema; commit the result
 generate-api-client:

@@ -39,3 +39,7 @@ coverage
 plans/
 
 .github/skills/*
+
+# Playwright
+apps/web/test-results/
+apps/web/playwright-report/

@@ -10,7 +10,8 @@
     "blog": "Blog",
     "contact": "Get involved",
     "github": "Cropstar on GitHub",
-    "earlyAccess": "Early access"
+    "earlyAccess": "Early access",
+    "signIn": "Sign in"
   },
   "seo": {
     "title": "Cropstar — software that explains instead of prescribes",
@@ -225,6 +226,89 @@
       "unreachable": "unreachable",
       "notInstalled": "not installed",
       "refresh": "Check again"
+    },
+    "nav": {
+      "home": "Overview",
+      "account": "Account",
+      "signOut": "Sign out",
+      "farm": "Farm",
+      "userMenu": "User menu"
+    },
+    "home": {
+      "title": "Welcome to {farm}",
+      "lead": "This is where your farm takes shape in Cropstar: plots on the map, tasks, and the operation log of every plot.",
+      "comingNext": "Next up: your plots on the map."
+    },
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "newPassword": "New password",
+      "currentPassword": "Current password",
+      "repeatPassword": "Repeat password",
+      "farmName": "Name of your farm"
+    },
+    "hints": {
+      "password": "At least 8 characters.",
+      "farmName": "What your farm is called in Cropstar. You can change it later."
+    },
+    "validation": {
+      "email": "Please enter a valid email address.",
+      "passwordLength": "The password needs at least 8 characters.",
+      "required": "Please fill this in.",
+      "passwordsDiffer": "The passwords do not match."
+    },
+    "signIn": {
+      "title": "Sign in",
+      "lead": "Sign in to get to your farm.",
+      "submit": "Sign in",
+      "forgot": "Forgot your password?",
+      "noAccount": "No account yet?",
+      "register": "Create a farm"
+    },
+    "register": {
+      "title": "Create a farm",
+      "lead": "Create your account and your farm. You become its admin and can invite others later.",
+      "submit": "Create account and farm",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "closedTitle": "Registration is closed",
+      "closed": "This Cropstar instance does not allow signing up yourself. Ask whoever manages your farm for an invitation."
+    },
+    "forgot": {
+      "title": "Forgot your password",
+      "lead": "Enter your account's email address. We'll send you a link to choose a new password.",
+      "submit": "Send link",
+      "sentTitle": "Email on its way",
+      "sent": "If there is an account for {email}, an email with a link is on its way. The link is valid for one hour.",
+      "noEmailTitle": "Password reset by email is not set up here",
+      "noEmail": "This Cropstar instance does not send email. Whoever runs it can reset your password for you.",
+      "back": "Back to sign in"
+    },
+    "reset": {
+      "title": "Choose a new password",
+      "lead": "Afterwards you sign in with the new password. All other sessions are signed out.",
+      "submit": "Save password",
+      "done": "Password changed. Sign in with your new password now.",
+      "missingToken": "This link is incomplete. Request a new one.",
+      "requestNew": "Request a new link"
+    },
+    "account": {
+      "title": "Account",
+      "signedInAs": "Signed in as {email}",
+      "changePassword": "Change password",
+      "changePasswordLead": "Other devices you are signed in on will be signed out.",
+      "submit": "Change password",
+      "changed": "Password changed."
+    },
+    "errors": {
+      "invalid_credentials": "Email or password is not correct.",
+      "email_taken": "There is already an account for this email address. Sign in or reset your password.",
+      "registration_closed": "Registration is closed on this instance.",
+      "wrong_password": "The current password is not correct.",
+      "invalid_or_expired_token": "This link has expired or was already used. Request a new one.",
+      "email_not_configured": "This instance does not send email.",
+      "not_signed_in": "Please sign in.",
+      "unknown": "That didn't work. Please try again."
     }
   }
 }
