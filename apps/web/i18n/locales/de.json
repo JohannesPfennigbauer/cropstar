@@ -232,12 +232,14 @@
       "account": "Konto",
       "signOut": "Abmelden",
       "farm": "Betrieb",
-      "userMenu": "Benutzermenü"
+      "userMenu": "Benutzermenü",
+      "plots": "Schläge"
     },
     "home": {
       "title": "Willkommen bei {farm}",
       "lead": "Hier entsteht dein Betrieb in Cropstar: Schläge auf der Karte, Aufgaben und das Maßnahmenprotokoll für jeden Schlag.",
-      "comingNext": "Als Nächstes kommen deine Schläge auf die Karte."
+      "plotsCta": "Zu deinen Schlägen",
+      "plotsLead": "Deine Schläge auf der Karte, so wie sie bei AMA beantragt sind."
     },
     "fields": {
       "email": "E-Mail",
@@ -309,6 +311,48 @@
       "email_not_configured": "Diese Instanz verschickt keine E-Mails.",
       "not_signed_in": "Bitte melde dich an.",
       "unknown": "Das hat nicht geklappt. Bitte versuch es noch einmal."
+    },
+    "harvestYear": {
+      "label": "Erntejahr",
+      "option": "Erntejahr {year}"
+    },
+    "map": {
+      "ortho": "Orthofoto",
+      "map": "Karte",
+      "legend": "Legende"
+    },
+    "plots": {
+      "title": "Schläge",
+      "fieldCount": "{n} Feldstück | {n} Feldstücke",
+      "plotCount": "{n} Schlag | {n} Schläge",
+      "provenance": "Wie bei AMA beantragt · Erntejahr {year}",
+      "field": "Feldstück {number}",
+      "plot": "Schlag {number}",
+      "emptyTitle": "Noch keine Schläge",
+      "empty": "Sobald du den Flächen-Export aus eAMA importierst, erscheinen deine Feldstücke und Schläge hier auf der Karte.",
+      "back": "Alle Schläge",
+      "notFound": "Diesen Schlag gibt es in deinem Betrieb nicht.",
+      "landUse": "Nutzungsart",
+      "declaredArea": "Beantragte Fläche",
+      "source": "Quelle",
+      "sourceValue": "AMA-Mehrfachantrag {year}",
+      "tasks": "Aufgaben",
+      "tasksSoon": "Hier siehst du bald die offenen Aufgaben für diesen Schlag.",
+      "log": "Maßnahmenprotokoll",
+      "logSoon": "Hier steht bald, was auf diesem Schlag passiert ist: Bodenbearbeitung, Aussaat, Düngung, Ernte.",
+      "category": "Kategorie"
+    },
+    "landUseCategory": {
+      "cereals": "Getreide",
+      "legumes": "Leguminosen",
+      "root_crops": "Hackfrüchte",
+      "oilseeds": "Öl- und Faserpflanzen",
+      "fodder": "Feldfutter",
+      "vegetables": "Gemüse und Sonderkulturen",
+      "fallow": "Brache",
+      "grassland": "Grünland",
+      "permanent": "Dauerkulturen",
+      "other": "Landschaftselemente und Sonstiges"
     }
   }
 }

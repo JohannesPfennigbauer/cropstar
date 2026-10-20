@@ -195,6 +195,77 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/farms/{farm_id}/harvest-years": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Harvest Years
+         * @description Harvest Years the Farm has Fields in, most recent first.
+         */
+        get: operations["listHarvestYears"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/farms/{farm_id}/fields": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Fields */
+        get: operations["listFields"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/farms/{farm_id}/plots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Plots */
+        get: operations["listPlots"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/farms/{farm_id}/plots/{plot_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read Plot */
+        get: operations["getPlot"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -243,11 +314,77 @@ export interface components {
             /** Name */
             name: string;
         };
+        /** FieldCollection */
+        FieldCollection: {
+            /**
+             * Type
+             * @default FeatureCollection
+             * @constant
+             */
+            type: "FeatureCollection";
+            /** Features */
+            features: components["schemas"]["FieldFeature"][];
+        };
+        /** FieldFeature */
+        FieldFeature: {
+            /**
+             * Type
+             * @default Feature
+             * @constant
+             */
+            type: "Feature";
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            geometry: components["schemas"]["MultiPolygon"];
+            properties: components["schemas"]["FieldProperties"];
+        };
+        /** FieldProperties */
+        FieldProperties: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Harvest Year */
+            harvest_year: number;
+            /** Number */
+            number: number;
+            /** Name */
+            name: string | null;
+            /** Land Use Code */
+            land_use_code: string;
+            /** Land Use Name */
+            land_use_name: string;
+            /** Declared Area Ha */
+            declared_area_ha: number;
+            /** Plot Count */
+            plot_count: number;
+        };
+        /** FieldRef */
+        FieldRef: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Number */
+            number: number;
+            /** Name */
+            name: string | null;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /**
+         * LandUseCategory
+         * @enum {string}
+         */
+        LandUseCategory: "cereals" | "legumes" | "root_crops" | "oilseeds" | "fodder" | "vegetables" | "fallow" | "grassland" | "permanent" | "other";
         /** Liveness */
         Liveness: {
             /**
@@ -272,6 +409,19 @@ export interface components {
             farm: components["schemas"]["FarmOut"];
             role: components["schemas"]["Role"];
         };
+        /** MultiPolygon */
+        MultiPolygon: {
+            /**
+             * Type
+             * @constant
+             */
+            type: "MultiPolygon";
+            /** Coordinates */
+            coordinates: [
+                number,
+                number
+            ][][][];
+        };
         /** PasswordResetCompletion */
         PasswordResetCompletion: {
             /** Token */
@@ -289,6 +439,55 @@ export interface components {
              * @enum {string}
              */
             locale: "de" | "en";
+        };
+        /** PlotCollection */
+        PlotCollection: {
+            /**
+             * Type
+             * @default FeatureCollection
+             * @constant
+             */
+            type: "FeatureCollection";
+            /** Features */
+            features: components["schemas"]["PlotFeature"][];
+        };
+        /** PlotFeature */
+        PlotFeature: {
+            /**
+             * Type
+             * @default Feature
+             * @constant
+             */
+            type: "Feature";
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            geometry: components["schemas"]["MultiPolygon"];
+            properties: components["schemas"]["PlotProperties"];
+        };
+        /** PlotProperties */
+        PlotProperties: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Harvest Year */
+            harvest_year: number;
+            /** Number */
+            number: number;
+            /** Name */
+            name: string | null;
+            /** Land Use Code */
+            land_use_code: string;
+            /** Land Use Name */
+            land_use_name: string;
+            land_use_category: components["schemas"]["LandUseCategory"];
+            /** Declared Area Ha */
+            declared_area_ha: number;
+            field: components["schemas"]["FieldRef"];
         };
         /** RegisterRequest */
         RegisterRequest: {
@@ -601,6 +800,135 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Me"];
+                };
+            };
+        };
+    };
+    listHarvestYears: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": number[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listFields: {
+        parameters: {
+            query: {
+                harvest_year: number;
+            };
+            header?: never;
+            path: {
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FieldCollection"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listPlots: {
+        parameters: {
+            query: {
+                harvest_year: number;
+            };
+            header?: never;
+            path: {
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlotCollection"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    getPlot: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plot_id: string;
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlotFeature"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

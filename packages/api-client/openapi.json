@@ -298,6 +298,215 @@
           }
         }
       }
+    },
+    "/api/farms/{farm_id}/harvest-years": {
+      "get": {
+        "tags": [
+          "areas"
+        ],
+        "summary": "List Harvest Years",
+        "description": "Harvest Years the Farm has Fields in, most recent first.",
+        "operationId": "listHarvestYears",
+        "parameters": [
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  },
+                  "title": "Response Listharvestyears"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/farms/{farm_id}/fields": {
+      "get": {
+        "tags": [
+          "areas"
+        ],
+        "summary": "List Fields",
+        "operationId": "listFields",
+        "parameters": [
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          },
+          {
+            "name": "harvest_year",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "maximum": 2200,
+              "minimum": 1990,
+              "title": "Harvest Year"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FieldCollection"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/farms/{farm_id}/plots": {
+      "get": {
+        "tags": [
+          "areas"
+        ],
+        "summary": "List Plots",
+        "operationId": "listPlots",
+        "parameters": [
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          },
+          {
+            "name": "harvest_year",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "maximum": 2200,
+              "minimum": 1990,
+              "title": "Harvest Year"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlotCollection"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/farms/{farm_id}/plots/{plot_id}": {
+      "get": {
+        "tags": [
+          "areas"
+        ],
+        "summary": "Read Plot",
+        "operationId": "getPlot",
+        "parameters": [
+          {
+            "name": "plot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Plot Id"
+            }
+          },
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlotFeature"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -420,6 +629,143 @@
         ],
         "title": "FarmOut"
       },
+      "FieldCollection": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "FeatureCollection",
+            "title": "Type",
+            "default": "FeatureCollection"
+          },
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/FieldFeature"
+            },
+            "type": "array",
+            "title": "Features"
+          }
+        },
+        "type": "object",
+        "required": [
+          "features"
+        ],
+        "title": "FieldCollection"
+      },
+      "FieldFeature": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "Feature",
+            "title": "Type",
+            "default": "Feature"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "geometry": {
+            "$ref": "#/components/schemas/MultiPolygon"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/FieldProperties"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "geometry",
+          "properties"
+        ],
+        "title": "FieldFeature"
+      },
+      "FieldProperties": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "harvest_year": {
+            "type": "integer",
+            "title": "Harvest Year"
+          },
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "land_use_code": {
+            "type": "string",
+            "title": "Land Use Code"
+          },
+          "land_use_name": {
+            "type": "string",
+            "title": "Land Use Name"
+          },
+          "declared_area_ha": {
+            "type": "number",
+            "title": "Declared Area Ha"
+          },
+          "plot_count": {
+            "type": "integer",
+            "title": "Plot Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "harvest_year",
+          "number",
+          "name",
+          "land_use_code",
+          "land_use_name",
+          "declared_area_ha",
+          "plot_count"
+        ],
+        "title": "FieldProperties"
+      },
+      "FieldRef": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "number",
+          "name"
+        ],
+        "title": "FieldRef"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -432,6 +778,22 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "LandUseCategory": {
+        "type": "string",
+        "enum": [
+          "cereals",
+          "legumes",
+          "root_crops",
+          "oilseeds",
+          "fodder",
+          "vegetables",
+          "fallow",
+          "grassland",
+          "permanent",
+          "other"
+        ],
+        "title": "LandUseCategory"
       },
       "Liveness": {
         "properties": {
@@ -489,6 +851,44 @@
         ],
         "title": "MembershipOut"
       },
+      "MultiPolygon": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "MultiPolygon",
+            "title": "Type"
+          },
+          "coordinates": {
+            "items": {
+              "items": {
+                "items": {
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "type": "array",
+                  "maxItems": 2,
+                  "minItems": 2
+                },
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Coordinates"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "coordinates"
+        ],
+        "title": "MultiPolygon"
+      },
       "PasswordResetCompletion": {
         "properties": {
           "token": {
@@ -532,6 +932,115 @@
           "email"
         ],
         "title": "PasswordResetRequest"
+      },
+      "PlotCollection": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "FeatureCollection",
+            "title": "Type",
+            "default": "FeatureCollection"
+          },
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/PlotFeature"
+            },
+            "type": "array",
+            "title": "Features"
+          }
+        },
+        "type": "object",
+        "required": [
+          "features"
+        ],
+        "title": "PlotCollection"
+      },
+      "PlotFeature": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "Feature",
+            "title": "Type",
+            "default": "Feature"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "geometry": {
+            "$ref": "#/components/schemas/MultiPolygon"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/PlotProperties"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "geometry",
+          "properties"
+        ],
+        "title": "PlotFeature"
+      },
+      "PlotProperties": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "harvest_year": {
+            "type": "integer",
+            "title": "Harvest Year"
+          },
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "land_use_code": {
+            "type": "string",
+            "title": "Land Use Code"
+          },
+          "land_use_name": {
+            "type": "string",
+            "title": "Land Use Name"
+          },
+          "land_use_category": {
+            "$ref": "#/components/schemas/LandUseCategory"
+          },
+          "declared_area_ha": {
+            "type": "number",
+            "title": "Declared Area Ha"
+          },
+          "field": {
+            "$ref": "#/components/schemas/FieldRef"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "harvest_year",
+          "number",
+          "name",
+          "land_use_code",
+          "land_use_name",
+          "land_use_category",
+          "declared_area_ha",
+          "field"
+        ],
+        "title": "PlotProperties"
       },
       "RegisterRequest": {
         "properties": {

@@ -18,7 +18,11 @@ dev:
 
 # Run the API in development mode with auto-reload (needs `just db-up`)
 api-dev: api-migrate
-    uv run uvicorn cropstar_api.app:create_app --factory --reload --port 8000
+    CROPSTAR_ENVIRONMENT=development uv run uvicorn cropstar_api.app:create_app --factory --reload --port 8000
+
+# Demo Farm with real INVEKOS Fields and Plots; sign in as demo@cropstar.local / cropstar-demo
+seed: api-migrate
+    CROPSTAR_ENVIRONMENT=development uv run cropstar-api seed-demo
 
 # Reset a user's password and sign them out everywhere (Instance Operator)
 reset-password email:

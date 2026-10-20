@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -9,6 +11,8 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_prefix="CROPSTAR_")
 
+    # Development unlocks conveniences such as demo data; never set it on a real instance.
+    environment: Literal["development", "production"] = "production"
     database_url: str = f"{_DRIVER_URL_PREFIX}cropstar:cropstar@localhost:5432/cropstar"
     host: str = "0.0.0.0"
     port: int = 8000

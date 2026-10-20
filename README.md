@@ -44,6 +44,7 @@ API:
 
 | Variable | Purpose |
 | --- | --- |
+| `CROPSTAR_ENVIRONMENT` | `development` unlocks demo data (`cropstar-api seed-demo`); default `production` |
 | `CROPSTAR_DATABASE_URL` | URL of the PostGIS database; `postgres://…` as shown by Coolify works as-is |
 | `CROPSTAR_HOST`, `CROPSTAR_PORT` | Bind address of the API server (default `0.0.0.0:8000`) |
 | `CROPSTAR_PUBLIC_BASE_URL` | Origin users reach Cropstar under, for links in emails (default `http://localhost:3000`) |
@@ -70,6 +71,7 @@ The full-stack compose file additionally reads `CROPSTAR_DB_PASSWORD` and
 just install       # pnpm install + uv sync
 just db-up         # PostGIS on localhost:5432
 just api-dev       # migrate, then the API on http://localhost:8000 (docs at /api/docs)
+just seed          # demo Farm with real INVEKOS plots; demo@cropstar.local / cropstar-demo
 just dev           # web app on http://localhost:3000; the farm app lives under /app
 just check         # lint, typecheck, test, API client check, build — same as CI
 ```
@@ -85,8 +87,12 @@ in a container with `cropstar-api reset-password <email>`.
 After changing the API, regenerate the typed client and commit it with the change:
 `just generate-api-client`. CI fails when the committed client is stale.
 
+The demo data is a real Field pair from the public dataset "INVEKOS Feldstücke/Schläge
+2026-1" (Agrarmarkt Austria, CC BY 4.0); field numbers and names are invented. The map uses
+[basemap.at](https://basemap.at) orthophoto and map tiles.
+
 Database migrations live in the API package (Alembic). Create one from `apps/api` with
-`uv run alembic revision -m "…" --rev-id 0003`; the API applies pending migrations when it
+`uv run alembic revision -m "…" --rev-id 0004`; the API applies pending migrations when it
 starts.
 
 ## Container

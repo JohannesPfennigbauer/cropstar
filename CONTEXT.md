@@ -51,6 +51,21 @@ A part of a Field carrying one crop in one Harvest Year, as declared to AMA / IN
 Plot is the unit the simulation model works on.
 _Avoid_: Field (a Field contains Plots), Parzelle, Teilfläche
 
+**Land Use** (de: _Nutzungsart_):
+What a Field or Plot is declared to AMA as used for: broad for a Field (arable land,
+grassland), specific for a Plot (winter rye, green fallow). Identified by its AMA code.
+_Avoid_: Crop, Kultur (fallow and grassland are not crops)
+
+**Land Use Category** (de: _Nutzungskategorie_):
+The broad group a Plot's Land Use belongs to, such as cereals, legumes, fallow or
+grassland, following the European crop taxonomy HCAT.
+_Avoid_: Crop group, Fruchtart
+
+**Declared Area** (de: _beantragte Fläche_):
+The area of a Field or Plot as declared to AMA. Cropstar shows it as declared and never
+recomputes it from the geometry.
+_Avoid_: Size, Fläche (unqualified)
+
 ## Work
 
 **Task** (de: _Aufgabe_):

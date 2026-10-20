@@ -1,5 +1,5 @@
 from alembic import command
-from sqlalchemy import create_engine, text
+from sqlalchemy import Engine, create_engine, text
 
 from cropstar_api.db import alembic_config, migrate
 
@@ -17,12 +17,14 @@ def _postgis_installed(database_url: str) -> bool:
         engine.dispose()
 
 
-def test_migrations_downgrade_and_upgrade_cleanly(database_url: str) -> None:
+def test_migrations_downgrade_and_upgrade_cleanly(database_url: str, engine: Engine) -> None:
     command.downgrade(alembic_config(database_url), "base")
     assert not _postgis_installed(database_url)
 
     migrate(database_url)
     assert _postgis_installed(database_url)
+    # Types were dropped and recreated with new OIDs; pooled connections still cache the old.
+    engine.dispose()
 
 
 def test_migrating_twice_is_a_no_op(database_url: str) -> None:

@@ -232,12 +232,14 @@
       "account": "Account",
       "signOut": "Sign out",
       "farm": "Farm",
-      "userMenu": "User menu"
+      "userMenu": "User menu",
+      "plots": "Plots"
     },
     "home": {
       "title": "Welcome to {farm}",
       "lead": "This is where your farm takes shape in Cropstar: plots on the map, tasks, and the operation log of every plot.",
-      "comingNext": "Next up: your plots on the map."
+      "plotsCta": "Go to your plots",
+      "plotsLead": "Your plots on the map, as declared to AMA."
     },
     "fields": {
       "email": "Email",
@@ -309,6 +311,48 @@
       "email_not_configured": "This instance does not send email.",
       "not_signed_in": "Please sign in.",
       "unknown": "That didn't work. Please try again."
+    },
+    "harvestYear": {
+      "label": "Harvest year",
+      "option": "Harvest year {year}"
+    },
+    "map": {
+      "ortho": "Aerial",
+      "map": "Map",
+      "legend": "Legend"
+    },
+    "plots": {
+      "title": "Plots",
+      "fieldCount": "{n} field | {n} fields",
+      "plotCount": "{n} plot | {n} plots",
+      "provenance": "As declared to AMA · harvest year {year}",
+      "field": "Field {number}",
+      "plot": "Plot {number}",
+      "emptyTitle": "No plots yet",
+      "empty": "Once you import your area export from eAMA, your fields and plots appear here on the map.",
+      "back": "All plots",
+      "notFound": "This plot does not exist on your farm.",
+      "landUse": "Land use",
+      "declaredArea": "Declared area",
+      "source": "Source",
+      "sourceValue": "AMA application {year}",
+      "tasks": "Tasks",
+      "tasksSoon": "The open tasks for this plot will show up here.",
+      "log": "Operation log",
+      "logSoon": "What happened on this plot will be recorded here: tillage, sowing, fertilisation, harvest.",
+      "category": "Category"
+    },
+    "landUseCategory": {
+      "cereals": "Cereals",
+      "legumes": "Legumes",
+      "root_crops": "Root crops",
+      "oilseeds": "Oil and fibre crops",
+      "fodder": "Fodder crops",
+      "vegetables": "Vegetables and special crops",
+      "fallow": "Fallow",
+      "grassland": "Grassland",
+      "permanent": "Permanent crops",
+      "other": "Landscape elements and other"
     }
   }
 }

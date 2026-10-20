@@ -1,3 +1,8 @@
+<script setup lang="ts">
+// Compact hides the wordmark on narrow screens, where the header needs the room.
+defineProps<{ compact?: boolean }>()
+</script>
+
 <template>
   <span class="flex items-center gap-2.5">
     <svg
@@ -17,6 +22,9 @@
         fill="currentColor"
       />
     </svg>
-    <span class="font-display text-xl font-semibold text-highlighted">Cropstar</span>
+    <span
+      class="font-display text-xl font-semibold text-highlighted"
+      :class="{ 'max-sm:sr-only': compact }"
+    >Cropstar</span>
   </span>
 </template>

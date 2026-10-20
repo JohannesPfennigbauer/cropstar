@@ -18,6 +18,7 @@ from cropstar_api.auth.provider import (
     PasswordAuthProvider,
 )
 from cropstar_api.db import create_db_engine, migrate
+from cropstar_api.seed import seed_demo
 from cropstar_api.settings import Settings
 
 
@@ -37,6 +38,11 @@ def main(argv: list[str] | None = None) -> None:
     reset.add_argument(
         "--password-stdin", action="store_true", help="read the new password from stdin"
     )
+    seed = commands.add_parser(
+        "seed-demo", help="development only: a demo Farm with real INVEKOS Fields and Plots"
+    )
+    seed.add_argument("--email", default="demo@cropstar.local")
+    seed.add_argument("--password", default="cropstar-demo")
 
     args = parser.parse_args(argv)
     # Makes Alembic report which migrations ran.
@@ -54,6 +60,23 @@ def main(argv: list[str] | None = None) -> None:
         args.output.write_text(json.dumps(schema, indent=2, ensure_ascii=False) + "\n")
     elif args.command == "reset-password":
         sys.exit(_reset_password(settings, args.email, args.password_stdin))
+    elif args.command == "seed-demo":
+        sys.exit(_seed_demo(settings, args.email, args.password))
+
+
+def _seed_demo(settings: Settings, email: str, password: str) -> int:
+    if settings.environment != "development":
+        print("Refusing to add demo data: set CROPSTAR_ENVIRONMENT=development.", file=sys.stderr)
+        return 1
+    auth = PasswordAuthProvider(timedelta(days=settings.session_lifetime_days))
+    engine = create_db_engine(settings.database_url)
+    try:
+        with Session(engine) as db, db.begin():
+            farm = seed_demo(db, auth, email, password)
+            print(f"Demo Farm '{farm.name}' ready. Sign in as {email} / {password}.")
+    finally:
+        engine.dispose()
+    return 0
 
 
 def _reset_password(settings: Settings, email: str, from_stdin: bool) -> int:

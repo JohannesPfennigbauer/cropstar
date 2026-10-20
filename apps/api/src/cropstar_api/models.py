@@ -1,9 +1,22 @@
 import enum
 import uuid
 from datetime import datetime
+from decimal import Decimal
 from typing import Any, ClassVar
 
-from sqlalchemy import DateTime, Enum, ForeignKey, MetaData, String, func
+from geoalchemy2 import Geometry, WKBElement
+from sqlalchemy import (
+    DateTime,
+    Enum,
+    ForeignKey,
+    Index,
+    MetaData,
+    Numeric,
+    SmallInteger,
+    String,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 # Stable constraint names keep Alembic migrations reviewable and reversible.
@@ -109,3 +122,54 @@ class Membership(Base):
 
     farm: Mapped[Farm] = relationship(back_populates="memberships")
     user: Mapped[User] = relationship(back_populates="memberships")
+
+
+# Geometry is stored as AMA delivers it: MGI / Austria Lambert. The API converts to WGS84.
+AMA_SRID = 31287
+
+
+class Field(Base):
+    """A Feldstück as declared to AMA for one Harvest Year."""
+
+    __tablename__ = "fields"
+    __table_args__ = (
+        UniqueConstraint("farm_id", "harvest_year", "number"),
+        Index("ix_fields_farm_id_harvest_year", "farm_id", "harvest_year"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    farm_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("farms.id", ondelete="CASCADE"))
+    harvest_year: Mapped[int] = mapped_column(SmallInteger)
+    # The farmer's AMA field number; only unique within one Farm and Harvest Year.
+    number: Mapped[int]
+    name: Mapped[str | None] = mapped_column(String(200))
+    land_use_code: Mapped[str] = mapped_column(String(10))
+    land_use_name: Mapped[str] = mapped_column(String(200))
+    declared_area_ha: Mapped[Decimal] = mapped_column(Numeric(10, 4))
+    geometry: Mapped[WKBElement] = mapped_column(
+        Geometry("MULTIPOLYGON", srid=AMA_SRID, spatial_index=True)
+    )
+
+    plots: Mapped[list["Plot"]] = relationship(back_populates="field", cascade="all, delete")
+
+
+class Plot(Base):
+    """A Schlag as declared to AMA: part of a Field, one Land Use, one Harvest Year."""
+
+    __tablename__ = "plots"
+    __table_args__ = (UniqueConstraint("field_id", "number"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    field_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("fields.id", ondelete="CASCADE"), index=True
+    )
+    number: Mapped[int]
+    name: Mapped[str | None] = mapped_column(String(200))
+    land_use_code: Mapped[str] = mapped_column(String(10))
+    land_use_name: Mapped[str] = mapped_column(String(200))
+    declared_area_ha: Mapped[Decimal] = mapped_column(Numeric(10, 4))
+    geometry: Mapped[WKBElement] = mapped_column(
+        Geometry("MULTIPOLYGON", srid=AMA_SRID, spatial_index=True)
+    )
+
+    field: Mapped[Field] = relationship(back_populates="plots")
