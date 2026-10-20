@@ -62,9 +62,10 @@ jobs:
     steps:
       # Set the repository variable COOLIFY_WEBHOOK_URL and the secret COOLIFY_TOKEN to
       # let Coolify redeploy the freshly pushed tag. Without them this step is skipped.
+      # Coolify's deploy endpoint only accepts POST; GET answers 405.
       - name: Trigger Coolify deployment
         if: vars.COOLIFY_WEBHOOK_URL != ''
         run: |
-          curl --fail --silent --show-error \
+          curl --fail --silent --show-error --request POST \
             -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}" \
             "${{ vars.COOLIFY_WEBHOOK_URL }}"

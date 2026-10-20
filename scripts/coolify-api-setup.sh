@@ -351,7 +351,7 @@ ask_secret COOLIFY_TOKEN "Paste the token (hidden; it is not written to disk):"
 COOLIFY_WEBHOOK_URL="$COOLIFY/api/v1/deploy?uuid=$COOLIFY_WEB_UUID,$COOLIFY_API_UUID&force=false"
 note "Webhook: $COOLIFY_WEBHOOK_URL"
 if confirm "Trigger a test deployment of web and API with this token now?"; then
-  if curl -fsS -H "Authorization: Bearer $COOLIFY_TOKEN" "$COOLIFY_WEBHOOK_URL" >/dev/null; then
+  if curl -fsS -X POST -H "Authorization: Bearer $COOLIFY_TOKEN" "$COOLIFY_WEBHOOK_URL" >/dev/null; then
     printf '  %s✓%s Coolify accepted the deployment; watch both Deployments pages.\n' "$GREEN" "$RESET"
   else
     warn "Coolify rejected the request. Check API access, the token permission and the UUIDs."
