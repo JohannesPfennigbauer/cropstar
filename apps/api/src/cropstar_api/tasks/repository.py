@@ -3,7 +3,7 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
-from cropstar_api.models import Field, Membership, Plot, Role, Task
+from cropstar_api.models import Field, Membership, OperationType, Plot, Role, Task
 
 
 class SqlTaskRepository:
@@ -42,3 +42,6 @@ class SqlTaskRepository:
                 .where(Field.farm_id == farm_id, Plot.id.in_(ids))
             )
         )
+
+    def operation_type_exists(self, code: str) -> bool:
+        return self._db.get(OperationType, code) is not None

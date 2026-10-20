@@ -427,6 +427,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/farms/{farm_id}/operation-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Operation Types
+         * @description The kinds of work reports and the model understand; the same for every Farm.
+         */
+        get: operations["listOperationTypes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/farms/{farm_id}/tasks": {
         parameters: {
             query?: never;
@@ -478,6 +498,60 @@ export interface paths {
         put?: never;
         /** Change Task Status */
         post: operations["changeTaskStatus"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/farms/{farm_id}/tasks/{task_id}/operations/{operation_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Operation */
+        patch: operations["updateOperation"];
+        trace?: never;
+    };
+    "/api/farms/{farm_id}/tasks/{task_id}/operations/{operation_id}/{command}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Change Operation Status */
+        post: operations["changeOperationStatus"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/farms/{farm_id}/plots/{plot_id}/operations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read Operation Log
+         * @description The Operation Log: every Done Operation on this Plot, oldest first.
+         */
+        get: operations["getOperationLog"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -731,6 +805,78 @@ export interface components {
                 number
             ][][][];
         };
+        /**
+         * OperationCompletion
+         * @description Optional when completing: without them the plan becomes the record, dated today.
+         */
+        OperationCompletion: {
+            /** Actual Details */
+            actual_details?: string | null;
+            /** Performed On */
+            performed_on?: string | null;
+        };
+        /** OperationLogEntry */
+        OperationLogEntry: {
+            /**
+             * Operation Id
+             * Format: uuid
+             */
+            operation_id: string;
+            /**
+             * Task Id
+             * Format: uuid
+             */
+            task_id: string;
+            /** Task Title */
+            task_title: string;
+            /** Operation Type */
+            operation_type: string;
+            /** Performed On */
+            performed_on: string | null;
+            /** Actual Details */
+            actual_details: string | null;
+            completed_by: components["schemas"]["PersonOut"] | null;
+            /** Completed At */
+            completed_at: string | null;
+        };
+        /** OperationOut */
+        OperationOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            plot: components["schemas"]["TaskPlotRef"];
+            status: components["schemas"]["TaskStatus"];
+            /** Planned Details */
+            planned_details: string | null;
+            /** Actual Details */
+            actual_details: string | null;
+            /** Performed On */
+            performed_on: string | null;
+            completed_by: components["schemas"]["PersonOut"] | null;
+            /** Completed At */
+            completed_at: string | null;
+            /** Allowed Actions */
+            allowed_actions: components["schemas"]["Action"][];
+        };
+        /** OperationTypeOut */
+        OperationTypeOut: {
+            /** Code */
+            code: string;
+        };
+        /**
+         * OperationUpdate
+         * @description Only the fields sent are changed; send null to clear one.
+         */
+        OperationUpdate: {
+            /** Planned Details */
+            planned_details?: string | null;
+            /** Actual Details */
+            actual_details?: string | null;
+            /** Performed On */
+            performed_on?: string | null;
+        };
         /** PasswordResetCompletion */
         PasswordResetCompletion: {
             /** Token */
@@ -870,6 +1016,10 @@ export interface components {
              * @default []
              */
             plot_ids: string[];
+            /** Operation Type */
+            operation_type?: string | null;
+            /** Planned Details */
+            planned_details?: string | null;
         };
         /** TaskFieldRef */
         TaskFieldRef: {
@@ -919,6 +1069,12 @@ export interface components {
             fields: components["schemas"]["TaskFieldRef"][];
             /** Plots */
             plots: components["schemas"]["TaskPlotRef"][];
+            /** Operation Type */
+            operation_type: string | null;
+            /** Planned Details */
+            planned_details: string | null;
+            /** Operations */
+            operations: components["schemas"]["OperationOut"][];
             /** Allowed Actions */
             allowed_actions: components["schemas"]["Action"][];
         };
@@ -961,6 +1117,8 @@ export interface components {
             field_ids?: string[] | null;
             /** Plot Ids */
             plot_ids?: string[] | null;
+            /** Planned Details */
+            planned_details?: string | null;
         };
         /** UserOut */
         UserOut: {
@@ -1824,6 +1982,37 @@ export interface operations {
             };
         };
     };
+    listOperationTypes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationTypeOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     listTasks: {
         parameters: {
             query?: {
@@ -1839,6 +2028,7 @@ export interface operations {
                 harvest_year?: number | null;
                 /** @description Only Tasks on this Plot */
                 plot_id?: string | null;
+                operation_type?: string[] | null;
             };
             header?: never;
             path: {
@@ -2021,6 +2211,113 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TaskOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    updateOperation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+                operation_id: string;
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OperationUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    changeOperationStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+                operation_id: string;
+                command: "complete" | "reopen" | "discard" | "restore";
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["OperationCompletion"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    getOperationLog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plot_id: string;
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationLogEntry"][];
                 };
             };
             /** @description Validation Error */

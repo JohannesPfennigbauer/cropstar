@@ -346,10 +346,10 @@
       "sourceValue": "AMA application {year}",
       "tasks": "Tasks",
       "log": "Operation log",
-      "logSoon": "What happened on this plot will be recorded here: tillage, sowing, fertilisation, harvest.",
       "category": "Category",
       "newTask": "New task",
-      "noTasks": "No open tasks for this plot."
+      "noTasks": "No open tasks for this plot.",
+      "logEmpty": "No completed operations on this plot yet."
     },
     "landUseCategory": {
       "cereals": "Cereals",
@@ -446,7 +446,10 @@
         "task_not_found": "This task no longer exists.",
         "harvest_year_locked": "The harvest year is locked.",
         "mixed_harvest_years": "All areas of a task must be from the same harvest year.",
-        "area_not_found": "One of the areas does not exist on this farm."
+        "area_not_found": "One of the areas does not exist on this farm.",
+        "operation_done": "A completed plot cannot be removed. Reopen its operation first.",
+        "operation_needs_plots": "An operation needs at least one plot.",
+        "operation_fields_not_allowed": "Operations apply to plots only, not to fields."
       },
       "newHint": "What needs doing? A title is enough; everything else is optional.",
       "fieldsGroup": "Fields",
@@ -539,6 +542,29 @@
         "invitation_revoked": "This invitation was revoked.",
         "invitation_used": "This invitation has already been used."
       }
+    },
+    "operationTypes": {
+      "tillage": "Tillage",
+      "sowing": "Sowing",
+      "fertilisation": "Fertilisation",
+      "harvest": "Harvest"
+    },
+    "operations": {
+      "kind": "Kind",
+      "general": "General task",
+      "anyKind": "Any kind",
+      "kindHelp": "An operation applies to plots: each plot gets its own entry in the operation log.",
+      "planned": "Plan",
+      "plannedHelp": "What is planned, e.g. implement, amount, depth. Copied to every plot, where you can adjust it.",
+      "actual": "Actual",
+      "performedOn": "Done on",
+      "needsPlot": "An operation needs at least one plot.",
+      "title": "Operations · {done} of {total} done",
+      "adjust": "Adjust the plan for this plot",
+      "completeTitle": "Complete {task}",
+      "completeLead": "Record what really happened. The plan is prefilled; plots left unticked stay open.",
+      "record": "Nothing selected | Record 1 operation | Record {n} operations",
+      "recorded": "Nothing recorded. | Operation recorded. | {n} operations recorded."
     }
   }
 }

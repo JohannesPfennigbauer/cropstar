@@ -27,6 +27,7 @@ const { membership } = useAuth()
 const { moment } = useFormat()
 
 const NOBODY = 'nobody'
+const GENERAL = 'general'
 const canRecordDone = computed(() => membership.value?.role !== 'advisor')
 
 const schema = computed(() => z.object({
@@ -36,8 +37,13 @@ const schema = computed(() => z.object({
   priority: z.enum(['none', 'low', 'normal', 'high']),
   assignee: z.string(),
   areas: z.array(z.string()),
+  operation_type: z.string(),
+  planned_details: z.string().max(5000),
   done: z.boolean()
-}))
+}).refine(
+  data => data.operation_type === GENERAL || data.areas.some(a => a.startsWith('plot:')),
+  { message: t('app.operations.needsPlot'), path: ['areas'] }
+))
 type Schema = z.output<typeof schema.value>
 
 function emptyState() {
@@ -50,6 +56,8 @@ function emptyState() {
     areas: props.task
       ? [...props.task.fields.map(f => `field:${f.id}`), ...props.task.plots.map(p => `plot:${p.id}`)]
       : (props.presetPlotIds ?? []).map(id => `plot:${id}`),
+    operation_type: props.task?.operation_type ?? GENERAL,
+    planned_details: props.task?.planned_details ?? '',
     done: false
   }
 }
@@ -71,11 +79,37 @@ const { data: areaOptions } = useAsyncData(
   { watch: [areaYear, () => props.farmId] }
 )
 
+const state = reactive(emptyState())
+const isOperation = computed(() => state.operation_type !== GENERAL)
+
+const { data: operationTypes } = useAsyncData(
+  () => `operation-types-${props.farmId}`,
+  async () => (await api.GET('/api/farms/{farm_id}/operation-types', {
+    params: { path: { farm_id: props.farmId } }
+  })).data ?? []
+)
+const typeItems = computed(() => [
+  { label: t('app.operations.general'), value: GENERAL },
+  ...(operationTypes.value ?? []).map(type => ({ label: t(`app.operationTypes.${type.code}`), value: type.code }))
+])
+
+// Operations concern Plots only, so Fields drop out of the picker for them.
+watch(isOperation, (operation) => {
+  if (operation) state.areas = state.areas.filter(a => a.startsWith('plot:'))
+})
+
+const completing = ref(false)
+const completeOnly = ref<string[] | undefined>(undefined)
+function openCompletion(only?: string[]) {
+  completeOnly.value = only
+  completing.value = true
+}
+
 const areaItems = computed(() => {
   if (!areaOptions.value) return []
   return [
-    { type: 'label' as const, label: t('app.tasks.fieldsGroup'), value: 'group:fields' },
-    ...areaOptions.value.fields.map(f => ({
+    ...(isOperation.value ? [] : [{ type: 'label' as const, label: t('app.tasks.fieldsGroup'), value: 'group:fields' }]),
+    ...(isOperation.value ? [] : areaOptions.value.fields).map(f => ({
       label: [t('app.plots.field', { number: f.properties.number }), f.properties.name].filter(Boolean).join(' · '),
       value: `field:${f.id}`
     })),
@@ -87,7 +121,6 @@ const areaItems = computed(() => {
   ]
 })
 
-const state = reactive(emptyState())
 const errorCode = ref<ApiErrorCode | 'invalid_assignee' | null>(null)
 const busy = ref(false)
 const confirmingDelete = ref(false)
@@ -129,7 +162,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     priority: event.data.priority,
     assignee_id: event.data.assignee === NOBODY ? null : event.data.assignee,
     field_ids: event.data.areas.filter(a => a.startsWith('field:')).map(a => a.slice(6)),
-    plot_ids: event.data.areas.filter(a => a.startsWith('plot:')).map(a => a.slice(5))
+    plot_ids: event.data.areas.filter(a => a.startsWith('plot:')).map(a => a.slice(5)),
+    planned_details: isOperation.value ? event.data.planned_details || null : null
   }
   const path = { farm_id: props.farmId }
   const result = props.task
@@ -139,7 +173,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       })
     : await api.POST('/api/farms/{farm_id}/tasks', {
         params: { path },
-        body: { ...fields, done: canRecordDone.value && event.data.done }
+        body: {
+          ...fields,
+          done: canRecordDone.value && event.data.done,
+          operation_type: isOperation.value ? event.data.operation_type : null
+        }
       })
   busy.value = false
   if (!result.data) {
@@ -188,7 +226,9 @@ async function remove() {
   <UModal
     v-model:open="open"
     :title="task ? t('app.tasks.editTitle') : t('app.tasks.newTitle')"
-    :description="task ? t(`app.tasks.status.${task.status}`) : t('app.tasks.newHint')"
+    :description="task
+      ? [t(`app.tasks.status.${task.status}`), task.operation_type && t(`app.operationTypes.${task.operation_type}`)].filter(Boolean).join(' · ')
+      : t('app.tasks.newHint')"
   >
     <template #body>
       <div
@@ -249,6 +289,19 @@ async function remove() {
           />
         </UFormField>
         <UFormField
+          v-if="!task"
+          :label="t('app.operations.kind')"
+          :help="isOperation ? t('app.operations.kindHelp') : undefined"
+          name="operation_type"
+        >
+          <USelect
+            v-model="state.operation_type"
+            :items="typeItems"
+            class="w-full"
+            data-testid="operation-type"
+          />
+        </UFormField>
+        <UFormField
           :label="t('app.tasks.fields.description')"
           name="description"
         >
@@ -298,6 +351,26 @@ async function remove() {
             data-testid="task-areas"
           />
         </UFormField>
+        <UFormField
+          v-if="isOperation"
+          :label="t('app.operations.planned')"
+          :help="t('app.operations.plannedHelp')"
+          name="planned_details"
+        >
+          <UTextarea
+            v-model="state.planned_details"
+            :rows="2"
+            autoresize
+            class="w-full"
+          />
+        </UFormField>
+        <AppOperationList
+          v-if="task?.operation_type"
+          :farm-id="farmId"
+          :task="task"
+          @changed="emit('changed')"
+          @complete="(id: string) => openCompletion([id])"
+        />
         <UFormField
           :label="t('app.tasks.fields.assignee')"
           :help="t('app.tasks.assigneeHelp')"
@@ -351,7 +424,8 @@ async function remove() {
             variant="soft"
             :label="t('app.tasks.actions.complete')"
             :loading="busy"
-            @click="run('complete')"
+            data-testid="complete-task"
+            @click="task.operation_type ? openCompletion() : run('complete')"
           />
           <UButton
             v-if="allowed.has('reopen_task')"
@@ -401,4 +475,12 @@ async function remove() {
       </div>
     </template>
   </UModal>
+  <AppCompleteOperations
+    v-if="task?.operation_type"
+    v-model:open="completing"
+    :farm-id="farmId"
+    :task="task"
+    :only="completeOnly"
+    @changed="emit('changed')"
+  />
 </template>

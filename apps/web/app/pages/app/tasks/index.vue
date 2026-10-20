@@ -20,6 +20,7 @@ const status = ref<StatusFilter>('open')
 const assignee = ref('all')
 const priority = ref<'all' | Schemas['Priority']>('all')
 const due = ref<DueFilter>('all')
+const operationType = ref('all')
 const today = todayIso()
 
 const { data: members } = await useAsyncData('members', async () => {
@@ -43,12 +44,13 @@ const { data: tasks, refresh, status: loading } = await useAsyncData('tasks', as
           ? addDaysIso(today, -1)
           : due.value === 'week' ? addDaysIso(today, 7) : undefined,
         without_due: due.value === 'none' || undefined,
-        harvest_year: harvestYear.value ?? undefined
+        harvest_year: harvestYear.value ?? undefined,
+        operation_type: operationType.value === 'all' ? undefined : [operationType.value]
       }
     }
   })
   return data ?? []
-}, { watch: [() => farm.value?.id, status, assignee, priority, due, harvestYear] })
+}, { watch: [() => farm.value?.id, status, assignee, priority, due, harvestYear, operationType] })
 
 const statusTabs = computed(() => (['open', 'done', 'discarded', 'all'] as const)
   .map(value => ({ label: t(`app.tasks.filters.status.${value}`), value })))
@@ -65,6 +67,18 @@ const priorityItems = computed(() => [
   ...(['high', 'normal', 'low', 'none'] as const).map(value => ({ label: t(`app.tasks.priority.${value}`), value }))
 ])
 
+const { data: operationTypes } = await useAsyncData('operation-types', async () => {
+  if (!farm.value) return []
+  return (await api.GET('/api/farms/{farm_id}/operation-types', {
+    params: { path: { farm_id: farm.value.id } }
+  })).data ?? []
+}, { watch: [() => farm.value?.id] })
+
+const typeItems = computed(() => [
+  { label: t('app.operations.anyKind'), value: 'all' },
+  ...(operationTypes.value ?? []).map(type => ({ label: t(`app.operationTypes.${type.code}`), value: type.code }))
+])
+
 const dueItems = computed(() => (['all', 'overdue', 'week', 'none'] as const)
   .map(value => ({ label: t(`app.tasks.filters.due.${value}`), value })))
 
@@ -76,7 +90,21 @@ function openEditor(task: Task | null) {
   editorOpen.value = true
 }
 
+const completing = ref(false)
+const completingTask = ref<Task | null>(null)
+
+/** After any change, show the fresh version of the Task being looked at. */
+async function changed() {
+  await refresh()
+  if (editing.value) editing.value = tasks.value?.find(item => item.id === editing.value?.id) ?? editing.value
+}
+
 async function toggle(task: Task) {
+  if (task.operation_type && task.status === 'open') {
+    completingTask.value = task
+    completing.value = true
+    return
+  }
   const command = task.status === 'open' ? 'complete' : 'reopen'
   const { data } = await api.POST('/api/farms/{farm_id}/tasks/{task_id}/{command}', {
     params: { path: { farm_id: farm.value!.id, task_id: task.id, command } }
@@ -89,6 +117,14 @@ async function toggle(task: Task) {
 
 function canToggle(task: Task) {
   return task.allowed_actions.includes(task.status === 'open' ? 'complete_task' : 'reopen_task')
+}
+
+/** "Düngung" for one Plot, "Düngung · 1/2" with progress across several. */
+function operationBadge(task: Task) {
+  const kind = t(`app.operationTypes.${task.operation_type}`)
+  const counted = task.operations.filter(o => o.status !== 'discarded')
+  if (task.operations.length < 2) return kind
+  return `${kind} · ${counted.filter(o => o.status === 'done').length}/${counted.length}`
 }
 
 const PRIORITY_COLOR = { high: 'error', normal: 'warning', low: 'neutral', none: 'neutral' } as const
@@ -141,6 +177,14 @@ const PRIORITY_COLOR = { high: 'error', normal: 'warning', low: 'neutral', none:
         icon="i-lucide-flag"
         class="w-36"
         :aria-label="t('app.tasks.fields.priority')"
+      />
+      <USelect
+        v-model="operationType"
+        :items="typeItems"
+        size="sm"
+        icon="i-lucide-tractor"
+        class="w-44"
+        :aria-label="t('app.operations.kind')"
       />
       <USelect
         v-model="due"
@@ -211,6 +255,14 @@ const PRIORITY_COLOR = { high: 'error', normal: 'warning', low: 'neutral', none:
               <template v-if="isOverdue(task, today)">· {{ t('app.tasks.overdue') }}</template>
             </span>
             <UBadge
+              v-if="task.operation_type"
+              color="primary"
+              variant="subtle"
+              size="sm"
+              :label="operationBadge(task)"
+              data-testid="operation-badge"
+            />
+            <UBadge
               v-if="task.priority !== 'none'"
               :color="PRIORITY_COLOR[task.priority]"
               variant="subtle"
@@ -259,7 +311,14 @@ const PRIORITY_COLOR = { high: 'error', normal: 'warning', low: 'neutral', none:
       :task="editing"
       :members="members ?? []"
       :harvest-year="harvestYear"
-      @changed="refresh()"
+      @changed="changed()"
+    />
+    <AppCompleteOperations
+      v-if="farm && completingTask"
+      v-model:open="completing"
+      :farm-id="farm.id"
+      :task="completingTask"
+      @changed="changed()"
     />
   </div>
 </template>

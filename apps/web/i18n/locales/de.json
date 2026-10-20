@@ -346,10 +346,10 @@
       "sourceValue": "AMA-Mehrfachantrag {year}",
       "tasks": "Aufgaben",
       "log": "Maßnahmenprotokoll",
-      "logSoon": "Hier steht bald, was auf diesem Schlag passiert ist: Bodenbearbeitung, Aussaat, Düngung, Ernte.",
       "category": "Kategorie",
       "newTask": "Neue Aufgabe",
-      "noTasks": "Keine offenen Aufgaben für diesen Schlag."
+      "noTasks": "Keine offenen Aufgaben für diesen Schlag.",
+      "logEmpty": "Noch keine erledigten Maßnahmen auf diesem Schlag."
     },
     "landUseCategory": {
       "cereals": "Getreide",
@@ -446,7 +446,10 @@
         "task_not_found": "Diese Aufgabe gibt es nicht mehr.",
         "harvest_year_locked": "Das Erntejahr ist gesperrt.",
         "mixed_harvest_years": "Alle Flächen einer Aufgabe müssen aus demselben Erntejahr sein.",
-        "area_not_found": "Eine der Flächen gibt es in diesem Betrieb nicht."
+        "area_not_found": "Eine der Flächen gibt es in diesem Betrieb nicht.",
+        "operation_done": "Ein erledigter Schlag kann nicht entfernt werden. Öffne die Maßnahme dafür zuerst wieder.",
+        "operation_needs_plots": "Eine Maßnahme braucht mindestens einen Schlag.",
+        "operation_fields_not_allowed": "Maßnahmen gelten nur für Schläge, nicht für Feldstücke."
       },
       "newHint": "Was steht an? Titel genügt, alles andere ist optional.",
       "fieldsGroup": "Feldstücke",
@@ -539,6 +542,29 @@
         "invitation_revoked": "Diese Einladung wurde widerrufen.",
         "invitation_used": "Diese Einladung wurde schon verwendet."
       }
+    },
+    "operationTypes": {
+      "tillage": "Bodenbearbeitung",
+      "sowing": "Aussaat",
+      "fertilisation": "Düngung",
+      "harvest": "Ernte"
+    },
+    "operations": {
+      "kind": "Art",
+      "general": "Allgemeine Aufgabe",
+      "anyKind": "Jede Art",
+      "kindHelp": "Eine Maßnahme gilt für Schläge: pro Schlag entsteht ein Eintrag im Maßnahmenprotokoll.",
+      "planned": "Plan",
+      "plannedHelp": "Was geplant ist, z. B. Gerät, Menge, Tiefe. Wird für jeden Schlag übernommen und lässt sich dort anpassen.",
+      "actual": "Ist",
+      "performedOn": "Ausgeführt am",
+      "needsPlot": "Eine Maßnahme braucht mindestens einen Schlag.",
+      "title": "Maßnahmen · {done} von {total} erledigt",
+      "adjust": "Plan für diesen Schlag anpassen",
+      "completeTitle": "{task} erledigen",
+      "completeLead": "Halte fest, was wirklich passiert ist. Der Plan ist vorausgefüllt; Schläge ohne Häkchen bleiben offen.",
+      "record": "Nichts ausgewählt | 1 Maßnahme festhalten | {n} Maßnahmen festhalten",
+      "recorded": "Nichts festgehalten. | Maßnahme festgehalten. | {n} Maßnahmen festgehalten."
     }
   }
 }

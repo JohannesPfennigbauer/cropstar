@@ -13,6 +13,10 @@ from cropstar_api.db import migrate
 from cropstar_api.models import Base
 from cropstar_api.settings import Settings
 
+pytest_plugins = ["tests.farm_fixtures"]
+
+REFERENCE_TABLES = {"operation_types"}
+
 TEST_DATABASE_URL = os.environ.get(
     "CROPSTAR_TEST_DATABASE_URL",
     "postgresql+psycopg://cropstar:cropstar@localhost:5432/cropstar_test",
@@ -57,7 +61,10 @@ def _empty_tables(request: pytest.FixtureRequest) -> Iterator[None]:
         return
     engine: Engine = request.getfixturevalue("engine")
     yield
-    tables = ", ".join(table.name for table in Base.metadata.sorted_tables)
+    # Reference data seeded by migrations survives; everything else is cleared.
+    tables = ", ".join(
+        table.name for table in Base.metadata.sorted_tables if table.name not in REFERENCE_TABLES
+    )
     with engine.begin() as connection:
         connection.execute(text(f"TRUNCATE {tables} CASCADE"))
 

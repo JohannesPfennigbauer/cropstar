@@ -32,6 +32,24 @@ const { data: members } = await useAsyncData('members', async () => {
   return (await api.GET('/api/farms/{farm_id}/members', { params: { path: { farm_id: farm.value.id } } })).data ?? []
 }, { watch: [() => farm.value?.id] })
 
+const { data: log, refresh: refreshLog } = await useAsyncData(`plot-log-${plotId.value}`, async () => {
+  if (!farm.value) return []
+  return (await api.GET('/api/farms/{farm_id}/plots/{plot_id}/operations', {
+    params: { path: { farm_id: farm.value.id, plot_id: plotId.value } }
+  })).data ?? []
+}, { watch: [plotId, () => farm.value?.id] })
+
+async function changed() {
+  await Promise.all([refreshTasks(), refreshLog()])
+  if (editing.value) {
+    // A Task that is no longer open drops out of this list; fetch it directly instead.
+    const { data } = await api.GET('/api/farms/{farm_id}/tasks/{task_id}', {
+      params: { path: { farm_id: farm.value!.id, task_id: editing.value.id } }
+    })
+    if (data) editing.value = data
+  }
+}
+
 const editorOpen = ref(false)
 const editing = ref<NonNullable<typeof tasks.value>[number] | null>(null)
 function openEditor(task: typeof editing.value) {
@@ -171,8 +189,38 @@ useSeoMeta({ title })
             <h2 class="font-semibold text-highlighted">
               {{ t('app.plots.log') }}
             </h2>
-            <p class="mt-1 text-sm text-muted">
-              {{ t('app.plots.logSoon') }}
+            <ol
+              v-if="log?.length"
+              class="mt-3 space-y-3 border-l border-default pl-4"
+              data-testid="operation-log"
+            >
+              <li
+                v-for="entry in log"
+                :key="entry.operation_id"
+                class="relative text-sm"
+              >
+                <span
+                  class="absolute top-1.5 -left-[1.3rem] size-2 rounded-full bg-primary"
+                  aria-hidden="true"
+                />
+                <span class="block text-xs text-muted">
+                  {{ entry.performed_on ? day(entry.performed_on) : '–' }}
+                </span>
+                <span class="block font-medium text-highlighted">
+                  {{ t(`app.operationTypes.${entry.operation_type}`) }} · {{ entry.task_title }}
+                </span>
+                <span
+                  v-if="entry.actual_details"
+                  class="block text-toned"
+                >{{ entry.actual_details }}</span>
+                <span class="block text-xs text-dimmed">{{ entry.completed_by?.email ?? t('app.tasks.formerMember') }}</span>
+              </li>
+            </ol>
+            <p
+              v-else
+              class="mt-1 text-sm text-muted"
+            >
+              {{ t('app.plots.logEmpty') }}
             </p>
           </UCard>
         </div>
@@ -194,7 +242,7 @@ useSeoMeta({ title })
         :members="members ?? []"
         :harvest-year="plot.properties.harvest_year"
         :preset-plot-ids="[plot.id]"
-        @changed="refreshTasks()"
+        @changed="changed()"
       />
     </template>
   </div>

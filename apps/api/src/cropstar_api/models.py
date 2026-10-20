@@ -226,6 +226,15 @@ class Priority(enum.StrEnum):
     HIGH = "high"
 
 
+class OperationType(Base):
+    """A kind of work the model and reports understand. The same list for every Farm."""
+
+    __tablename__ = "operation_types"
+
+    code: Mapped[str] = mapped_column(String(30), primary_key=True)
+    position: Mapped[int] = mapped_column(SmallInteger)
+
+
 task_fields = Table(
     "task_fields",
     Base.metadata,
@@ -272,6 +281,39 @@ class Task(Base):
     completed_at: Mapped[datetime | None]
     # Derived from the Fields and Plots below: set exactly when the Task refers to areas.
     harvest_year: Mapped[int | None] = mapped_column(SmallInteger)
+    # With an Operation Type the Task holds one Operation per Plot; fixed at creation.
+    operation_type: Mapped[str | None] = mapped_column(ForeignKey("operation_types.code"))
+    # The template copied into each Operation's Planned Details.
+    planned_details: Mapped[str | None] = mapped_column(Text)
 
     fields: Mapped[list[Field]] = relationship(secondary=task_fields, order_by=Field.number)
     plots: Mapped[list[Plot]] = relationship(secondary=task_plots)
+    operations: Mapped[list["Operation"]] = relationship(
+        back_populates="task", cascade="all, delete-orphan", passive_deletes=True
+    )
+
+
+class Operation(Base):
+    """The Plot-specific part of a Task that has an Operation Type."""
+
+    __tablename__ = "operations"
+    __table_args__ = (UniqueConstraint("task_id", "plot_id"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    task_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tasks.id", ondelete="CASCADE"))
+    plot_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("plots.id", ondelete="CASCADE"), index=True
+    )
+    status: Mapped[TaskStatus] = mapped_column(_pg_enum(TaskStatus, "task_status"))
+    planned_details: Mapped[str | None] = mapped_column(Text)
+    # What really happened; kept as a draft when a Done Operation is reopened.
+    actual_details: Mapped[str | None] = mapped_column(Text)
+    # The day the work was done, which may be long before it was recorded.
+    performed_on: Mapped[date | None]
+    completed_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
+    completed_at: Mapped[datetime | None]
+
+    task: Mapped[Task] = relationship(back_populates="operations")
+    plot: Mapped[Plot] = relationship()

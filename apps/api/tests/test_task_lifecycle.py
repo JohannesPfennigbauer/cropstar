@@ -46,6 +46,9 @@ class InMemoryTasks:
     def plots(self, farm_id: uuid.UUID, ids: frozenset[uuid.UUID]) -> list[Plot]:
         return [p for p in self.all_plots if p.field.farm_id == farm_id and p.id in ids]
 
+    def operation_type_exists(self, code: str) -> bool:
+        return code in {"tillage", "sowing", "fertilisation", "harvest"}
+
     def add_field(self, farm_id: uuid.UUID, year: int, number: int) -> Field:
         field = Field(id=uuid.uuid4(), farm_id=farm_id, harvest_year=year, number=number)
         self.all_fields.append(field)
