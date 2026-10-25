@@ -36,6 +36,10 @@ export default defineNuxtConfig({
     '/en': { prerender: true },
     '/blog/**': { prerender: true },
     '/en/blog/**': { prerender: true },
+    '/impressum': { prerender: true },
+    '/datenschutz': { prerender: true },
+    '/en/imprint': { prerender: true },
+    '/en/privacy': { prerender: true },
     '/app/**': { ssr: false },
     '/en/app/**': { ssr: false }
   },
@@ -75,6 +79,8 @@ export default defineNuxtConfig({
       { code: 'en', language: 'en', name: 'English', file: 'en.json' }
     ],
     // German stays the default; visitors switch deliberately rather than by browser header.
-    detectBrowserLanguage: false
+    detectBrowserLanguage: false,
+    // Pages declare translated paths via definePageMeta({ i18n: { paths } }).
+    customRoutes: 'meta'
   }
 })

@@ -253,7 +253,11 @@ modelled soil data and should be actively encouraged.
 
 - App: **AGPL-3.0** (keeps SaaS forks open). Model code and contracts: **permissive**
   (Apache-2.0/MIT) so researchers and other tools can adopt and cite the model.
-- Model weights and a later SaaS offering are **open decisions** — see §8.
+- Model weights may be published openly, provided no third party can profit from them
+  without giving back; the licence and contribution rules are an **open decision** — see
+  §8. Training data is never published.
+- Cropstar never earns from farmers' decisions, yields or sales — revenue comes only from
+  its own software and services (hosting, operation for organisations, training).
 - Farm boundaries, yields and grain quality are **commercially sensitive**. Treat them
   accordingly; trust lost here is not recoverable.
 - Contributing data to model training is **opt-in, per dataset, revocable, and off by
@@ -296,36 +300,21 @@ modelled soil data and should be actively encouraged.
 
 **Stage 1 — Landing page.** One-pager: header, about, sign-in, contact.
 
-**Stage 2 — Blog.** Markdown-driven via Nuxt Content: regenerative practices and crop
-modeling. First delivery of the teaching layer.
+**Stage 2 — Blog.** Markdown-driven via Nuxt Content: regenerative practices and crop modeling. First delivery of the teaching layer.
 
-**Stage 3 — Farm management app, without simulation.** Auth, plot management, geometry
-drawing and import, satellite basemap with field boundaries, tasks, observation and
-management data entry, dashboard shell, mobile PWA. **Draft the input side of the model
-contract here** — otherwise the app will not collect the fields the model later needs
-(seeding configuration, fertilization events, soil).
+**Stage 3 — Farm management app, without simulation.** Auth, plot management, geometry drawing and import, satellite basemap with field boundaries, tasks, observation and management data entry, dashboard shell, mobile PWA. **Draft the input side of the model contract here** — otherwise the app will not collect the fields the model later needs (seeding configuration, fertilization events, soil).
 
-**Stage 4 — Data pipeline.** Provider abstractions, GeoSphere / Open-Meteo weather,
-Sentinel-2 ingestion with cloud masking, biophysical retrieval and per-plot statistics,
-eBOD soil ingestion, caching and reproducible run persistence.
+**Stage 4 — Data pipeline.** Provider abstractions, GeoSphere / Open-Meteo weather, Sentinel-2 ingestion with cloud masking, biophysical retrieval and per-plot statistics, eBOD soil ingestion, caching and reproducible run persistence.
 
-**Stage 5 — Process-based baseline model.** Contract v1 finalised. Daily-step single-plant
-model as a Python library + CLI + thin service, passing the conformance suite. Detail view
-shows results and forecast.
+**Stage 5 — Process-based baseline model.** Contract v1 finalised. Daily-step single-plant model as a Python library + CLI + thin service, passing the conformance suite. Detail view shows results and forecast.
 
-**Stage 6 — Agent-based multi-species simulation.** Companion planting, intercropping,
-agroforestry via interacting single-plant agents sharing light, water and nutrients.
+**Stage 6 — Agent-based multi-species simulation.** Companion planting, intercropping, agroforestry via interacting single-plant agents sharing light, water and nutrients.
 
-**Stage 7 — Scenario comparison.** Side-by-side user-defined what-if scenarios with driver
-explanations. Never ranked.
+**Stage 7 — Scenario comparison.** Side-by-side user-defined what-if scenarios with driver explanations. Never ranked.
 
-**Stage 8 — ML model.** Real-dataset sourcing first (no real-data pipeline → no ML work),
-then synthetic pretraining on baseline output, fine-tuning on observed data, per-output
-replacement gate, continuous improvement loop from opt-in user data and satellite
-observations.
+**Stage 8 — ML model.** Real-dataset sourcing first (no real-data pipeline → no ML work), then synthetic pretraining on baseline output, fine-tuning on observed data, per-output replacement gate, continuous improvement loop from opt-in user data and satellite observations.
 
-Stages are ordered by dependency, not by calendar, and overlap freely. The teaching layer
-is built inside every stage, never deferred to a stage of its own.
+Stages are ordered by dependency, not by calendar, and overlap freely. The teaching layer is built inside every stage, never deferred to a stage of its own.
 
 ---
 
@@ -333,5 +322,5 @@ is built inside every stage, never deferred to a stage of its own.
 
 - Additional real observed training datasets beyond the intercrop/monocrop trials.
 - How simulation results and scenario comparisons are actually presented in the UI.
-- Licensing of trained model weights (likely not open) and the shape of a later SaaS
-  offering.
+- Licence and contribution rules for trained model weights (open by default, no
+  third-party profit without giving back), and the shape of a later hosted offering.

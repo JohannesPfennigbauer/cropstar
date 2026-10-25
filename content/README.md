@@ -3,10 +3,12 @@
 Markdown sources for the blog, rendered by Nuxt Content in `apps/web`.
 
 ```
-blog/de/<slug>.md     German posts      → /blog/<slug>
-blog/en/<slug>.md     English posts     → /en/blog/<slug>
-authors/<id>.yml      Author profiles, referenced by id
-media/<slug>/…        Images            → /media/<slug>/…
+blog/de/<slug>.md            German posts      → /blog/<slug>
+blog/en/<slug>.md            English posts     → /en/blog/<slug>
+authors/<id>.yml             Author profiles, referenced by id
+legal/<locale>/imprint.md    Impressum         → /impressum, /en/imprint
+legal/<locale>/privacy.md    Privacy policy    → /datenschutz, /en/privacy
+media/<slug>/…               Images            → /media/<slug>/…
 ```
 
 ## Frontmatter
@@ -18,7 +20,7 @@ description: One or two sentences for the card and search engines.
 date: 2026-10-01
 updated: 2026-11-15          # optional
 authors: [jpf]               # ids from authors/
-topic: practice              # practice | modeling
+topic: practice              # cropstar | practice | modeling | technology
 tags: [cover-crops, nitrogen]
 cover:                       # optional
   src: /media/zwischenfruechte/cover.jpg
@@ -52,3 +54,9 @@ authors, covers and `translationOf` targets exist. CI runs it before the build.
 
   They must show an uncertainty band, their provenance and a clear "illustrative" label.
 - Describe consequences; never recommend.
+
+## Legal pages
+
+`legal/` holds the Impressum and the privacy policy of the public cropstar.at instance. Every
+locale needs both files with `title`, `description` and `updated`. A self-hosted instance
+replaces them with its own operator's details before building.

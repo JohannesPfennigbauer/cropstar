@@ -4,7 +4,7 @@ export const BLOG_LOCALES = ['de', 'en'] as const
 export type BlogLocale = typeof BLOG_LOCALES[number]
 
 // Adding a topic: extend this list and add `blog.topics.<id>` to every locale file.
-export const BLOG_TOPICS = ['practice', 'modeling'] as const
+export const BLOG_TOPICS = ['cropstar', 'practice', 'modeling', 'technology'] as const
 export type BlogTopic = typeof BLOG_TOPICS[number]
 
 const slug = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'lowercase kebab-case')

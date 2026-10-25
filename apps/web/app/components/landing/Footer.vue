@@ -10,7 +10,8 @@ const year = new Date().getFullYear()
       <p class="text-sm text-muted">
         {{ t('footer.rights', { year }) }}
       </p>
-      <div class="flex items-center gap-4 text-sm">
+      <div class="flex flex-wrap items-center gap-4 text-sm">
+        <LegalLinks />
         <ULink
           :to="repositoryUrl"
           target="_blank"

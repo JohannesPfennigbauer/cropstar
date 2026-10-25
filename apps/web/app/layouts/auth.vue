@@ -18,5 +18,9 @@ useSeoMeta({ robots: 'noindex, nofollow' })
         <slot />
       </div>
     </main>
+
+    <footer class="container-page flex justify-center py-6">
+      <LegalLinks />
+    </footer>
   </div>
 </template>

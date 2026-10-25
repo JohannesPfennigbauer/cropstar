@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { parse } from 'yaml'
 import { BLOG_LOCALES, authorSchema, postSchema, translationKey } from '../shared/blog'
+import { LEGAL_DOCUMENTS, legalSchema } from '../shared/legal'
 
 // Nuxt Content does not validate frontmatter at build time, so this suite is the gate.
 const root = fileURLToPath(new URL('../../../content', import.meta.url))
@@ -80,5 +81,13 @@ describe.each(posts)('content/$name', (post) => {
       translationOf: (other.raw as { translationOf?: string }).translationOf
     }) === key)
     expect(sameLocale.map(other => other.name)).toEqual([post.name])
+  })
+})
+
+describe.each(BLOG_LOCALES)('content/legal/%s', (lang) => {
+  it.each(LEGAL_DOCUMENTS)('%s exists and matches the legal schema', (id) => {
+    const file = join(root, 'legal', lang, `${id}.md`)
+    expect(existsSync(file)).toBe(true)
+    expect(legalSchema.strict().safeParse(frontmatter(file)).error?.issues ?? []).toEqual([])
   })
 })

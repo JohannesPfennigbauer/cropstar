@@ -176,6 +176,11 @@
     "source": "Source",
     "issues": "Issues & ideas"
   },
+  "legal": {
+    "imprint": "Imprint",
+    "privacy": "Privacy",
+    "updated": "Last updated: {date}"
+  },
   "blog": {
     "seo": {
       "title": "Blog — Cropstar",
@@ -198,8 +203,10 @@
       "en": "English"
     },
     "topics": {
+      "cropstar": "Cropstar",
       "practice": "Regenerative practice",
-      "modeling": "Crop modelling"
+      "modeling": "Crop modelling",
+      "technology": "Technology"
     },
     "illustration": {
       "inputs": "Held fixed: {manure} rotted manure, {soilNitrogen} available soil nitrogen, medium water storage. The numbers come from a hard-coded response surface for winter wheat.",

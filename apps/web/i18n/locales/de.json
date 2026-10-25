@@ -176,6 +176,11 @@
     "source": "Quellcode",
     "issues": "Fehler & Ideen"
   },
+  "legal": {
+    "imprint": "Impressum",
+    "privacy": "Datenschutz",
+    "updated": "Stand: {date}"
+  },
   "blog": {
     "seo": {
       "title": "Blog – Cropstar",
@@ -198,8 +203,10 @@
       "en": "Englisch"
     },
     "topics": {
+      "cropstar": "Cropstar",
       "practice": "Regenerative Praxis",
-      "modeling": "Pflanzenmodellierung"
+      "modeling": "Pflanzenmodellierung",
+      "technology": "Technologie"
     },
     "illustration": {
       "inputs": "Fest angenommen: {manure} Rottemist, {soilNitrogen} verfügbarer Bodenstickstoff, mittlerer Wasserspeicher. Die Zahlen stammen aus einer fest hinterlegten Kennfläche für Winterweizen.",
