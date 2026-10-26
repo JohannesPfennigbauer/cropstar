@@ -16,7 +16,7 @@ services:
       - "${CROPSTAR_WEB_PORT:-3000}:3000"
     environment:
       NUXT_API_BASE_URL: http://api:8000
-      NUXT_PUBLIC_CONTACT_EMAIL: ${NUXT_PUBLIC_CONTACT_EMAIL:-hello@cropstar.at}
+      NUXT_PUBLIC_CONTACT_EMAIL: ${NUXT_PUBLIC_CONTACT_EMAIL:-j.pfennigbauer@proton.me}
     depends_on:
       - api
 

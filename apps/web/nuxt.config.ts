@@ -21,7 +21,7 @@ export default defineNuxtConfig({
     apiBaseUrl: 'http://localhost:8000',
     public: {
       // Override with NUXT_PUBLIC_CONTACT_EMAIL / NUXT_PUBLIC_REPOSITORY_URL.
-      contactEmail: 'hello@cropstar.at',
+      contactEmail: 'j.pfennigbauer@proton.me',
       repositoryUrl: 'https://github.com/JohannesPfennigbauer/cropstar',
       // Needed for hreflang and canonical links; set NUXT_PUBLIC_I18N_BASE_URL in production.
       i18n: {
