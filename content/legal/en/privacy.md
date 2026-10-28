@@ -14,7 +14,7 @@ Email: [j.pfennigbauer@proton.me](mailto:j.pfennigbauer@proton.me)
 
 ## Visiting the website
 
-To deliver the website, our server processes technically necessary data from your browser: IP address, time of the request, requested address, and browser and system information. This data is used only to deliver the pages and to keep the server secure, and is not combined with any other data.
+To deliver the website, our server processes technically necessary data from your browser: IP address, time of the request, requested address, and browser and system information. This data is used only to deliver the pages and to keep the server secure, and is not combined with any other data. It is processed only for the duration of the request. We do not keep an access log with IP addresses.
 
 **Legal basis:** Art. 6(1)(f) GDPR (legitimate interest in secure and reliable operation).
 

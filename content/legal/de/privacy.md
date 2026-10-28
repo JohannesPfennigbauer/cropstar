@@ -14,7 +14,7 @@ E-Mail: [j.pfennigbauer@proton.me](mailto:j.pfennigbauer@proton.me)
 
 ## Aufruf der Website
 
-Damit die Website ausgeliefert werden kann, verarbeitet unser Server technisch notwendige Daten deines Browsers: IP-Adresse, Zeitpunkt der Anfrage, aufgerufene Adresse sowie Browser- und Systemangaben. Diese Daten dienen nur der Auslieferung der Seiten und der Sicherheit des Servers und werden nicht mit anderen Daten zusammengeführt.
+Damit die Website ausgeliefert werden kann, verarbeitet unser Server technisch notwendige Daten deines Browsers: IP-Adresse, Zeitpunkt der Anfrage, aufgerufene Adresse sowie Browser- und Systemangaben. Diese Daten dienen nur der Auslieferung der Seiten und der Sicherheit des Servers und werden nicht mit anderen Daten zusammengeführt. Sie werden nur für die Dauer der Anfrage verarbeitet. Ein Zugriffsprotokoll mit IP-Adressen führen wir nicht.
 
 **Rechtsgrundlage:** Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einem sicheren und funktionierenden Betrieb).
 
