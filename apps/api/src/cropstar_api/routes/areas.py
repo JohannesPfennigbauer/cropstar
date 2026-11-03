@@ -2,7 +2,8 @@
 
 import json
 import uuid
-from typing import Annotated, Any, Literal
+from datetime import datetime
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel
@@ -10,20 +11,26 @@ from sqlalchemy import Select, func, select
 
 from cropstar_api.db import Db
 from cropstar_api.farms import FarmMembership
+from cropstar_api.geometry import to_wgs84_geojson
 from cropstar_api.land_use import LandUseCategory, land_use_category
-from cropstar_api.models import Field, Plot
+from cropstar_api.models import AreaSource, Field, Plot
 
 router = APIRouter(prefix="/farms/{farm_id}", tags=["areas"])
 
 HarvestYear = Annotated[int, Query(ge=1990, le=2200)]
 Position = tuple[float, float]
-# Roughly a centimetre at Austrian latitudes; finer digits are noise.
-COORDINATE_DECIMALS = 7
 
 
 class MultiPolygon(BaseModel):
     type: Literal["MultiPolygon"]
     coordinates: list[list[list[Position]]]
+
+
+class AreaProvenance(BaseModel):
+    """Where the geometry came from and when it arrived."""
+
+    source: AreaSource
+    imported_at: datetime
 
 
 class FieldRef(BaseModel):
@@ -41,6 +48,7 @@ class FieldProperties(BaseModel):
     land_use_name: str
     declared_area_ha: float
     plot_count: int
+    provenance: AreaProvenance
 
 
 class FieldFeature(BaseModel):
@@ -65,6 +73,7 @@ class PlotProperties(BaseModel):
     land_use_category: LandUseCategory
     declared_area_ha: float
     field: FieldRef
+    provenance: AreaProvenance
 
 
 class PlotFeature(BaseModel):
@@ -83,7 +92,7 @@ class PlotCollection(BaseModel):
 def list_fields(membership: FarmMembership, db: Db, harvest_year: HarvestYear) -> FieldCollection:
     plot_count = select(func.count(Plot.id)).where(Plot.field_id == Field.id).scalar_subquery()
     rows = db.execute(
-        select(Field, _wgs84(Field.geometry), plot_count)
+        select(Field, to_wgs84_geojson(Field.geometry), plot_count)
         .where(Field.farm_id == membership.farm_id, Field.harvest_year == harvest_year)
         .order_by(Field.number)
     ).all()
@@ -101,6 +110,7 @@ def list_fields(membership: FarmMembership, db: Db, harvest_year: HarvestYear) -
                     land_use_name=field.land_use_name,
                     declared_area_ha=float(field.declared_area_ha),
                     plot_count=count,
+                    provenance=_provenance(field),
                 ),
             )
             for field, geometry, count in rows
@@ -127,13 +137,9 @@ def read_plot(membership: FarmMembership, db: Db, plot_id: uuid.UUID) -> PlotFea
     return _plot_feature(plot, field, geometry)
 
 
-def _wgs84(geometry: Any) -> Any:
-    return func.ST_AsGeoJSON(func.ST_Transform(geometry, 4326), COORDINATE_DECIMALS)
-
-
 def _plots(farm_id: uuid.UUID) -> Select[Plot, Field, str]:
     return (
-        select(Plot, Field, _wgs84(Plot.geometry))
+        select(Plot, Field, to_wgs84_geojson(Plot.geometry))
         .join(Field, Plot.field_id == Field.id)
         .where(Field.farm_id == farm_id)
     )
@@ -153,5 +159,10 @@ def _plot_feature(plot: Plot, field: Field, geometry: str) -> PlotFeature:
             land_use_category=land_use_category(plot.land_use_code),
             declared_area_ha=float(plot.declared_area_ha),
             field=FieldRef(id=field.id, number=field.number, name=field.name),
+            provenance=_provenance(plot),
         ),
     )
+
+
+def _provenance(area: Field | Plot) -> AreaProvenance:
+    return AreaProvenance(source=area.geometry_source, imported_at=area.imported_at)

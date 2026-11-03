@@ -343,21 +343,80 @@
       "map": "Map",
       "legend": "Legend"
     },
+    "areaUpload": {
+      "title": "Upload areas from eAMA",
+      "lead": "Export the fields and the plots of your application from eAMA as shapefiles and select all files of both exports here – loose or as ZIP. Cropstar adopts the areas exactly as declared.",
+      "privacy": "The files are only read, not stored. Only the fields and plots you confirm are kept.",
+      "files": "Drop files or ZIP here",
+      "filesHint": ".shp, .shx, .dbf, .prj, .cpg or .zip",
+      "preview": "Show preview",
+      "back": "Other files",
+      "confirm": "Adopt areas",
+      "harvestYear": "Harvest year",
+      "fields": "Fields",
+      "plots": "Plots",
+      "count": "{n} · {area}",
+      "invalid": "The export cannot be read",
+      "done": "Harvest year {year} adopted",
+      "doneDetail": "{fields} fields and {plots} plots, as declared to AMA.",
+      "sets": {
+        "fields": "fields",
+        "plots": "plots"
+      },
+      "blockers": {
+        "harvest_year_locked": "Harvest year {year} is locked. Unlock it under Farm first.",
+        "harvest_year_not_empty": "Harvest year {year} already has fields and plots. Updating them follows in a later step."
+      },
+      "errors": {
+        "forbidden_for_role": "Only admins can upload areas.",
+        "harvest_year_locked": "The harvest year is locked.",
+        "harvest_year_not_empty": "The harvest year already has fields and plots.",
+        "upload_too_large": "The files are too large together (max. 20 MB).",
+        "unknown": "That did not work. Please try again."
+      },
+      "problems": {
+        "no_files": "No shapefile was found among the files.",
+        "too_large": "The unpacked files are too large.",
+        "unreadable_archive": "{file} cannot be opened as ZIP.",
+        "conflicting_files": "{file} was selected twice with different content.",
+        "missing_component": "{file}: a part of the shapefile is missing ({detail}).",
+        "unreadable_shapefile": "{file} cannot be read.",
+        "wrong_projection": "{file} is not in the AMA projection (MGI Austria Lambert).",
+        "unknown_set": "{file} is neither a field nor a plot export.",
+        "missing_attribute": "{file} lacks the attribute {detail}.",
+        "not_polygons": "{file} contains no areas.",
+        "duplicate_set": "{file}: this export was selected more than once.",
+        "missing_set": "The export of the {detail} is missing.",
+        "missing_harvest_year": "{file} names no harvest year.",
+        "mixed_harvest_years": "The files belong to different harvest years.",
+        "invalid_record": "{file}: field {field} plot {plot} is invalid ({detail}).",
+        "duplicate_area": "Field {field} plot {plot} appears more than once.",
+        "plot_without_field": "Plot {plot} lies on field {field}, which is missing from the export."
+      }
+    },
     "plots": {
       "title": "Plots",
       "fieldCount": "{n} field | {n} fields",
       "plotCount": "{n} plot | {n} plots",
-      "provenance": "As declared to AMA · harvest year {year}",
+      "provenance": {
+        "eama_export": "As declared to AMA · harvest year {year} · uploaded {date}",
+        "invekos_open_data": "Public INVEKOS data (AMA, CC BY 4.0) · harvest year {year}"
+      },
+      "upload": "Upload areas",
       "field": "Field {number}",
       "plot": "Plot {number}",
       "emptyTitle": "No plots yet",
-      "empty": "Once you import your area export from eAMA, your fields and plots appear here on the map.",
+      "empty": "Upload the area export of your eAMA application and your fields and plots appear here on the map.",
+      "emptyReadOnly": "Once an admin of your farm uploads the area export from eAMA, the fields and plots appear here on the map.",
       "back": "All plots",
       "notFound": "This plot does not exist on your farm.",
       "landUse": "Land use",
       "declaredArea": "Declared area",
       "source": "Source",
-      "sourceValue": "AMA application {year}",
+      "sourceValue": {
+        "eama_export": "AMA application {year}, uploaded {date}",
+        "invekos_open_data": "Public INVEKOS data {year} (AMA, CC BY 4.0)"
+      },
       "tasks": "Tasks",
       "log": "Operation log",
       "category": "Category",

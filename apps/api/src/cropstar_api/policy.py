@@ -17,6 +17,7 @@ class Action(enum.StrEnum):
     MANAGE_FARM = "manage_farm"
     MANAGE_MEMBERS = "manage_members"
     LOCK_HARVEST_YEAR = "lock_harvest_year"
+    UPLOAD_AREAS = "upload_areas"
     CREATE_TASK = "create_task"
     EDIT_TASK = "edit_task"
     COMPLETE_TASK = "complete_task"
@@ -56,7 +57,13 @@ class Decision:
 ALLOW = Decision(True)
 
 _ADMIN_ONLY = frozenset(
-    {Action.READ_FARM_NUMBER, Action.MANAGE_FARM, Action.MANAGE_MEMBERS, Action.LOCK_HARVEST_YEAR}
+    {
+        Action.READ_FARM_NUMBER,
+        Action.MANAGE_FARM,
+        Action.MANAGE_MEMBERS,
+        Action.LOCK_HARVEST_YEAR,
+        Action.UPLOAD_AREAS,
+    }
 )
 # Confirming that work happened is for people who work on the Farm, not Advisors.
 _STATUS_CHANGES = frozenset(

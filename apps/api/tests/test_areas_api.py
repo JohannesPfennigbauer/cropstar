@@ -56,6 +56,17 @@ def test_plots_come_as_wgs84_geojson_with_their_declared_attributes(
     ]
 
 
+def test_demo_areas_name_public_invekos_data_as_their_source(
+    client: TestClient, demo_farm_id: str
+) -> None:
+    query = f"harvest_year={DEMO_HARVEST_YEAR}"
+    fields = get(client, f"/api/farms/{demo_farm_id}/fields?{query}")["features"]
+    plots = get(client, f"/api/farms/{demo_farm_id}/plots?{query}")["features"]
+
+    sources = {f["properties"]["provenance"]["source"] for f in [*fields, *plots]}
+    assert sources == {"invekos_open_data"}
+
+
 def test_geometry_is_transformed_from_ama_crs_to_wgs84(
     client: TestClient, demo_farm_id: str
 ) -> None:

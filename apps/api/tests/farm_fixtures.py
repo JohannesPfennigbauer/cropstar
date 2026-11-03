@@ -2,7 +2,7 @@
 
 from collections.abc import Iterator
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import pytest
@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from cropstar_api.app import create_app
 from cropstar_api.auth.provider import PasswordAuthProvider
-from cropstar_api.models import Field, Membership, Plot, Role
+from cropstar_api.models import AreaSource, Field, Membership, Plot, Role
 from cropstar_api.settings import Settings
 
 PASSWORD = "correct horse"
@@ -115,6 +115,8 @@ def areas(farm: Farm, db: Session) -> Areas:
             land_use_name="ACKERLAND",
             declared_area_ha=1,
             geometry=_square(600_000 + number * 200, 500_000 + year),
+            geometry_source=AreaSource.EAMA_EXPORT,
+            imported_at=datetime.now(UTC),
         )
         db.add(created)
         db.flush()
@@ -128,6 +130,8 @@ def areas(farm: Farm, db: Session) -> Areas:
             land_use_name=name,
             declared_area_ha=0.5,
             geometry=parent.geometry,
+            geometry_source=AreaSource.EAMA_EXPORT,
+            imported_at=datetime.now(UTC),
         )
         db.add(created)
         db.flush()

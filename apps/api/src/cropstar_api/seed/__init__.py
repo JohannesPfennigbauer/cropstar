@@ -1,14 +1,16 @@
 """Demo data for development: a Farm with real Fields and Plots from public INVEKOS data."""
 
 import json
+from datetime import UTC, datetime
 from importlib.resources import files
 from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from cropstar_api.auth.provider import PasswordAuthProvider, normalize_email
-from cropstar_api.models import AMA_SRID, Farm, Field, Membership, Plot, Role, User
+from cropstar_api.geometry import from_ama_geojson
+from cropstar_api.models import AreaSource, Farm, Field, Membership, Plot, Role, User
 
 DEMO_FARM_NAME = "Demo-Betrieb Weinviertel"
 DEMO_HARVEST_YEAR = 2026
@@ -45,6 +47,7 @@ def seed_demo(db: Session, auth: PasswordAuthProvider, email: str, password: str
     db.flush()
 
     features = load_fixture()["features"]
+    now = datetime.now(UTC)
     fields: dict[int, Field] = {}
     for feature in (f for f in features if f["properties"]["kind"] == "field"):
         p = feature["properties"]
@@ -56,7 +59,9 @@ def seed_demo(db: Session, auth: PasswordAuthProvider, email: str, password: str
             land_use_code=p["fnar_code"],
             land_use_name=p["fnar_bezeichnung"],
             declared_area_ha=p["fs_flaeche_ha"],
-            geometry=_ama_geometry(feature["geometry"]),
+            geometry=from_ama_geojson(feature["geometry"]),
+            geometry_source=AreaSource.INVEKOS_OPEN_DATA,
+            imported_at=now,
         )
         db.add(field)
         fields[p["fs_kennung"]] = field
@@ -70,12 +75,10 @@ def seed_demo(db: Session, auth: PasswordAuthProvider, email: str, password: str
                 land_use_code=p["snar_code"],
                 land_use_name=p["snar_bezeichnung"],
                 declared_area_ha=p["sl_flaeche_brutto_ha"],
-                geometry=_ama_geometry(feature["geometry"]),
+                geometry=from_ama_geojson(feature["geometry"]),
+                geometry_source=AreaSource.INVEKOS_OPEN_DATA,
+                imported_at=now,
             )
         )
     db.flush()
     return farm
-
-
-def _ama_geometry(geometry: dict[str, Any]) -> Any:
-    return func.ST_Multi(func.ST_SetSRID(func.ST_GeomFromGeoJSON(json.dumps(geometry)), AMA_SRID))

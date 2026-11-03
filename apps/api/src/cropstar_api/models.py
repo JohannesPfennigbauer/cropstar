@@ -119,6 +119,15 @@ def _pg_enum(enum_type: type[enum.StrEnum], name: str) -> Enum:
     return Enum(enum_type, name=name, values_callable=lambda members: [m.value for m in members])
 
 
+class AreaSource(enum.StrEnum):
+    """Where the geometry of a Field or Plot came from."""
+
+    # The Farm's own area export from eAMA, uploaded by an Admin.
+    EAMA_EXPORT = "eama_export"
+    # Public INVEKOS open data (the demo Farm).
+    INVEKOS_OPEN_DATA = "invekos_open_data"
+
+
 class Membership(Base):
     """The link between one User and one Farm, carrying exactly one Role."""
 
@@ -187,6 +196,8 @@ class Field(Base):
     geometry: Mapped[WKBElement] = mapped_column(
         Geometry("MULTIPOLYGON", srid=AMA_SRID, spatial_index=True)
     )
+    geometry_source: Mapped[AreaSource] = mapped_column(_pg_enum(AreaSource, "area_source"))
+    imported_at: Mapped[datetime]
 
     plots: Mapped[list["Plot"]] = relationship(back_populates="field", cascade="all, delete")
 
@@ -209,6 +220,8 @@ class Plot(Base):
     geometry: Mapped[WKBElement] = mapped_column(
         Geometry("MULTIPOLYGON", srid=AMA_SRID, spatial_index=True)
     )
+    geometry_source: Mapped[AreaSource] = mapped_column(_pg_enum(AreaSource, "area_source"))
+    imported_at: Mapped[datetime]
 
     field: Mapped[Field] = relationship(back_populates="plots")
 

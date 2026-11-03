@@ -343,21 +343,80 @@
       "map": "Karte",
       "legend": "Legende"
     },
+    "areaUpload": {
+      "title": "Flächen aus eAMA hochladen",
+      "lead": "Exportiere in eAMA die Feldstücke und die Schläge deines Antrags als Shapefile und wähle hier alle Dateien beider Exporte aus – lose oder als ZIP. Cropstar übernimmt die Flächen genau so, wie sie beantragt sind.",
+      "privacy": "Die Dateien werden nur gelesen, nicht gespeichert. Übernommen wird nur, was du bestätigst.",
+      "files": "Dateien oder ZIP hier ablegen",
+      "filesHint": ".shp, .shx, .dbf, .prj, .cpg oder .zip",
+      "preview": "Vorschau anzeigen",
+      "back": "Andere Dateien",
+      "confirm": "Flächen übernehmen",
+      "harvestYear": "Erntejahr",
+      "fields": "Feldstücke",
+      "plots": "Schläge",
+      "count": "{n} · {area}",
+      "invalid": "Der Export lässt sich nicht lesen",
+      "done": "Erntejahr {year} übernommen",
+      "doneDetail": "{fields} Feldstücke und {plots} Schläge, wie bei AMA beantragt.",
+      "sets": {
+        "fields": "Feldstücke",
+        "plots": "Schläge"
+      },
+      "blockers": {
+        "harvest_year_locked": "Erntejahr {year} ist gesperrt. Entsperre es zuerst unter Betrieb.",
+        "harvest_year_not_empty": "Erntejahr {year} hat schon Feldstücke und Schläge. Das Aktualisieren folgt in einem späteren Schritt."
+      },
+      "errors": {
+        "forbidden_for_role": "Flächen hochladen dürfen nur Admins.",
+        "harvest_year_locked": "Das Erntejahr ist gesperrt.",
+        "harvest_year_not_empty": "Das Erntejahr hat schon Feldstücke und Schläge.",
+        "upload_too_large": "Die Dateien sind zusammen zu groß (max. 20 MB).",
+        "unknown": "Das hat nicht geklappt. Bitte versuch es noch einmal."
+      },
+      "problems": {
+        "no_files": "Unter den Dateien ist kein Shapefile.",
+        "too_large": "Die entpackten Dateien sind zu groß.",
+        "unreadable_archive": "{file} lässt sich nicht als ZIP öffnen.",
+        "conflicting_files": "{file} wurde zweimal mit unterschiedlichem Inhalt ausgewählt.",
+        "missing_component": "{file}: Ein Teil des Shapefiles fehlt ({detail}).",
+        "unreadable_shapefile": "{file} lässt sich nicht lesen.",
+        "wrong_projection": "{file} ist nicht in der AMA-Projektion (MGI Austria Lambert).",
+        "unknown_set": "{file} ist weder ein Feldstück- noch ein Schlag-Export.",
+        "missing_attribute": "{file}: Das Attribut {detail} fehlt.",
+        "not_polygons": "{file} enthält keine Flächen.",
+        "duplicate_set": "{file}: Dieser Export wurde mehrfach ausgewählt.",
+        "missing_set": "Der Export der {detail} fehlt.",
+        "missing_harvest_year": "{file} nennt kein Erntejahr.",
+        "mixed_harvest_years": "Die Dateien gehören zu verschiedenen Erntejahren.",
+        "invalid_record": "{file}: Feldstück {field} Schlag {plot} ist ungültig ({detail}).",
+        "duplicate_area": "Feldstück {field} Schlag {plot} kommt mehrfach vor.",
+        "plot_without_field": "Schlag {plot} liegt auf Feldstück {field}, das im Export fehlt."
+      }
+    },
     "plots": {
       "title": "Schläge",
       "fieldCount": "{n} Feldstück | {n} Feldstücke",
       "plotCount": "{n} Schlag | {n} Schläge",
-      "provenance": "Wie bei AMA beantragt · Erntejahr {year}",
+      "provenance": {
+        "eama_export": "Wie bei AMA beantragt · Erntejahr {year} · hochgeladen am {date}",
+        "invekos_open_data": "Öffentliche INVEKOS-Daten (AMA, CC BY 4.0) · Erntejahr {year}"
+      },
+      "upload": "Flächen hochladen",
       "field": "Feldstück {number}",
       "plot": "Schlag {number}",
       "emptyTitle": "Noch keine Schläge",
-      "empty": "Sobald du den Flächen-Export aus eAMA importierst, erscheinen deine Feldstücke und Schläge hier auf der Karte.",
+      "empty": "Lade den Flächen-Export deines eAMA-Antrags hoch, dann erscheinen deine Feldstücke und Schläge hier auf der Karte.",
+      "emptyReadOnly": "Sobald ein Admin deines Betriebs den Flächen-Export aus eAMA hochlädt, erscheinen die Feldstücke und Schläge hier auf der Karte.",
       "back": "Alle Schläge",
       "notFound": "Diesen Schlag gibt es in deinem Betrieb nicht.",
       "landUse": "Nutzungsart",
       "declaredArea": "Beantragte Fläche",
       "source": "Quelle",
-      "sourceValue": "AMA-Mehrfachantrag {year}",
+      "sourceValue": {
+        "eama_export": "AMA-Mehrfachantrag {year}, hochgeladen am {date}",
+        "invekos_open_data": "Öffentliche INVEKOS-Daten {year} (AMA, CC BY 4.0)"
+      },
       "tasks": "Aufgaben",
       "log": "Maßnahmenprotokoll",
       "category": "Kategorie",

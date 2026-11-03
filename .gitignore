@@ -37,6 +37,7 @@ coverage
 
 # Local planning documents (PRDs)
 plans/
+docs/reference/
 
 .github/skills/*
 

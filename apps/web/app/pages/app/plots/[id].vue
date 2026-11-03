@@ -6,7 +6,7 @@ const api = useApi()
 const route = useRoute()
 const localePath = useLocalePath()
 const { farm } = useAuth()
-const { hectares, day } = useFormat()
+const { hectares, day, moment } = useFormat()
 const { lockOf } = useHarvestYear()
 const today = todayIso()
 
@@ -140,7 +140,10 @@ useSeoMeta({ title })
                 {{ t('app.plots.source') }}
               </dt>
               <dd class="text-highlighted">
-                {{ t('app.plots.sourceValue', { year: plot.properties.harvest_year }) }}
+                {{ t(`app.plots.sourceValue.${plot.properties.provenance.source}`, {
+                  year: plot.properties.harvest_year,
+                  date: moment(plot.properties.provenance.imported_at)
+                }) }}
               </dd>
             </dl>
           </UCard>

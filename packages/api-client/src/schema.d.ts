@@ -407,6 +407,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/farms/{farm_id}/area-uploads/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview Area Upload
+         * @description What the export contains and whether it can be applied. Writes nothing.
+         */
+        post: operations["previewAreaUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/farms/{farm_id}/area-uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Apply Area Upload
+         * @description Creates the Fields and Plots of the export's Harvest Year. The files are read again,
+         *     exactly as for the preview.
+         */
+        post: operations["applyAreaUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/farms/{farm_id}/harvest-years": {
         parameters: {
             query?: never;
@@ -592,7 +633,7 @@ export interface components {
          * Action
          * @enum {string}
          */
-        Action: "read" | "read_farm_number" | "manage_farm" | "manage_members" | "lock_harvest_year" | "create_task" | "edit_task" | "complete_task" | "reopen_task" | "discard_task" | "restore_task" | "delete_task";
+        Action: "read" | "read_farm_number" | "manage_farm" | "manage_members" | "lock_harvest_year" | "upload_areas" | "create_task" | "edit_task" | "complete_task" | "reopen_task" | "discard_task" | "restore_task" | "delete_task";
         /** ApiStatus */
         ApiStatus: {
             /**
@@ -604,12 +645,73 @@ export interface components {
             version: string;
             database: components["schemas"]["DatabaseStatus"];
         };
+        /**
+         * AreaProvenance
+         * @description Where the geometry came from and when it arrived.
+         */
+        AreaProvenance: {
+            source: components["schemas"]["AreaSource"];
+            /**
+             * Imported At
+             * Format: date-time
+             */
+            imported_at: string;
+        };
+        /**
+         * AreaSource
+         * @description Where the geometry of a Field or Plot came from.
+         * @enum {string}
+         */
+        AreaSource: "eama_export" | "invekos_open_data";
+        /** AreaUploadPreview */
+        AreaUploadPreview: {
+            /** Harvest Year */
+            harvest_year: number;
+            /** Field Area Ha */
+            field_area_ha: number;
+            /** Plot Area Ha */
+            plot_area_ha: number;
+            /** Blockers */
+            blockers: components["schemas"]["Blocker"][];
+            fields: components["schemas"]["UploadedFieldCollection"];
+            plots: components["schemas"]["UploadedPlotCollection"];
+        };
+        /** AreaUploadResult */
+        AreaUploadResult: {
+            /** Harvest Year */
+            harvest_year: number;
+            /** Field Count */
+            field_count: number;
+            /** Plot Count */
+            plot_count: number;
+        };
         /** AuthConfig */
         AuthConfig: {
             /** Registration Open */
             registration_open: boolean;
             /** Password Reset By Email */
             password_reset_by_email: boolean;
+        };
+        /**
+         * Blocker
+         * @enum {string}
+         */
+        Blocker: "harvest_year_locked" | "harvest_year_not_empty";
+        /** Body_applyAreaUpload */
+        Body_applyAreaUpload: {
+            /**
+             * Files
+             * @description The eAMA export: shapefile components (.shp, .shx, .dbf, .prj) or ZIPs
+             */
+            files: string[];
+        };
+        /** Body_previewAreaUpload */
+        Body_previewAreaUpload: {
+            /**
+             * Files
+             * @description The eAMA export: shapefile components (.shp, .shx, .dbf, .prj) or ZIPs
+             */
+            files: string[];
         };
         /** ChangePasswordRequest */
         ChangePasswordRequest: {
@@ -626,6 +728,18 @@ export interface components {
             postgres_version: string | null;
             /** Postgis Version */
             postgis_version: string | null;
+        };
+        /** ExportProblem */
+        ExportProblem: {
+            code: components["schemas"]["ProblemCode"];
+            /** File */
+            file: string | null;
+            /** Field Number */
+            field_number: number | null;
+            /** Plot Number */
+            plot_number: number | null;
+            /** Detail */
+            detail: string | null;
         };
         /** FarmCreate */
         FarmCreate: {
@@ -687,6 +801,7 @@ export interface components {
             declared_area_ha: number;
             /** Plot Count */
             plot_count: number;
+            provenance: components["schemas"]["AreaProvenance"];
         };
         /** FieldRef */
         FieldRef: {
@@ -710,6 +825,21 @@ export interface components {
             /** Year */
             year: number;
             lock: components["schemas"]["LockOut"] | null;
+        };
+        /** InvalidExport */
+        InvalidExport: {
+            /**
+             * Code
+             * @default invalid_eama_export
+             * @constant
+             */
+            code: "invalid_eama_export";
+            /** Problems */
+            problems: components["schemas"]["ExportProblem"][];
+        };
+        /** InvalidExportResponse */
+        InvalidExportResponse: {
+            detail: components["schemas"]["InvalidExport"];
         };
         /** InvitationCreate */
         InvitationCreate: {
@@ -989,12 +1119,18 @@ export interface components {
             /** Declared Area Ha */
             declared_area_ha: number;
             field: components["schemas"]["FieldRef"];
+            provenance: components["schemas"]["AreaProvenance"];
         };
         /**
          * Priority
          * @enum {string}
          */
         Priority: "none" | "low" | "normal" | "high";
+        /**
+         * ProblemCode
+         * @enum {string}
+         */
+        ProblemCode: "no_files" | "too_large" | "unreadable_archive" | "conflicting_files" | "missing_component" | "unreadable_shapefile" | "wrong_projection" | "unknown_set" | "missing_attribute" | "not_polygons" | "duplicate_set" | "missing_set" | "missing_harvest_year" | "mixed_harvest_years" | "invalid_record" | "duplicate_area" | "plot_without_field";
         /** RegisterRequest */
         RegisterRequest: {
             /**
@@ -1155,6 +1291,85 @@ export interface components {
             plot_ids?: string[] | null;
             /** Planned Details */
             planned_details?: string | null;
+        };
+        /** UploadedFieldCollection */
+        UploadedFieldCollection: {
+            /**
+             * Type
+             * @default FeatureCollection
+             * @constant
+             */
+            type: "FeatureCollection";
+            /** Features */
+            features: components["schemas"]["UploadedFieldFeature"][];
+        };
+        /** UploadedFieldFeature */
+        UploadedFieldFeature: {
+            /**
+             * Type
+             * @default Feature
+             * @constant
+             */
+            type: "Feature";
+            /** Id */
+            id: string;
+            geometry: components["schemas"]["MultiPolygon"];
+            properties: components["schemas"]["UploadedFieldProperties"];
+        };
+        /** UploadedFieldProperties */
+        UploadedFieldProperties: {
+            /** Id */
+            id: string;
+            /** Number */
+            number: number;
+            /** Name */
+            name: string | null;
+            /** Land Use Code */
+            land_use_code: string;
+            /** Land Use Name */
+            land_use_name: string;
+            /** Declared Area Ha */
+            declared_area_ha: number;
+        };
+        /** UploadedPlotCollection */
+        UploadedPlotCollection: {
+            /**
+             * Type
+             * @default FeatureCollection
+             * @constant
+             */
+            type: "FeatureCollection";
+            /** Features */
+            features: components["schemas"]["UploadedPlotFeature"][];
+        };
+        /** UploadedPlotFeature */
+        UploadedPlotFeature: {
+            /**
+             * Type
+             * @default Feature
+             * @constant
+             */
+            type: "Feature";
+            /** Id */
+            id: string;
+            geometry: components["schemas"]["MultiPolygon"];
+            properties: components["schemas"]["UploadedPlotProperties"];
+        };
+        /** UploadedPlotProperties */
+        UploadedPlotProperties: {
+            /** Id */
+            id: string;
+            /** Field Number */
+            field_number: number;
+            /** Number */
+            number: number;
+            /** Land Use Code */
+            land_use_code: string;
+            /** Land Use Name */
+            land_use_name: string;
+            land_use_category: components["schemas"]["LandUseCategory"];
+            /** Declared Area Ha */
+            declared_area_ha: number;
         };
         /** UserOut */
         UserOut: {
@@ -1983,6 +2198,76 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    previewAreaUpload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_previewAreaUpload"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AreaUploadPreview"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvalidExportResponse"];
+                };
+            };
+        };
+    };
+    applyAreaUpload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_applyAreaUpload"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AreaUploadResult"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvalidExportResponse"];
                 };
             };
         };

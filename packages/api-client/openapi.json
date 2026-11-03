@@ -1060,6 +1060,114 @@
         }
       }
     },
+    "/api/farms/{farm_id}/area-uploads/preview": {
+      "post": {
+        "tags": [
+          "areas"
+        ],
+        "summary": "Preview Area Upload",
+        "description": "What the export contains and whether it can be applied. Writes nothing.",
+        "operationId": "previewAreaUpload",
+        "parameters": [
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_previewAreaUpload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AreaUploadPreview"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidExportResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        }
+      }
+    },
+    "/api/farms/{farm_id}/area-uploads": {
+      "post": {
+        "tags": [
+          "areas"
+        ],
+        "summary": "Apply Area Upload",
+        "description": "Creates the Fields and Plots of the export's Harvest Year. The files are read again,\nexactly as for the preview.",
+        "operationId": "applyAreaUpload",
+        "parameters": [
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_applyAreaUpload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AreaUploadResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidExportResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        }
+      }
+    },
     "/api/farms/{farm_id}/harvest-years": {
       "get": {
         "tags": [
@@ -1982,6 +2090,7 @@
           "manage_farm",
           "manage_members",
           "lock_harvest_year",
+          "upload_areas",
           "create_task",
           "edit_task",
           "complete_task",
@@ -2015,6 +2124,96 @@
         ],
         "title": "ApiStatus"
       },
+      "AreaProvenance": {
+        "properties": {
+          "source": {
+            "$ref": "#/components/schemas/AreaSource"
+          },
+          "imported_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Imported At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "imported_at"
+        ],
+        "title": "AreaProvenance",
+        "description": "Where the geometry came from and when it arrived."
+      },
+      "AreaSource": {
+        "type": "string",
+        "enum": [
+          "eama_export",
+          "invekos_open_data"
+        ],
+        "title": "AreaSource",
+        "description": "Where the geometry of a Field or Plot came from."
+      },
+      "AreaUploadPreview": {
+        "properties": {
+          "harvest_year": {
+            "type": "integer",
+            "title": "Harvest Year"
+          },
+          "field_area_ha": {
+            "type": "number",
+            "title": "Field Area Ha"
+          },
+          "plot_area_ha": {
+            "type": "number",
+            "title": "Plot Area Ha"
+          },
+          "blockers": {
+            "items": {
+              "$ref": "#/components/schemas/Blocker"
+            },
+            "type": "array",
+            "title": "Blockers"
+          },
+          "fields": {
+            "$ref": "#/components/schemas/UploadedFieldCollection"
+          },
+          "plots": {
+            "$ref": "#/components/schemas/UploadedPlotCollection"
+          }
+        },
+        "type": "object",
+        "required": [
+          "harvest_year",
+          "field_area_ha",
+          "plot_area_ha",
+          "blockers",
+          "fields",
+          "plots"
+        ],
+        "title": "AreaUploadPreview"
+      },
+      "AreaUploadResult": {
+        "properties": {
+          "harvest_year": {
+            "type": "integer",
+            "title": "Harvest Year"
+          },
+          "field_count": {
+            "type": "integer",
+            "title": "Field Count"
+          },
+          "plot_count": {
+            "type": "integer",
+            "title": "Plot Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "harvest_year",
+          "field_count",
+          "plot_count"
+        ],
+        "title": "AreaUploadResult"
+      },
       "AuthConfig": {
         "properties": {
           "registration_open": {
@@ -2032,6 +2231,50 @@
           "password_reset_by_email"
         ],
         "title": "AuthConfig"
+      },
+      "Blocker": {
+        "type": "string",
+        "enum": [
+          "harvest_year_locked",
+          "harvest_year_not_empty"
+        ],
+        "title": "Blocker"
+      },
+      "Body_applyAreaUpload": {
+        "properties": {
+          "files": {
+            "items": {
+              "type": "string",
+              "contentMediaType": "application/octet-stream"
+            },
+            "type": "array",
+            "title": "Files",
+            "description": "The eAMA export: shapefile components (.shp, .shx, .dbf, .prj) or ZIPs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "files"
+        ],
+        "title": "Body_applyAreaUpload"
+      },
+      "Body_previewAreaUpload": {
+        "properties": {
+          "files": {
+            "items": {
+              "type": "string",
+              "contentMediaType": "application/octet-stream"
+            },
+            "type": "array",
+            "title": "Files",
+            "description": "The eAMA export: shapefile components (.shp, .shx, .dbf, .prj) or ZIPs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "files"
+        ],
+        "title": "Body_previewAreaUpload"
       },
       "ChangePasswordRequest": {
         "properties": {
@@ -2090,6 +2333,66 @@
           "postgis_version"
         ],
         "title": "DatabaseStatus"
+      },
+      "ExportProblem": {
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/ProblemCode"
+          },
+          "file": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File"
+          },
+          "field_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Field Number"
+          },
+          "plot_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plot Number"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "file",
+          "field_number",
+          "plot_number",
+          "detail"
+        ],
+        "title": "ExportProblem"
       },
       "FarmCreate": {
         "properties": {
@@ -2228,6 +2531,9 @@
           "plot_count": {
             "type": "integer",
             "title": "Plot Count"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/AreaProvenance"
           }
         },
         "type": "object",
@@ -2239,7 +2545,8 @@
           "land_use_code",
           "land_use_name",
           "declared_area_ha",
-          "plot_count"
+          "plot_count",
+          "provenance"
         ],
         "title": "FieldProperties"
       },
@@ -2310,6 +2617,40 @@
           "lock"
         ],
         "title": "HarvestYearOut"
+      },
+      "InvalidExport": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "const": "invalid_eama_export",
+            "title": "Code",
+            "default": "invalid_eama_export"
+          },
+          "problems": {
+            "items": {
+              "$ref": "#/components/schemas/ExportProblem"
+            },
+            "type": "array",
+            "title": "Problems"
+          }
+        },
+        "type": "object",
+        "required": [
+          "problems"
+        ],
+        "title": "InvalidExport"
+      },
+      "InvalidExportResponse": {
+        "properties": {
+          "detail": {
+            "$ref": "#/components/schemas/InvalidExport"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "InvalidExportResponse"
       },
       "InvitationCreate": {
         "properties": {
@@ -3046,6 +3387,9 @@
           },
           "field": {
             "$ref": "#/components/schemas/FieldRef"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/AreaProvenance"
           }
         },
         "type": "object",
@@ -3058,7 +3402,8 @@
           "land_use_name",
           "land_use_category",
           "declared_area_ha",
-          "field"
+          "field",
+          "provenance"
         ],
         "title": "PlotProperties"
       },
@@ -3071,6 +3416,29 @@
           "high"
         ],
         "title": "Priority"
+      },
+      "ProblemCode": {
+        "type": "string",
+        "enum": [
+          "no_files",
+          "too_large",
+          "unreadable_archive",
+          "conflicting_files",
+          "missing_component",
+          "unreadable_shapefile",
+          "wrong_projection",
+          "unknown_set",
+          "missing_attribute",
+          "not_polygons",
+          "duplicate_set",
+          "missing_set",
+          "missing_harvest_year",
+          "mixed_harvest_years",
+          "invalid_record",
+          "duplicate_area",
+          "plot_without_field"
+        ],
+        "title": "ProblemCode"
       },
       "RegisterRequest": {
         "properties": {
@@ -3618,6 +3986,191 @@
         "type": "object",
         "title": "TaskUpdate",
         "description": "Only the fields sent are changed; send null to clear an optional field. Sending\n`field_ids` or `plot_ids` replaces that set of areas."
+      },
+      "UploadedFieldCollection": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "FeatureCollection",
+            "title": "Type",
+            "default": "FeatureCollection"
+          },
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/UploadedFieldFeature"
+            },
+            "type": "array",
+            "title": "Features"
+          }
+        },
+        "type": "object",
+        "required": [
+          "features"
+        ],
+        "title": "UploadedFieldCollection"
+      },
+      "UploadedFieldFeature": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "Feature",
+            "title": "Type",
+            "default": "Feature"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "geometry": {
+            "$ref": "#/components/schemas/MultiPolygon"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/UploadedFieldProperties"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "geometry",
+          "properties"
+        ],
+        "title": "UploadedFieldFeature"
+      },
+      "UploadedFieldProperties": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "land_use_code": {
+            "type": "string",
+            "title": "Land Use Code"
+          },
+          "land_use_name": {
+            "type": "string",
+            "title": "Land Use Name"
+          },
+          "declared_area_ha": {
+            "type": "number",
+            "title": "Declared Area Ha"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "number",
+          "name",
+          "land_use_code",
+          "land_use_name",
+          "declared_area_ha"
+        ],
+        "title": "UploadedFieldProperties"
+      },
+      "UploadedPlotCollection": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "FeatureCollection",
+            "title": "Type",
+            "default": "FeatureCollection"
+          },
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/UploadedPlotFeature"
+            },
+            "type": "array",
+            "title": "Features"
+          }
+        },
+        "type": "object",
+        "required": [
+          "features"
+        ],
+        "title": "UploadedPlotCollection"
+      },
+      "UploadedPlotFeature": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "Feature",
+            "title": "Type",
+            "default": "Feature"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "geometry": {
+            "$ref": "#/components/schemas/MultiPolygon"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/UploadedPlotProperties"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "geometry",
+          "properties"
+        ],
+        "title": "UploadedPlotFeature"
+      },
+      "UploadedPlotProperties": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "field_number": {
+            "type": "integer",
+            "title": "Field Number"
+          },
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "land_use_code": {
+            "type": "string",
+            "title": "Land Use Code"
+          },
+          "land_use_name": {
+            "type": "string",
+            "title": "Land Use Name"
+          },
+          "land_use_category": {
+            "$ref": "#/components/schemas/LandUseCategory"
+          },
+          "declared_area_ha": {
+            "type": "number",
+            "title": "Declared Area Ha"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "field_number",
+          "number",
+          "land_use_code",
+          "land_use_name",
+          "land_use_category",
+          "declared_area_ha"
+        ],
+        "title": "UploadedPlotProperties"
       },
       "UserOut": {
         "properties": {
