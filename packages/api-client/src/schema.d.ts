@@ -418,7 +418,8 @@ export interface paths {
         put?: never;
         /**
          * Preview Area Upload
-         * @description What the export contains and whether it can be applied. Writes nothing.
+         * @description What the export would do to its Harvest Year, given the assignments so far, and
+         *     whether it can be applied. Writes nothing.
          */
         post: operations["previewAreaUpload"];
         delete?: never;
@@ -438,8 +439,9 @@ export interface paths {
         put?: never;
         /**
          * Apply Area Upload
-         * @description Creates the Fields and Plots of the export's Harvest Year. The files are read again,
-         *     exactly as for the preview.
+         * @description Makes the export's Harvest Year match it: assigned areas are updated in place and keep
+         *     their Tasks and Operations, unassigned ones are removed. The files are read again and
+         *     reconciled exactly as for the preview.
          */
         post: operations["applyAreaUpload"];
         delete?: never;
@@ -645,6 +647,38 @@ export interface components {
             version: string;
             database: components["schemas"]["DatabaseStatus"];
         };
+        /** AreaCandidate */
+        AreaCandidate: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Coverage */
+            coverage: number;
+        };
+        /**
+         * AreaChange
+         * @enum {string}
+         */
+        AreaChange: "number" | "field" | "name" | "land_use" | "declared_area" | "geometry" | "source";
+        /**
+         * AreaDecision
+         * @description What happens to a declared area, given the assignments so far.
+         */
+        AreaDecision: {
+            status: components["schemas"]["AreaStatus"];
+            /** Target */
+            target: string | null;
+            /** Decided */
+            decided: boolean;
+            /** Suggested */
+            suggested: boolean;
+            /** Changes */
+            changes: components["schemas"]["AreaChange"][];
+            /** Candidates */
+            candidates: components["schemas"]["AreaCandidate"][];
+        };
         /**
          * AreaProvenance
          * @description Where the geometry came from and when it arrived.
@@ -663,6 +697,16 @@ export interface components {
          * @enum {string}
          */
         AreaSource: "eama_export" | "invekos_open_data";
+        /**
+         * AreaStatus
+         * @enum {string}
+         */
+        AreaStatus: "new" | "unchanged" | "changed" | "undecided";
+        /**
+         * AreaUploadBlocker
+         * @enum {string}
+         */
+        AreaUploadBlocker: "harvest_year_locked" | "undecided_areas" | "removes_referenced_areas";
         /** AreaUploadPreview */
         AreaUploadPreview: {
             /** Harvest Year */
@@ -672,9 +716,11 @@ export interface components {
             /** Plot Area Ha */
             plot_area_ha: number;
             /** Blockers */
-            blockers: components["schemas"]["Blocker"][];
+            blockers: components["schemas"]["AreaUploadBlocker"][];
             fields: components["schemas"]["UploadedFieldCollection"];
             plots: components["schemas"]["UploadedPlotCollection"];
+            current_fields: components["schemas"]["CurrentFieldCollection"];
+            current_plots: components["schemas"]["CurrentPlotCollection"];
         };
         /** AreaUploadResult */
         AreaUploadResult: {
@@ -684,6 +730,12 @@ export interface components {
             field_count: number;
             /** Plot Count */
             plot_count: number;
+            /** Created Count */
+            created_count: number;
+            /** Changed Count */
+            changed_count: number;
+            /** Removed Count */
+            removed_count: number;
         };
         /** AuthConfig */
         AuthConfig: {
@@ -692,11 +744,6 @@ export interface components {
             /** Password Reset By Email */
             password_reset_by_email: boolean;
         };
-        /**
-         * Blocker
-         * @enum {string}
-         */
-        Blocker: "harvest_year_locked" | "harvest_year_not_empty";
         /** Body_applyAreaUpload */
         Body_applyAreaUpload: {
             /**
@@ -704,6 +751,11 @@ export interface components {
              * @description The eAMA export: shapefile components (.shp, .shx, .dbf, .prj) or ZIPs
              */
             files: string[];
+            /**
+             * Assignments
+             * @description JSON list of `Assignment`: which existing area each declared area is, or null for a new one. Declared areas left out take the suggestion, if there is one.
+             */
+            assignments?: string | null;
         };
         /** Body_previewAreaUpload */
         Body_previewAreaUpload: {
@@ -712,6 +764,11 @@ export interface components {
              * @description The eAMA export: shapefile components (.shp, .shx, .dbf, .prj) or ZIPs
              */
             files: string[];
+            /**
+             * Assignments
+             * @description JSON list of `Assignment`: which existing area each declared area is, or null for a new one. Declared areas left out take the suggestion, if there is one.
+             */
+            assignments?: string | null;
         };
         /** ChangePasswordRequest */
         ChangePasswordRequest: {
@@ -719,6 +776,110 @@ export interface components {
             current_password: string;
             /** New Password */
             new_password: string;
+        };
+        /** CurrentFieldCollection */
+        CurrentFieldCollection: {
+            /**
+             * Type
+             * @default FeatureCollection
+             * @constant
+             */
+            type: "FeatureCollection";
+            /** Features */
+            features: components["schemas"]["CurrentFieldFeature"][];
+        };
+        /** CurrentFieldFeature */
+        CurrentFieldFeature: {
+            /**
+             * Type
+             * @default Feature
+             * @constant
+             */
+            type: "Feature";
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            geometry: components["schemas"]["MultiPolygon"];
+            properties: components["schemas"]["CurrentFieldProperties"];
+        };
+        /** CurrentFieldProperties */
+        CurrentFieldProperties: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Number */
+            number: number;
+            /** Name */
+            name: string | null;
+            /** Land Use Code */
+            land_use_code: string;
+            /** Land Use Name */
+            land_use_name: string;
+            /** Declared Area Ha */
+            declared_area_ha: number;
+            /** Removed */
+            removed: boolean;
+            /** Tasks */
+            tasks: components["schemas"]["TaskRef"][];
+        };
+        /** CurrentPlotCollection */
+        CurrentPlotCollection: {
+            /**
+             * Type
+             * @default FeatureCollection
+             * @constant
+             */
+            type: "FeatureCollection";
+            /** Features */
+            features: components["schemas"]["CurrentPlotFeature"][];
+        };
+        /** CurrentPlotFeature */
+        CurrentPlotFeature: {
+            /**
+             * Type
+             * @default Feature
+             * @constant
+             */
+            type: "Feature";
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            geometry: components["schemas"]["MultiPolygon"];
+            properties: components["schemas"]["CurrentPlotProperties"];
+        };
+        /** CurrentPlotProperties */
+        CurrentPlotProperties: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Field Id
+             * Format: uuid
+             */
+            field_id: string;
+            /** Field Number */
+            field_number: number;
+            /** Number */
+            number: number;
+            /** Land Use Code */
+            land_use_code: string;
+            /** Land Use Name */
+            land_use_name: string;
+            land_use_category: components["schemas"]["LandUseCategory"];
+            /** Declared Area Ha */
+            declared_area_ha: number;
+            /** Removed */
+            removed: boolean;
+            /** Tasks */
+            tasks: components["schemas"]["TaskRef"][];
         };
         /** DatabaseStatus */
         DatabaseStatus: {
@@ -753,6 +914,24 @@ export interface components {
             /** Ama Farm Number */
             ama_farm_number?: string | null;
         };
+        /** FertilisationDetails */
+        FertilisationDetails: {
+            /** Note */
+            note?: string | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "fertilisation";
+            /** Amount */
+            amount?: number | null;
+            unit?: components["schemas"]["FertilisationUnit"] | null;
+        };
+        /**
+         * FertilisationUnit
+         * @enum {string}
+         */
+        FertilisationUnit: "kg_per_ha" | "t_per_ha" | "m3_per_ha" | "l_per_ha";
         /** FieldCollection */
         FieldCollection: {
             /**
@@ -820,12 +999,34 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** HarvestDetails */
+        HarvestDetails: {
+            /** Note */
+            note?: string | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "harvest";
+            product?: components["schemas"]["HarvestedProduct"] | null;
+            /** Yield T Per Ha */
+            yield_t_per_ha?: number | null;
+            /** Moisture Percent */
+            moisture_percent?: number | null;
+            /** Crude Protein Percent */
+            crude_protein_percent?: number | null;
+        };
         /** HarvestYearOut */
         HarvestYearOut: {
             /** Year */
             year: number;
             lock: components["schemas"]["LockOut"] | null;
         };
+        /**
+         * HarvestedProduct
+         * @enum {string}
+         */
+        HarvestedProduct: "grain" | "straw" | "whole_crop" | "forage" | "other";
         /** InvalidExport */
         InvalidExport: {
             /**
@@ -941,6 +1142,17 @@ export interface components {
             /** Memberships */
             memberships: components["schemas"]["MembershipOut"][];
         };
+        /** MechanicalWeedControlDetails */
+        MechanicalWeedControlDetails: {
+            /** Note */
+            note?: string | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "mechanical_weed_control";
+            implement?: components["schemas"]["WeedControlImplement"] | null;
+        };
         /** MemberOut */
         MemberOut: {
             user: components["schemas"]["PersonOut"];
@@ -957,6 +1169,22 @@ export interface components {
         MembershipOut: {
             farm: components["schemas"]["cropstar_api__routes__auth__FarmOut"];
             role: components["schemas"]["Role"];
+        };
+        /**
+         * MulchedMaterial
+         * @enum {string}
+         */
+        MulchedMaterial: "cover_crop" | "crop_residues" | "grassland" | "other";
+        /** MulchingDetails */
+        MulchingDetails: {
+            /** Note */
+            note?: string | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "mulching";
+            material?: components["schemas"]["MulchedMaterial"] | null;
         };
         /** MultiPolygon */
         MultiPolygon: {
@@ -977,7 +1205,7 @@ export interface components {
          */
         OperationCompletion: {
             /** Actual Details */
-            actual_details?: string | null;
+            actual_details?: (components["schemas"]["TillageDetails"] | components["schemas"]["MechanicalWeedControlDetails"] | components["schemas"]["MulchingDetails"] | components["schemas"]["SowingDetails"] | components["schemas"]["FertilisationDetails"] | components["schemas"]["HarvestDetails"]) | null;
             /** Performed On */
             performed_on?: string | null;
         };
@@ -1000,7 +1228,7 @@ export interface components {
             /** Performed On */
             performed_on: string | null;
             /** Actual Details */
-            actual_details: string | null;
+            actual_details: (components["schemas"]["TillageDetails"] | components["schemas"]["MechanicalWeedControlDetails"] | components["schemas"]["MulchingDetails"] | components["schemas"]["SowingDetails"] | components["schemas"]["FertilisationDetails"] | components["schemas"]["HarvestDetails"]) | null;
             completed_by: components["schemas"]["PersonOut"] | null;
             /** Completed At */
             completed_at: string | null;
@@ -1015,9 +1243,9 @@ export interface components {
             plot: components["schemas"]["TaskPlotRef"];
             status: components["schemas"]["TaskStatus"];
             /** Planned Details */
-            planned_details: string | null;
+            planned_details: (components["schemas"]["TillageDetails"] | components["schemas"]["MechanicalWeedControlDetails"] | components["schemas"]["MulchingDetails"] | components["schemas"]["SowingDetails"] | components["schemas"]["FertilisationDetails"] | components["schemas"]["HarvestDetails"]) | null;
             /** Actual Details */
-            actual_details: string | null;
+            actual_details: (components["schemas"]["TillageDetails"] | components["schemas"]["MechanicalWeedControlDetails"] | components["schemas"]["MulchingDetails"] | components["schemas"]["SowingDetails"] | components["schemas"]["FertilisationDetails"] | components["schemas"]["HarvestDetails"]) | null;
             /** Performed On */
             performed_on: string | null;
             completed_by: components["schemas"]["PersonOut"] | null;
@@ -1037,9 +1265,9 @@ export interface components {
          */
         OperationUpdate: {
             /** Planned Details */
-            planned_details?: string | null;
+            planned_details?: (components["schemas"]["TillageDetails"] | components["schemas"]["MechanicalWeedControlDetails"] | components["schemas"]["MulchingDetails"] | components["schemas"]["SowingDetails"] | components["schemas"]["FertilisationDetails"] | components["schemas"]["HarvestDetails"]) | null;
             /** Actual Details */
-            actual_details?: string | null;
+            actual_details?: (components["schemas"]["TillageDetails"] | components["schemas"]["MechanicalWeedControlDetails"] | components["schemas"]["MulchingDetails"] | components["schemas"]["SowingDetails"] | components["schemas"]["FertilisationDetails"] | components["schemas"]["HarvestDetails"]) | null;
             /** Performed On */
             performed_on?: string | null;
         };
@@ -1161,6 +1389,30 @@ export interface components {
             /** Password */
             password: string;
         };
+        /** SowingDetails */
+        SowingDetails: {
+            /** Note */
+            note?: string | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "sowing";
+            purpose?: components["schemas"]["SowingPurpose"] | null;
+            /** Rate */
+            rate?: number | null;
+            unit?: components["schemas"]["SowingUnit"] | null;
+        };
+        /**
+         * SowingPurpose
+         * @enum {string}
+         */
+        SowingPurpose: "main_crop" | "cover_crop" | "undersown_crop";
+        /**
+         * SowingUnit
+         * @enum {string}
+         */
+        SowingUnit: "kg_per_ha" | "seeds_per_m2" | "seeds_per_ha";
         /** TaskCreate */
         TaskCreate: {
             /** Title */
@@ -1191,7 +1443,7 @@ export interface components {
             /** Operation Type */
             operation_type?: string | null;
             /** Planned Details */
-            planned_details?: string | null;
+            planned_details?: (components["schemas"]["TillageDetails"] | components["schemas"]["MechanicalWeedControlDetails"] | components["schemas"]["MulchingDetails"] | components["schemas"]["SowingDetails"] | components["schemas"]["FertilisationDetails"] | components["schemas"]["HarvestDetails"]) | null;
         };
         /** TaskFieldRef */
         TaskFieldRef: {
@@ -1244,7 +1496,7 @@ export interface components {
             /** Operation Type */
             operation_type: string | null;
             /** Planned Details */
-            planned_details: string | null;
+            planned_details: (components["schemas"]["TillageDetails"] | components["schemas"]["MechanicalWeedControlDetails"] | components["schemas"]["MulchingDetails"] | components["schemas"]["SowingDetails"] | components["schemas"]["FertilisationDetails"] | components["schemas"]["HarvestDetails"]) | null;
             /** Operations */
             operations: components["schemas"]["OperationOut"][];
             /** Allowed Actions */
@@ -1264,6 +1516,16 @@ export interface components {
             /** Land Use Name */
             land_use_name: string;
             land_use_category: components["schemas"]["LandUseCategory"];
+        };
+        /** TaskRef */
+        TaskRef: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Title */
+            title: string;
         };
         /**
          * TaskStatus
@@ -1290,8 +1552,26 @@ export interface components {
             /** Plot Ids */
             plot_ids?: string[] | null;
             /** Planned Details */
-            planned_details?: string | null;
+            planned_details?: (components["schemas"]["TillageDetails"] | components["schemas"]["MechanicalWeedControlDetails"] | components["schemas"]["MulchingDetails"] | components["schemas"]["SowingDetails"] | components["schemas"]["FertilisationDetails"] | components["schemas"]["HarvestDetails"]) | null;
         };
+        /** TillageDetails */
+        TillageDetails: {
+            /** Note */
+            note?: string | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "tillage";
+            implement?: components["schemas"]["TillageImplement"] | null;
+            /** Depth Cm */
+            depth_cm?: number | null;
+        };
+        /**
+         * TillageImplement
+         * @enum {string}
+         */
+        TillageImplement: "plough" | "cultivator" | "disc_harrow" | "subsoiler" | "seedbed_combination" | "power_harrow" | "roller" | "other";
         /** UploadedFieldCollection */
         UploadedFieldCollection: {
             /**
@@ -1330,6 +1610,7 @@ export interface components {
             land_use_name: string;
             /** Declared Area Ha */
             declared_area_ha: number;
+            decision: components["schemas"]["AreaDecision"];
         };
         /** UploadedPlotCollection */
         UploadedPlotCollection: {
@@ -1370,6 +1651,7 @@ export interface components {
             land_use_category: components["schemas"]["LandUseCategory"];
             /** Declared Area Ha */
             declared_area_ha: number;
+            decision: components["schemas"]["AreaDecision"];
         };
         /** UserOut */
         UserOut: {
@@ -1394,6 +1676,11 @@ export interface components {
             /** Context */
             ctx?: Record<string, never>;
         };
+        /**
+         * WeedControlImplement
+         * @enum {string}
+         */
+        WeedControlImplement: "tine_weeder" | "hoe" | "finger_weeder" | "rotary_hoe" | "other";
         /** FarmOut */
         cropstar_api__routes__auth__FarmOut: {
             /**
@@ -2253,7 +2540,7 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };

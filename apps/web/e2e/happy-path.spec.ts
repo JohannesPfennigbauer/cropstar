@@ -24,7 +24,11 @@ test('plots, an Operation on two of them, its log, and a locked season', async (
     await editor.getByRole('heading', { name: 'Neue Aufgabe' }).click()
     await expect(page.getByRole('listbox')).toBeHidden({ timeout: 500 })
   }).toPass()
-  await editor.getByLabel('Plan').fill('Schleppschuh, 20 m³/ha')
+  const plan = editor.getByTestId('planned-details')
+  await plan.getByLabel('Menge je ha').fill('20')
+  await plan.getByTestId('details-unit').click()
+  await page.getByRole('option', { name: 'm³/ha' }).click()
+  await plan.getByLabel('Notiz').fill('Rindergülle, Schleppschuh')
   await editor.getByRole('button', { name: 'Anlegen' }).click()
 
   const row = page.getByTestId('task-row').filter({ hasText: 'Gülle ausbringen' })
@@ -34,16 +38,17 @@ test('plots, an Operation on two of them, its log, and a locked season', async (
   await row.getByTestId('task-toggle').click()
   const completion = page.getByRole('dialog', { name: 'Gülle ausbringen erledigen' })
   const rows = completion.getByTestId('complete-row')
-  await expect(rows.first().getByRole('textbox', { name: 'Ist' })).toHaveValue('Schleppschuh, 20 m³/ha')
+  await expect(rows.first().getByLabel('Menge je ha')).toHaveValue('20')
+  await expect(rows.first().getByLabel('Notiz')).toHaveValue('Rindergülle, Schleppschuh')
   await rows.nth(1).getByRole('checkbox').click()
-  await rows.first().getByRole('textbox', { name: 'Ist' }).fill('Schleppschuh, 18 m³/ha')
+  await rows.first().getByLabel('Menge je ha').fill('18')
   await completion.getByTestId('record-operations').click()
   await expect(row.getByTestId('operation-badge')).toHaveText('Düngung · 1/2')
 
   await page.getByRole('link', { name: 'Schläge', exact: true }).click()
   await page.getByRole('link', { name: /Winterroggen/ }).click()
   await expect(page.getByTestId('operation-log')).toContainText('Düngung · Gülle ausbringen')
-  await expect(page.getByTestId('operation-log')).toContainText('Schleppschuh, 18 m³/ha')
+  await expect(page.getByTestId('operation-log')).toContainText('18 m³/ha · Rindergülle, Schleppschuh')
   const plotPage = page.url()
 
   // The season is closed: everything referring to it becomes read-only.

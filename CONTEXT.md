@@ -75,6 +75,18 @@ The area of a Field or Plot as declared to AMA. Cropstar shows it as declared an
 recomputes it from the geometry.
 _Avoid_: Size, Fläche (unqualified)
 
+**Area Upload** (de: _Flächen-Upload_):
+An Admin bringing a Harvest Year's Fields and Plots into line with the Farm's eAMA export.
+Every declared area is assigned to an existing one (the same piece of land, which keeps its
+Tasks and Operations) or created as new, without history; existing areas nobody is
+assigned to are removed.
+_Avoid_: Import (reserved for farmdok), Sync
+
+**Provisional Geometry** (de: _vorläufige Geometrie_):
+Geometry a Field or Plot borrows from another Harvest Year because no eAMA export exists for
+its own year. An Area Upload for that year replaces it.
+_Avoid_: Estimated geometry
+
 ## Work
 
 **Task** (de: _Aufgabe_):
@@ -89,9 +101,10 @@ Discarding is reversible; deleting is not, and a deleted Task leaves no trace. A
 with Operations takes its Status from them: Open while any Operation is Open.
 
 **Operation Type** (de: _Maßnahmen-Typ_):
-One entry of the list of kinds of work the model and reports understand, e.g. tillage,
-sowing, fertilisation, harvest. The list is the same for every Farm. A Task with an
-Operation Type refers to Plots only, at least one.
+One entry of the list of kinds of work the model and reports understand: tillage,
+mechanical weed control, mulching, sowing, fertilisation, harvest. The list is the same
+for every Farm. A Task with an Operation Type refers to Plots only, at least one. The
+Implement is a detail, never an Operation Type of its own.
 
 **Operation** (de: _Maßnahme_):
 The Plot-specific part of a Task that has an Operation Type: one Operation per Plot,
@@ -99,12 +112,19 @@ each with its own Status, Planned Details and Actual Details.
 _Avoid_: Management event, Measure, Activity
 
 **Planned Details** (de: _Plan-Details_):
-What an Operation is intended to apply, e.g. amount and date. Entered once on the Task
-and adjustable per Operation.
+What an Operation is intended to apply, in the structured form of its Operation Type
+(e.g. Implement and depth, or amount per hectare and unit) plus a free note. Entered once
+on the Task and adjustable per Operation. Amounts are always per hectare, never totals.
 
 **Actual Details** (de: _Ist-Details_):
-What an Operation really applied. Recorded when the Operation is Done, defaulting to the
-Planned Details. Only Actual Details count as having happened.
+What an Operation really applied, in the same form as the Planned Details. Recorded when
+the Operation is Done, defaulting to the Planned Details. Only Actual Details count as
+having happened.
+
+**Implement** (de: _Gerät_):
+The machine an Operation was done with, e.g. plough, cultivator or tine weeder; chosen
+from a fixed list per Operation Type.
+_Avoid_: Tool, Maschine
 
 **Operation Log** (de: _Maßnahmenprotokoll_):
 All Done Operations of one Plot, in date order.

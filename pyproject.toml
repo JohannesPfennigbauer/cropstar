@@ -13,6 +13,7 @@ dev = [
     "mypy>=1.13",
     "pytest>=8.3",
     "ruff>=0.8",
+    "types-shapely>=2.1.0.20261030",
 ]
 
 [tool.ruff]

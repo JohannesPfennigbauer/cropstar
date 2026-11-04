@@ -359,19 +359,61 @@
       "invalid": "The export cannot be read",
       "done": "Harvest year {year} adopted",
       "doneDetail": "{fields} fields and {plots} plots, as declared to AMA.",
+      "assignLead": "Assign every area of the export: the same piece of land as an existing area – it then keeps its tasks and operations – or new, without history. Unchanged and largely identical areas are prefilled; you can change them.",
+      "status": {
+        "undecided": "Open",
+        "changed": "Changed",
+        "new": "New",
+        "unchanged": "Unchanged",
+        "removed": "Will be removed"
+      },
+      "statusCount": {
+        "undecided": "{n} open | {n} open",
+        "changed": "{n} changed | {n} changed",
+        "new": "{n} new | {n} new",
+        "unchanged": "{n} unchanged | {n} unchanged",
+        "removed": "{n} will be removed | {n} will be removed"
+      },
+      "changes": {
+        "number": "number",
+        "field": "other field",
+        "name": "name",
+        "land_use": "land use",
+        "declared_area": "declared area",
+        "geometry": "location",
+        "source": "source now eAMA"
+      },
+      "coverage": "{percent} % overlapping",
+      "overlapping": "Overlapping areas",
+      "others": "Other areas",
+      "newArea": "New – without history",
+      "choose": "Assign …",
+      "chooseFor": "Assignment for {area}",
+      "suggested": "suggested",
+      "showUnchanged": "Show {n} unchanged | Show {n} unchanged",
+      "hideUnchanged": "Hide unchanged",
+      "allUnchanged": "Everything unchanged.",
+      "removedTitle": "Will be removed",
+      "referencedBy": "Tasks refer to it: {tasks}",
+      "referencedHint": "Assign these areas to an area of the export so the recorded work is kept. Tasks concerned:",
+      "toTasks": "Go to tasks",
+      "doneChanges": "{created} new, {changed} changed, {removed} removed.",
       "sets": {
         "fields": "fields",
         "plots": "plots"
       },
       "blockers": {
         "harvest_year_locked": "Harvest year {year} is locked. Unlock it under Farm first.",
-        "harvest_year_not_empty": "Harvest year {year} already has fields and plots. Updating them follows in a later step."
+        "undecided_areas": "Still open: {n}. Decide for every area whether it is the same piece of land as an existing one or new.",
+        "removes_referenced_areas": "Areas with tasks would be removed"
       },
       "errors": {
         "forbidden_for_role": "Only admins can upload areas.",
         "harvest_year_locked": "The harvest year is locked.",
-        "harvest_year_not_empty": "The harvest year already has fields and plots.",
         "upload_too_large": "The files are too large together (max. 20 MB).",
+        "undecided_areas": "Not all areas are assigned yet.",
+        "removes_referenced_areas": "Tasks now refer to areas that would be removed. Show the preview again.",
+        "invalid_assignments": "The assignment no longer fits the areas. Show the preview again.",
         "unknown": "That did not work. Please try again."
       },
       "problems": {
@@ -630,6 +672,8 @@
     },
     "operationTypes": {
       "tillage": "Tillage",
+      "mechanical_weed_control": "Mechanical weed control",
+      "mulching": "Mulching",
       "sowing": "Sowing",
       "fertilisation": "Fertilisation",
       "harvest": "Harvest"
@@ -640,7 +684,7 @@
       "anyKind": "Any kind",
       "kindHelp": "An operation applies to plots: each plot gets its own entry in the operation log.",
       "planned": "Plan",
-      "plannedHelp": "What is planned, e.g. implement, amount, depth. Copied to every plot, where you can adjust it.",
+      "plannedHelp": "What is planned. Copied to every plot, where it can be adjusted. Amounts always per hectare.",
       "actual": "Actual",
       "performedOn": "Done on",
       "needsPlot": "An operation needs at least one plot.",
@@ -650,6 +694,86 @@
       "completeLead": "Record what really happened. The plan is prefilled; plots left unticked stay open.",
       "record": "Nothing selected | Record 1 operation | Record {n} operations",
       "recorded": "Nothing recorded. | Operation recorded. | {n} operations recorded."
+    },
+    "details": {
+      "fields": {
+        "implement": "Implement",
+        "depth_cm": "Depth (cm)",
+        "material": "Mulched",
+        "purpose": "Purpose",
+        "rate": "Seed rate per ha",
+        "amount": "Amount per ha",
+        "unit": "Unit",
+        "product": "Harvested product",
+        "yield_t_per_ha": "Yield (t/ha, at harvest moisture)",
+        "moisture_percent": "Moisture (%)",
+        "crude_protein_percent": "Crude protein (% of DM)",
+        "note": "Note"
+      },
+      "values": {
+        "tillageImplement": {
+          "plough": "Plough",
+          "cultivator": "Cultivator",
+          "disc_harrow": "Disc harrow",
+          "subsoiler": "Subsoiler",
+          "seedbed_combination": "Seedbed combination",
+          "power_harrow": "Power harrow",
+          "roller": "Roller",
+          "other": "Other implement"
+        },
+        "weedControlImplement": {
+          "tine_weeder": "Tine weeder",
+          "hoe": "Hoe",
+          "finger_weeder": "Finger weeder",
+          "rotary_hoe": "Rotary hoe",
+          "other": "Other implement"
+        },
+        "mulchedMaterial": {
+          "cover_crop": "Cover crop",
+          "crop_residues": "Crop residues/straw",
+          "grassland": "Grassland/fallow",
+          "other": "Other"
+        },
+        "sowingPurpose": {
+          "main_crop": "Main crop",
+          "cover_crop": "Cover crop",
+          "undersown_crop": "Undersown crop"
+        },
+        "sowingUnit": {
+          "kg_per_ha": "kg/ha",
+          "seeds_per_m2": "seeds/m²",
+          "seeds_per_ha": "seeds/ha"
+        },
+        "fertilisationUnit": {
+          "kg_per_ha": "kg/ha",
+          "t_per_ha": "t/ha",
+          "m3_per_ha": "m³/ha",
+          "l_per_ha": "l/ha"
+        },
+        "harvestedProduct": {
+          "grain": "Grain",
+          "straw": "Straw",
+          "whole_crop": "Whole crop/silage",
+          "forage": "Hay/forage",
+          "other": "Other"
+        }
+      },
+      "summary": {
+        "depth_cm": "{n} cm deep",
+        "yield_t_per_ha": "{n} t/ha",
+        "moisture_percent": "{n} % moisture",
+        "crude_protein_percent": "{n} % crude protein"
+      },
+      "noteHint": {
+        "sowing": "What was sown (crop, variety, mixture) – until farm inputs can be recorded in Cropstar.",
+        "fertilisation": "Which fertiliser (e.g. cattle slurry, compost) – until farm inputs can be recorded in Cropstar."
+      },
+      "errors": {
+        "negative": "Values cannot be negative.",
+        "percent": "Percentages lie between 0 and 100.",
+        "tooLarge": "Depth lies between 0 and 100 cm.",
+        "unitMissing": "An amount needs its unit."
+      }
     }
   }
 }

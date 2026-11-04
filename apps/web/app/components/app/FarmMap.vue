@@ -11,11 +11,12 @@ import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 setWorkerUrl(workerUrl)
 
 // Deliberately narrow: any GeoJSON MultiPolygon features with an id and a Land Use code.
+// A `color` overrides the Land Use colour, e.g. to show what an upload changes.
 interface AreaFeature {
   type: 'Feature'
   id: string
   geometry: { type: 'MultiPolygon', coordinates: number[][][][] }
-  properties: { land_use_category?: LandUseCategory } & Record<string, unknown>
+  properties: { land_use_category?: LandUseCategory, color?: string } & Record<string, unknown>
 }
 interface AreaCollection {
   type: 'FeatureCollection'
@@ -27,7 +28,11 @@ const props = withDefaults(defineProps<{
   fields?: AreaCollection | null
   selectedId?: string | null
   hoveredId?: string | null
-}>(), { fields: null, selectedId: null, hoveredId: null })
+  // Areas about to disappear, drawn as dashed outlines.
+  removed?: AreaCollection | null
+  // Replaces the Land Use legend when features carry their own colour.
+  legendItems?: { label: string, color: string }[] | null
+}>(), { fields: null, selectedId: null, hoveredId: null, removed: null, legendItems: null })
 
 const emit = defineEmits<{
   hover: [id: string | null]
@@ -37,8 +42,11 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 const legend = computed(() => {
+  if (props.legendItems) return props.legendItems
   const present = new Set(props.plots.features.map(f => f.properties.land_use_category ?? 'other'))
-  return LAND_USE_CATEGORIES.filter(category => present.has(category))
+  return LAND_USE_CATEGORIES
+    .filter(category => present.has(category))
+    .map(category => ({ label: t(`app.landUseCategory.${category}`), color: landUseColor(category) }))
 })
 const container = useTemplateRef<HTMLDivElement>('container')
 const basemap = ref<'ortho' | 'map'>('ortho')
@@ -47,6 +55,7 @@ let map: MapLibreMap | null = null
 let ready = false
 
 const BASEMAP_ATTRIBUTION = '<a href="https://basemap.at" target="_blank" rel="noopener">basemap.at</a>'
+const REMOVED_COLOR = '#dc2626'
 const AREAS_ATTRIBUTION = 'Feldstücke/Schläge: AMA INVEKOS'
 // basemap.at covers Austria only; outside it every tile request would be a 404.
 const AUSTRIA: [number, number, number, number] = [9.4, 46.3, 17.2, 49.1]
@@ -56,18 +65,27 @@ function plotData() {
     type: 'FeatureCollection' as const,
     features: props.plots.features.map(feature => ({
       ...feature,
-      properties: { ...feature.properties, color: landUseColor(feature.properties.land_use_category ?? 'other') }
+      properties: {
+        ...feature.properties,
+        color: feature.properties.color ?? landUseColor(feature.properties.land_use_category ?? 'other')
+      }
     }))
   }
 }
 
+const EMPTY = { type: 'FeatureCollection' as const, features: [] }
+
 function fieldData() {
-  return props.fields ?? { type: 'FeatureCollection' as const, features: [] }
+  return props.fields ?? EMPTY
+}
+
+function removedData() {
+  return props.removed ?? EMPTY
 }
 
 function bounds(): LngLatBoundsLike | null {
   let west = Infinity, south = Infinity, east = -Infinity, north = -Infinity
-  for (const feature of props.plots.features) {
+  for (const feature of [...props.plots.features, ...(props.removed?.features ?? [])]) {
     for (const polygon of feature.geometry.coordinates) {
       for (const ring of polygon) {
         for (const position of ring) {
@@ -84,9 +102,15 @@ function bounds(): LngLatBoundsLike | null {
   return Number.isFinite(west) ? [[west, south], [east, north]] : null
 }
 
+let fitted: string | null = null
+
+// Only when the areas cover other ground: restyling them must not undo the user's zoom.
 function fit(animate: boolean) {
   const box = bounds()
-  if (map && ready && box) map.fitBounds(box, { padding: 48, maxZoom: 17, animate })
+  const key = JSON.stringify(box)
+  if (!map || !ready || !box || key === fitted) return
+  fitted = key
+  map.fitBounds(box, { padding: 48, maxZoom: 17, animate })
 }
 
 function setState(id: string | null | undefined, key: 'hover' | 'selected', value: boolean) {
@@ -164,6 +188,19 @@ onMounted(() => {
           1.5]
       }
     })
+    map.addSource('removed', { type: 'geojson', data: removedData() })
+    map.addLayer({
+      id: 'removed-fill',
+      type: 'fill',
+      source: 'removed',
+      paint: { 'fill-color': REMOVED_COLOR, 'fill-opacity': 0.15 }
+    })
+    map.addLayer({
+      id: 'removed-line',
+      type: 'line',
+      source: 'removed',
+      paint: { 'line-color': REMOVED_COLOR, 'line-width': 2, 'line-dasharray': [1.5, 1] }
+    })
     map.addLayer({
       id: 'fields-line',
       type: 'line',
@@ -210,6 +247,10 @@ watch(() => props.plots, () => {
   (map?.getSource('plots') as GeoJSONSource | undefined)?.setData(plotData())
   fit(true)
 })
+watch(() => props.removed, () => {
+  if (!ready) return
+  (map?.getSource('removed') as GeoJSONSource | undefined)?.setData(removedData())
+})
 watch(() => props.fields, () => {
   if (!ready) return
   (map?.getSource('fields') as GeoJSONSource | undefined)?.setData(fieldData())
@@ -251,16 +292,16 @@ watch(basemap, applyBasemap)
       :aria-label="t('app.map.legend')"
     >
       <li
-        v-for="category in legend"
-        :key="category"
+        v-for="item in legend"
+        :key="item.label"
         class="flex items-center gap-2"
       >
         <span
           class="size-2.5 rounded-sm"
-          :style="{ backgroundColor: landUseColor(category) }"
+          :style="{ backgroundColor: item.color }"
           aria-hidden="true"
         />
-        {{ t(`app.landUseCategory.${category}`) }}
+        {{ item.label }}
       </li>
     </ul>
   </div>

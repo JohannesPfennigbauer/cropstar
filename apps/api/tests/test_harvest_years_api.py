@@ -63,7 +63,7 @@ def test_a_locked_year_refuses_every_write(farm: Farm, areas: Areas) -> None:
         client.post(f"{url}/discard"),
         client.delete(url),
         client.post(f"{op}/complete", json={}),
-        client.patch(op, json={"actual_details": "Striegel, 3 cm"}),
+        client.patch(op, json={"actual_details": {"type": "tillage", "depth_cm": 3}}),
         client.post(tasks_url(farm), json={"title": "Neu", "plot_ids": [areas.plot_2027_a]}),
         client.patch(tasks_url(farm, f"/{soil['id']}"), json={"plot_ids": [areas.plot_2027_a]}),
     ]

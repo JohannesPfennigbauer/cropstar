@@ -7,6 +7,7 @@ const route = useRoute()
 const localePath = useLocalePath()
 const { farm } = useAuth()
 const { hectares, day, moment } = useFormat()
+const { summary } = useOperationDetails()
 const { lockOf } = useHarvestYear()
 const today = todayIso()
 
@@ -224,7 +225,7 @@ useSeoMeta({ title })
                 <span
                   v-if="entry.actual_details"
                   class="block text-toned"
-                >{{ entry.actual_details }}</span>
+                >{{ summary(entry.actual_details) }}</span>
                 <span class="block text-xs text-dimmed">{{ entry.completed_by?.email ?? t('app.tasks.formerMember') }}</span>
               </li>
             </ol>

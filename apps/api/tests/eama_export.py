@@ -3,13 +3,13 @@
 Never use a real farm's export in tests: it is commercially sensitive. Run as a module to
 write a demo export for the end-to-end tests:
 
-    uv run python -m tests.eama_export <directory>    (from apps/api)
+    uv run python -m tests.eama_export <directory> [reworked]    (from apps/api)
 """
 
 import io
 import sys
 import zipfile
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -180,6 +180,17 @@ def demo_export(year: int = 2026) -> dict[str, bytes]:
     return fields_set(fields, year=year) | plots_set(plots, year=year)
 
 
+def reworked_export(year: int = 2026) -> dict[str, bytes]:
+    """The demo export after a correction: Plot 1/1 has another Land Use and Plot 2/2 lies
+    on other ground, so it has to be assigned by hand."""
+    fields, plots = demo_rows()
+    plots[0] = replace(plots[0], land_use_code="311", land_use_name="KÖRNERMAIS")
+    plots[3] = replace(
+        plots[3], rings=[[[x + 5_000, y] for x, y in ring] for ring in plots[3].rings]
+    )
+    return fields_set(fields, year=year) | plots_set(plots, year=year)
+
+
 def zipped(files: dict[str, bytes], folder: str = "") -> bytes:
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
@@ -225,5 +236,6 @@ def _shapefile_rings(rings: Rings) -> list[Any]:
 if __name__ == "__main__":
     target = Path(sys.argv[1])
     target.mkdir(parents=True, exist_ok=True)
-    for name, content in demo_export().items():
+    export = reworked_export() if sys.argv[2:] == ["reworked"] else demo_export()
+    for name, content in export.items():
         (target / name).write_bytes(content)

@@ -17,5 +17,5 @@ does not guarantee.
 - An Operation belongs to the Harvest Year of its Plot, not to the calendar year of its
   date. For example, sowing winter wheat in October 2026 belongs to Harvest Year 2027.
   This means a Plot may have to exist in Cropstar before AMA knows it; how such Plots are
-  reconciled with a later import is decided in the import slice.
+  reconciled with a later upload is decided in ADR 0004.
 - Locking a Harvest Year freezes everything that refers to it.

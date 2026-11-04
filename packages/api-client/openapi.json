@@ -1066,7 +1066,7 @@
           "areas"
         ],
         "summary": "Preview Area Upload",
-        "description": "What the export contains and whether it can be applied. Writes nothing.",
+        "description": "What the export would do to its Harvest Year, given the assignments so far, and\nwhether it can be applied. Writes nothing.",
         "operationId": "previewAreaUpload",
         "parameters": [
           {
@@ -1120,7 +1120,7 @@
           "areas"
         ],
         "summary": "Apply Area Upload",
-        "description": "Creates the Fields and Plots of the export's Harvest Year. The files are read again,\nexactly as for the preview.",
+        "description": "Makes the export's Harvest Year match it: assigned areas are updated in place and keep\ntheir Tasks and Operations, unassigned ones are removed. The files are read again and\nreconciled exactly as for the preview.",
         "operationId": "applyAreaUpload",
         "parameters": [
           {
@@ -1145,7 +1145,7 @@
           }
         },
         "responses": {
-          "201": {
+          "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
@@ -2124,6 +2124,90 @@
         ],
         "title": "ApiStatus"
       },
+      "AreaCandidate": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "coverage": {
+            "type": "number",
+            "title": "Coverage"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "coverage"
+        ],
+        "title": "AreaCandidate"
+      },
+      "AreaChange": {
+        "type": "string",
+        "enum": [
+          "number",
+          "field",
+          "name",
+          "land_use",
+          "declared_area",
+          "geometry",
+          "source"
+        ],
+        "title": "AreaChange"
+      },
+      "AreaDecision": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/AreaStatus"
+          },
+          "target": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target"
+          },
+          "decided": {
+            "type": "boolean",
+            "title": "Decided"
+          },
+          "suggested": {
+            "type": "boolean",
+            "title": "Suggested"
+          },
+          "changes": {
+            "items": {
+              "$ref": "#/components/schemas/AreaChange"
+            },
+            "type": "array",
+            "title": "Changes"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/AreaCandidate"
+            },
+            "type": "array",
+            "title": "Candidates"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "target",
+          "decided",
+          "suggested",
+          "changes",
+          "candidates"
+        ],
+        "title": "AreaDecision",
+        "description": "What happens to a declared area, given the assignments so far."
+      },
       "AreaProvenance": {
         "properties": {
           "source": {
@@ -2152,6 +2236,25 @@
         "title": "AreaSource",
         "description": "Where the geometry of a Field or Plot came from."
       },
+      "AreaStatus": {
+        "type": "string",
+        "enum": [
+          "new",
+          "unchanged",
+          "changed",
+          "undecided"
+        ],
+        "title": "AreaStatus"
+      },
+      "AreaUploadBlocker": {
+        "type": "string",
+        "enum": [
+          "harvest_year_locked",
+          "undecided_areas",
+          "removes_referenced_areas"
+        ],
+        "title": "AreaUploadBlocker"
+      },
       "AreaUploadPreview": {
         "properties": {
           "harvest_year": {
@@ -2168,7 +2271,7 @@
           },
           "blockers": {
             "items": {
-              "$ref": "#/components/schemas/Blocker"
+              "$ref": "#/components/schemas/AreaUploadBlocker"
             },
             "type": "array",
             "title": "Blockers"
@@ -2178,6 +2281,12 @@
           },
           "plots": {
             "$ref": "#/components/schemas/UploadedPlotCollection"
+          },
+          "current_fields": {
+            "$ref": "#/components/schemas/CurrentFieldCollection"
+          },
+          "current_plots": {
+            "$ref": "#/components/schemas/CurrentPlotCollection"
           }
         },
         "type": "object",
@@ -2187,7 +2296,9 @@
           "plot_area_ha",
           "blockers",
           "fields",
-          "plots"
+          "plots",
+          "current_fields",
+          "current_plots"
         ],
         "title": "AreaUploadPreview"
       },
@@ -2204,13 +2315,28 @@
           "plot_count": {
             "type": "integer",
             "title": "Plot Count"
+          },
+          "created_count": {
+            "type": "integer",
+            "title": "Created Count"
+          },
+          "changed_count": {
+            "type": "integer",
+            "title": "Changed Count"
+          },
+          "removed_count": {
+            "type": "integer",
+            "title": "Removed Count"
           }
         },
         "type": "object",
         "required": [
           "harvest_year",
           "field_count",
-          "plot_count"
+          "plot_count",
+          "created_count",
+          "changed_count",
+          "removed_count"
         ],
         "title": "AreaUploadResult"
       },
@@ -2232,14 +2358,6 @@
         ],
         "title": "AuthConfig"
       },
-      "Blocker": {
-        "type": "string",
-        "enum": [
-          "harvest_year_locked",
-          "harvest_year_not_empty"
-        ],
-        "title": "Blocker"
-      },
       "Body_applyAreaUpload": {
         "properties": {
           "files": {
@@ -2250,6 +2368,18 @@
             "type": "array",
             "title": "Files",
             "description": "The eAMA export: shapefile components (.shp, .shx, .dbf, .prj) or ZIPs"
+          },
+          "assignments": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assignments",
+            "description": "JSON list of `Assignment`: which existing area each declared area is, or null for a new one. Declared areas left out take the suggestion, if there is one."
           }
         },
         "type": "object",
@@ -2268,6 +2398,18 @@
             "type": "array",
             "title": "Files",
             "description": "The eAMA export: shapefile components (.shp, .shx, .dbf, .prj) or ZIPs"
+          },
+          "assignments": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assignments",
+            "description": "JSON list of `Assignment`: which existing area each declared area is, or null for a new one. Declared areas left out take the suggestion, if there is one."
           }
         },
         "type": "object",
@@ -2296,6 +2438,227 @@
           "new_password"
         ],
         "title": "ChangePasswordRequest"
+      },
+      "CurrentFieldCollection": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "FeatureCollection",
+            "title": "Type",
+            "default": "FeatureCollection"
+          },
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/CurrentFieldFeature"
+            },
+            "type": "array",
+            "title": "Features"
+          }
+        },
+        "type": "object",
+        "required": [
+          "features"
+        ],
+        "title": "CurrentFieldCollection"
+      },
+      "CurrentFieldFeature": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "Feature",
+            "title": "Type",
+            "default": "Feature"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "geometry": {
+            "$ref": "#/components/schemas/MultiPolygon"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/CurrentFieldProperties"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "geometry",
+          "properties"
+        ],
+        "title": "CurrentFieldFeature"
+      },
+      "CurrentFieldProperties": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "land_use_code": {
+            "type": "string",
+            "title": "Land Use Code"
+          },
+          "land_use_name": {
+            "type": "string",
+            "title": "Land Use Name"
+          },
+          "declared_area_ha": {
+            "type": "number",
+            "title": "Declared Area Ha"
+          },
+          "removed": {
+            "type": "boolean",
+            "title": "Removed"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/TaskRef"
+            },
+            "type": "array",
+            "title": "Tasks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "number",
+          "name",
+          "land_use_code",
+          "land_use_name",
+          "declared_area_ha",
+          "removed",
+          "tasks"
+        ],
+        "title": "CurrentFieldProperties"
+      },
+      "CurrentPlotCollection": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "FeatureCollection",
+            "title": "Type",
+            "default": "FeatureCollection"
+          },
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/CurrentPlotFeature"
+            },
+            "type": "array",
+            "title": "Features"
+          }
+        },
+        "type": "object",
+        "required": [
+          "features"
+        ],
+        "title": "CurrentPlotCollection"
+      },
+      "CurrentPlotFeature": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "Feature",
+            "title": "Type",
+            "default": "Feature"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "geometry": {
+            "$ref": "#/components/schemas/MultiPolygon"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/CurrentPlotProperties"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "geometry",
+          "properties"
+        ],
+        "title": "CurrentPlotFeature"
+      },
+      "CurrentPlotProperties": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "field_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Field Id"
+          },
+          "field_number": {
+            "type": "integer",
+            "title": "Field Number"
+          },
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "land_use_code": {
+            "type": "string",
+            "title": "Land Use Code"
+          },
+          "land_use_name": {
+            "type": "string",
+            "title": "Land Use Name"
+          },
+          "land_use_category": {
+            "$ref": "#/components/schemas/LandUseCategory"
+          },
+          "declared_area_ha": {
+            "type": "number",
+            "title": "Declared Area Ha"
+          },
+          "removed": {
+            "type": "boolean",
+            "title": "Removed"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/TaskRef"
+            },
+            "type": "array",
+            "title": "Tasks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "field_id",
+          "field_number",
+          "number",
+          "land_use_code",
+          "land_use_name",
+          "land_use_category",
+          "declared_area_ha",
+          "removed",
+          "tasks"
+        ],
+        "title": "CurrentPlotProperties"
       },
       "DatabaseStatus": {
         "properties": {
@@ -2439,6 +2802,63 @@
         },
         "type": "object",
         "title": "FarmUpdate"
+      },
+      "FertilisationDetails": {
+        "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 5000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "type": {
+            "type": "string",
+            "const": "fertilisation",
+            "title": "Type",
+            "default": "fertilisation"
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FertilisationUnit"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "FertilisationDetails"
+      },
+      "FertilisationUnit": {
+        "type": "string",
+        "enum": [
+          "kg_per_ha",
+          "t_per_ha",
+          "m3_per_ha",
+          "l_per_ha"
+        ],
+        "title": "FertilisationUnit"
       },
       "FieldCollection": {
         "properties": {
@@ -2594,6 +3014,79 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "HarvestDetails": {
+        "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 5000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "type": {
+            "type": "string",
+            "const": "harvest",
+            "title": "Type",
+            "default": "harvest"
+          },
+          "product": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HarvestedProduct"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "yield_t_per_ha": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Yield T Per Ha"
+          },
+          "moisture_percent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Moisture Percent"
+          },
+          "crude_protein_percent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Crude Protein Percent"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "HarvestDetails"
+      },
       "HarvestYearOut": {
         "properties": {
           "year": {
@@ -2617,6 +3110,17 @@
           "lock"
         ],
         "title": "HarvestYearOut"
+      },
+      "HarvestedProduct": {
+        "type": "string",
+        "enum": [
+          "grain",
+          "straw",
+          "whole_crop",
+          "forage",
+          "other"
+        ],
+        "title": "HarvestedProduct"
       },
       "InvalidExport": {
         "properties": {
@@ -2893,6 +3397,41 @@
         ],
         "title": "Me"
       },
+      "MechanicalWeedControlDetails": {
+        "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 5000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "type": {
+            "type": "string",
+            "const": "mechanical_weed_control",
+            "title": "Type",
+            "default": "mechanical_weed_control"
+          },
+          "implement": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WeedControlImplement"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "MechanicalWeedControlDetails"
+      },
       "MemberOut": {
         "properties": {
           "user": {
@@ -2935,6 +3474,51 @@
           "role"
         ],
         "title": "MembershipOut"
+      },
+      "MulchedMaterial": {
+        "type": "string",
+        "enum": [
+          "cover_crop",
+          "crop_residues",
+          "grassland",
+          "other"
+        ],
+        "title": "MulchedMaterial"
+      },
+      "MulchingDetails": {
+        "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 5000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "type": {
+            "type": "string",
+            "const": "mulching",
+            "title": "Type",
+            "default": "mulching"
+          },
+          "material": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MulchedMaterial"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "MulchingDetails"
       },
       "MultiPolygon": {
         "properties": {
@@ -2979,8 +3563,37 @@
           "actual_details": {
             "anyOf": [
               {
-                "type": "string",
-                "maxLength": 5000
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/TillageDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MechanicalWeedControlDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MulchingDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SowingDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/FertilisationDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/HarvestDetails"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": {
+                    "fertilisation": "#/components/schemas/FertilisationDetails",
+                    "harvest": "#/components/schemas/HarvestDetails",
+                    "mechanical_weed_control": "#/components/schemas/MechanicalWeedControlDetails",
+                    "mulching": "#/components/schemas/MulchingDetails",
+                    "sowing": "#/components/schemas/SowingDetails",
+                    "tillage": "#/components/schemas/TillageDetails"
+                  }
+                }
               },
               {
                 "type": "null"
@@ -3040,7 +3653,37 @@
           "actual_details": {
             "anyOf": [
               {
-                "type": "string"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/TillageDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MechanicalWeedControlDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MulchingDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SowingDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/FertilisationDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/HarvestDetails"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": {
+                    "fertilisation": "#/components/schemas/FertilisationDetails",
+                    "harvest": "#/components/schemas/HarvestDetails",
+                    "mechanical_weed_control": "#/components/schemas/MechanicalWeedControlDetails",
+                    "mulching": "#/components/schemas/MulchingDetails",
+                    "sowing": "#/components/schemas/SowingDetails",
+                    "tillage": "#/components/schemas/TillageDetails"
+                  }
+                }
               },
               {
                 "type": "null"
@@ -3100,7 +3743,37 @@
           "planned_details": {
             "anyOf": [
               {
-                "type": "string"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/TillageDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MechanicalWeedControlDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MulchingDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SowingDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/FertilisationDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/HarvestDetails"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": {
+                    "fertilisation": "#/components/schemas/FertilisationDetails",
+                    "harvest": "#/components/schemas/HarvestDetails",
+                    "mechanical_weed_control": "#/components/schemas/MechanicalWeedControlDetails",
+                    "mulching": "#/components/schemas/MulchingDetails",
+                    "sowing": "#/components/schemas/SowingDetails",
+                    "tillage": "#/components/schemas/TillageDetails"
+                  }
+                }
               },
               {
                 "type": "null"
@@ -3111,7 +3784,37 @@
           "actual_details": {
             "anyOf": [
               {
-                "type": "string"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/TillageDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MechanicalWeedControlDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MulchingDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SowingDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/FertilisationDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/HarvestDetails"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": {
+                    "fertilisation": "#/components/schemas/FertilisationDetails",
+                    "harvest": "#/components/schemas/HarvestDetails",
+                    "mechanical_weed_control": "#/components/schemas/MechanicalWeedControlDetails",
+                    "mulching": "#/components/schemas/MulchingDetails",
+                    "sowing": "#/components/schemas/SowingDetails",
+                    "tillage": "#/components/schemas/TillageDetails"
+                  }
+                }
               },
               {
                 "type": "null"
@@ -3193,8 +3896,37 @@
           "planned_details": {
             "anyOf": [
               {
-                "type": "string",
-                "maxLength": 5000
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/TillageDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MechanicalWeedControlDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MulchingDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SowingDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/FertilisationDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/HarvestDetails"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": {
+                    "fertilisation": "#/components/schemas/FertilisationDetails",
+                    "harvest": "#/components/schemas/HarvestDetails",
+                    "mechanical_weed_control": "#/components/schemas/MechanicalWeedControlDetails",
+                    "mulching": "#/components/schemas/MulchingDetails",
+                    "sowing": "#/components/schemas/SowingDetails",
+                    "tillage": "#/components/schemas/TillageDetails"
+                  }
+                }
               },
               {
                 "type": "null"
@@ -3205,8 +3937,37 @@
           "actual_details": {
             "anyOf": [
               {
-                "type": "string",
-                "maxLength": 5000
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/TillageDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MechanicalWeedControlDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MulchingDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SowingDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/FertilisationDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/HarvestDetails"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": {
+                    "fertilisation": "#/components/schemas/FertilisationDetails",
+                    "harvest": "#/components/schemas/HarvestDetails",
+                    "mechanical_weed_control": "#/components/schemas/MechanicalWeedControlDetails",
+                    "mulching": "#/components/schemas/MulchingDetails",
+                    "sowing": "#/components/schemas/SowingDetails",
+                    "tillage": "#/components/schemas/TillageDetails"
+                  }
+                }
               },
               {
                 "type": "null"
@@ -3527,6 +4288,81 @@
         ],
         "title": "SignInRequest"
       },
+      "SowingDetails": {
+        "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 5000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "type": {
+            "type": "string",
+            "const": "sowing",
+            "title": "Type",
+            "default": "sowing"
+          },
+          "purpose": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SowingPurpose"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SowingUnit"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "SowingDetails"
+      },
+      "SowingPurpose": {
+        "type": "string",
+        "enum": [
+          "main_crop",
+          "cover_crop",
+          "undersown_crop"
+        ],
+        "title": "SowingPurpose"
+      },
+      "SowingUnit": {
+        "type": "string",
+        "enum": [
+          "kg_per_ha",
+          "seeds_per_m2",
+          "seeds_per_ha"
+        ],
+        "title": "SowingUnit"
+      },
       "TaskCreate": {
         "properties": {
           "title": {
@@ -3612,8 +4448,37 @@
           "planned_details": {
             "anyOf": [
               {
-                "type": "string",
-                "maxLength": 5000
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/TillageDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MechanicalWeedControlDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MulchingDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SowingDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/FertilisationDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/HarvestDetails"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": {
+                    "fertilisation": "#/components/schemas/FertilisationDetails",
+                    "harvest": "#/components/schemas/HarvestDetails",
+                    "mechanical_weed_control": "#/components/schemas/MechanicalWeedControlDetails",
+                    "mulching": "#/components/schemas/MulchingDetails",
+                    "sowing": "#/components/schemas/SowingDetails",
+                    "tillage": "#/components/schemas/TillageDetails"
+                  }
+                }
               },
               {
                 "type": "null"
@@ -3790,7 +4655,37 @@
           "planned_details": {
             "anyOf": [
               {
-                "type": "string"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/TillageDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MechanicalWeedControlDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MulchingDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SowingDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/FertilisationDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/HarvestDetails"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": {
+                    "fertilisation": "#/components/schemas/FertilisationDetails",
+                    "harvest": "#/components/schemas/HarvestDetails",
+                    "mechanical_weed_control": "#/components/schemas/MechanicalWeedControlDetails",
+                    "mulching": "#/components/schemas/MulchingDetails",
+                    "sowing": "#/components/schemas/SowingDetails",
+                    "tillage": "#/components/schemas/TillageDetails"
+                  }
+                }
               },
               {
                 "type": "null"
@@ -3869,6 +4764,25 @@
           "land_use_category"
         ],
         "title": "TaskPlotRef"
+      },
+      "TaskRef": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title"
+        ],
+        "title": "TaskRef"
       },
       "TaskStatus": {
         "type": "string",
@@ -3973,8 +4887,37 @@
           "planned_details": {
             "anyOf": [
               {
-                "type": "string",
-                "maxLength": 5000
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/TillageDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MechanicalWeedControlDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MulchingDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SowingDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/FertilisationDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/HarvestDetails"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": {
+                    "fertilisation": "#/components/schemas/FertilisationDetails",
+                    "harvest": "#/components/schemas/HarvestDetails",
+                    "mechanical_weed_control": "#/components/schemas/MechanicalWeedControlDetails",
+                    "mulching": "#/components/schemas/MulchingDetails",
+                    "sowing": "#/components/schemas/SowingDetails",
+                    "tillage": "#/components/schemas/TillageDetails"
+                  }
+                }
               },
               {
                 "type": "null"
@@ -3986,6 +4929,68 @@
         "type": "object",
         "title": "TaskUpdate",
         "description": "Only the fields sent are changed; send null to clear an optional field. Sending\n`field_ids` or `plot_ids` replaces that set of areas."
+      },
+      "TillageDetails": {
+        "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 5000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "type": {
+            "type": "string",
+            "const": "tillage",
+            "title": "Type",
+            "default": "tillage"
+          },
+          "implement": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TillageImplement"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "depth_cm": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Depth Cm"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "TillageDetails"
+      },
+      "TillageImplement": {
+        "type": "string",
+        "enum": [
+          "plough",
+          "cultivator",
+          "disc_harrow",
+          "subsoiler",
+          "seedbed_combination",
+          "power_harrow",
+          "roller",
+          "other"
+        ],
+        "title": "TillageImplement"
       },
       "UploadedFieldCollection": {
         "properties": {
@@ -4068,6 +5073,9 @@
           "declared_area_ha": {
             "type": "number",
             "title": "Declared Area Ha"
+          },
+          "decision": {
+            "$ref": "#/components/schemas/AreaDecision"
           }
         },
         "type": "object",
@@ -4077,7 +5085,8 @@
           "name",
           "land_use_code",
           "land_use_name",
-          "declared_area_ha"
+          "declared_area_ha",
+          "decision"
         ],
         "title": "UploadedFieldProperties"
       },
@@ -4158,6 +5167,9 @@
           "declared_area_ha": {
             "type": "number",
             "title": "Declared Area Ha"
+          },
+          "decision": {
+            "$ref": "#/components/schemas/AreaDecision"
           }
         },
         "type": "object",
@@ -4168,7 +5180,8 @@
           "land_use_code",
           "land_use_name",
           "land_use_category",
-          "declared_area_ha"
+          "declared_area_ha",
+          "decision"
         ],
         "title": "UploadedPlotProperties"
       },
@@ -4230,6 +5243,17 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "WeedControlImplement": {
+        "type": "string",
+        "enum": [
+          "tine_weeder",
+          "hoe",
+          "finger_weeder",
+          "rotary_hoe",
+          "other"
+        ],
+        "title": "WeedControlImplement"
       },
       "cropstar_api__routes__auth__FarmOut": {
         "properties": {

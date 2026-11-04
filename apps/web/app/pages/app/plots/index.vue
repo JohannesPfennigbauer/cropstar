@@ -13,12 +13,14 @@ const uploadOpen = ref(false)
 
 async function onUploaded(year: number) {
   await loadHarvestYears()
-  harvestYear.value = year
+  // A re-upload into the shown year changes its areas without changing the year.
+  if (harvestYear.value === year) await refresh()
+  else harvestYear.value = year
 }
 
 useSeoMeta({ title: () => t('app.plots.title') })
 
-const { data, status } = await useAsyncData('plots', async () => {
+const { data, status, refresh } = await useAsyncData('plots', async () => {
   if (!farm.value || harvestYear.value === null) return null
   const path = { farm_id: farm.value.id }
   const query = { harvest_year: harvestYear.value }

@@ -50,7 +50,7 @@ def test_every_write_to_a_task_of_a_locked_year_is_refused(s: Locks) -> None:
     _refused(lambda: life.discard_operation(admin, FARM, task.id, s.op(task, 1)))
     _refused(lambda: life.reopen_operation(admin, FARM, done.id, s.op(done, 1)))
     _refused(
-        lambda: life.edit_operation(admin, FARM, task.id, s.op(task, 1), {"actual_details": "x"})
+        lambda: life.edit_operation(admin, FARM, task.id, s.op(task, 1), {"performed_on": None})
     )
 
 

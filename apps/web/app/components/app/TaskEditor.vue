@@ -2,6 +2,7 @@
 import { z } from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import type { Schemas } from '@cropstar/api-client'
+import type { OperationDetails, OperationTypeCode } from '~/utils/operation-details'
 
 type Task = Schemas['TaskOut']
 type Member = Schemas['MemberOut']
@@ -39,7 +40,10 @@ const schema = computed(() => z.object({
   assignee: z.string(),
   areas: z.array(z.string()),
   operation_type: z.string(),
-  planned_details: z.string().max(5000),
+  planned_details: z.custom<OperationDetails | null>().superRefine((details, context) => {
+    const problem = detailsProblem(details)
+    if (problem) context.addIssue({ code: 'custom', message: t(`app.details.errors.${problem}`) })
+  }),
   done: z.boolean()
 }).refine(
   data => data.operation_type === GENERAL || data.areas.some(a => a.startsWith('plot:')),
@@ -58,7 +62,8 @@ function emptyState() {
       ? [...props.task.fields.map(f => `field:${f.id}`), ...props.task.plots.map(p => `plot:${p.id}`)]
       : areasLocked.value ? [] : (props.presetPlotIds ?? []).map(id => `plot:${id}`),
     operation_type: props.task?.operation_type ?? GENERAL,
-    planned_details: props.task?.planned_details ?? '',
+    planned_details: props.task?.planned_details
+      ?? (props.task?.operation_type ? emptyDetails(props.task.operation_type as OperationTypeCode) : null),
     done: false
   }
 }
@@ -99,6 +104,11 @@ const typeItems = computed(() => [
 // Operations concern Plots only, so Fields drop out of the picker for them.
 watch(isOperation, (operation) => {
   if (operation) state.areas = state.areas.filter(a => a.startsWith('plot:'))
+})
+// Each Operation Type has its own details; switching type starts them afresh.
+watch(() => state.operation_type, (type) => {
+  if (type === GENERAL) state.planned_details = null
+  else if (state.planned_details?.type !== type) state.planned_details = emptyDetails(type as OperationTypeCode)
 })
 
 const completing = ref(false)
@@ -167,7 +177,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     assignee_id: event.data.assignee === NOBODY ? null : event.data.assignee,
     field_ids: event.data.areas.filter(a => a.startsWith('field:')).map(a => a.slice(6)),
     plot_ids: event.data.areas.filter(a => a.startsWith('plot:')).map(a => a.slice(5)),
-    planned_details: isOperation.value ? event.data.planned_details || null : null
+    planned_details: isOperation.value ? cleanDetails(event.data.planned_details) : null
   }
   const path = { farm_id: props.farmId }
   const result = props.task
@@ -371,16 +381,15 @@ async function remove() {
           />
         </UFormField>
         <UFormField
-          v-if="isOperation"
+          v-if="isOperation && state.planned_details"
           :label="t('app.operations.planned')"
           :help="t('app.operations.plannedHelp')"
           name="planned_details"
+          data-testid="planned-details"
         >
-          <UTextarea
+          <AppOperationDetailsForm
             v-model="state.planned_details"
-            :rows="2"
-            autoresize
-            class="w-full"
+            class="mt-1 rounded-md border border-default p-3"
           />
         </UFormField>
         <AppOperationList

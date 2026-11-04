@@ -14,6 +14,7 @@ from datetime import UTC, date, datetime
 from typing import Any, Protocol
 
 from cropstar_api.models import Field, Operation, Plot, Priority, Role, Task, TaskStatus
+from cropstar_api.operation_details import OperationDetails, to_stored
 from cropstar_api.policy import (
     TASK_ACTIONS,
     Action,
@@ -95,6 +96,16 @@ class OperationFieldsError(TaskError):
     code = "operation_fields_not_allowed"
 
 
+class DetailsWithoutOperationTypeError(TaskError):
+    """Planned and Actual Details describe Operations; a general Task has a description."""
+
+    code = "details_need_operation_type"
+
+
+class DetailsTypeMismatchError(TaskError):
+    code = "details_type_mismatch"
+
+
 class OperationDoneError(TaskError):
     """Removing a Plot whose Operation is Done would silently shrink the Operation Log."""
 
@@ -113,7 +124,7 @@ class NewTask:
     field_ids: frozenset[uuid.UUID] = frozenset()
     plot_ids: frozenset[uuid.UUID] = frozenset()
     operation_type: str | None = None
-    planned_details: str | None = None
+    planned_details: OperationDetails | None = None
 
 
 EDITABLE_FIELDS = frozenset(
@@ -160,6 +171,7 @@ class TaskLifecycle:
             if not self._repository.operation_type_exists(new.operation_type):
                 raise UnknownOperationTypeError(new.operation_type)
             self._check_operation_areas(new.field_ids, new.plot_ids)
+        planned = _stored_details(new.operation_type, new.planned_details)
         self._check_assignee(farm_id, new.assignee_id)
         now = self._clock()
         task = Task(
@@ -175,7 +187,7 @@ class TaskLifecycle:
             created_at=now,
             updated_at=now,
             operation_type=new.operation_type,
-            planned_details=new.planned_details,
+            planned_details=planned,
         )
         task.operations = []
         self._set_areas(actor, Action.CREATE_TASK, task, new.field_ids, new.plot_ids)
@@ -198,6 +210,10 @@ class TaskLifecycle:
             raise ValueError(f"Not editable: {sorted(unknown)}")
         task = self._get(farm_id, task_id)
         self._require(actor, Action.EDIT_TASK, task)
+        if "planned_details" in changes:
+            changes = changes | {
+                "planned_details": _stored_details(task.operation_type, changes["planned_details"])
+            }
         if "assignee_id" in changes:
             self._check_assignee(farm_id, changes["assignee_id"])
         if "field_ids" in changes or "plot_ids" in changes:
@@ -255,14 +271,15 @@ class TaskLifecycle:
         farm_id: uuid.UUID,
         task_id: uuid.UUID,
         operation_id: uuid.UUID,
-        actual_details: str | None = None,
+        actual_details: OperationDetails | None = None,
         performed_on: date | None = None,
     ) -> Task:
         """Done, with Actual Details defaulting to the draft, else to the Planned Details."""
         task, operation = self._operation(
             actor, farm_id, task_id, operation_id, Action.COMPLETE_TASK
         )
-        self._complete(operation, actor, self._clock(), actual_details, performed_on)
+        actual = _stored_details(task.operation_type, actual_details)
+        self._complete(operation, actor, self._clock(), actual, performed_on)
         return self._touch(task)
 
     def reopen_operation(
@@ -305,6 +322,8 @@ class TaskLifecycle:
             raise ValueError(f"Not editable: {sorted(unknown)}")
         task, operation = self._operation(actor, farm_id, task_id, operation_id, Action.EDIT_TASK)
         for name, value in changes.items():
+            if name in ("planned_details", "actual_details"):
+                value = _stored_details(task.operation_type, value)
             setattr(operation, name, value)
         return self._touch(task)
 
@@ -370,7 +389,7 @@ class TaskLifecycle:
         operation: Operation,
         actor: Actor,
         now: datetime,
-        actual_details: str | None,
+        actual_details: dict[str, Any] | None,
         performed_on: date | None,
     ) -> None:
         operation.status = TaskStatus.DONE
@@ -512,3 +531,15 @@ class TaskLifecycle:
         role = self._repository.role_of(farm_id, assignee_id)
         if role is None or not can_be_assigned(role):
             raise InvalidAssigneeError(str(assignee_id))
+
+
+def _stored_details(
+    operation_type: str | None, details: OperationDetails | None
+) -> dict[str, Any] | None:
+    if details is None:
+        return None
+    if operation_type is None:
+        raise DetailsWithoutOperationTypeError("a general Task has no Planned Details")
+    if details.type != operation_type:
+        raise DetailsTypeMismatchError(f"{details.type} details for a {operation_type} Task")
+    return to_stored(details)

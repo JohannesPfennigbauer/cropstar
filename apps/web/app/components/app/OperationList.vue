@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Schemas } from '@cropstar/api-client'
+import type { OperationDetails, OperationTypeCode } from '~/utils/operation-details'
 
 type Task = Schemas['TaskOut']
 type Operation = Task['operations'][number]
@@ -11,19 +12,23 @@ const emit = defineEmits<{ changed: [], complete: [operationId: string] }>()
 const { t } = useI18n()
 const api = useApi()
 const { day } = useFormat()
+const { summary } = useOperationDetails()
 
 const editing = ref<string | null>(null)
-const draft = ref('')
+const draft = ref<OperationDetails>(emptyDetails('tillage'))
+const problem = computed(() => detailsProblem(draft.value))
 
 function startEditing(operation: Operation) {
   editing.value = operation.id
-  draft.value = operation.planned_details ?? ''
+  draft.value = structuredClone(toRaw(operation.planned_details))
+    ?? emptyDetails(props.task.operation_type as OperationTypeCode)
 }
 
 async function savePlan(operation: Operation) {
+  if (problem.value) return
   await api.PATCH('/api/farms/{farm_id}/tasks/{task_id}/operations/{operation_id}', {
     params: { path: { farm_id: props.farmId, task_id: props.task.id, operation_id: operation.id } },
-    body: { planned_details: draft.value || null }
+    body: { planned_details: cleanDetails(draft.value) }
   })
   editing.value = null
   emit('changed')
@@ -111,16 +116,20 @@ const STATUS_ICON = { open: 'i-lucide-circle', done: 'i-lucide-circle-check', di
               v-if="editing === operation.id"
               class="flex flex-col gap-2"
             >
-              <UTextarea
+              <AppOperationDetailsForm
                 v-model="draft"
-                :rows="2"
-                autoresize
                 size="sm"
-                class="w-full"
               />
+              <p
+                v-if="problem"
+                class="text-error"
+              >
+                {{ t(`app.details.errors.${problem}`) }}
+              </p>
               <div class="flex gap-2">
                 <UButton
                   size="xs"
+                  :disabled="problem !== null"
                   :label="t('app.tasks.save')"
                   @click="savePlan(operation)"
                 />
@@ -137,7 +146,7 @@ const STATUS_ICON = { open: 'i-lucide-circle', done: 'i-lucide-circle-check', di
               v-else
               class="inline-flex items-start gap-1 text-toned"
             >
-              {{ operation.planned_details || '–' }}
+              {{ summary(operation.planned_details) || '–' }}
               <UButton
                 v-if="operation.status === 'open' && operation.allowed_actions.includes('edit_task')"
                 size="xs"
@@ -155,7 +164,7 @@ const STATUS_ICON = { open: 'i-lucide-circle', done: 'i-lucide-circle-check', di
               {{ t('app.operations.actual') }}
             </dt>
             <dd class="text-highlighted">
-              {{ operation.actual_details || '–' }}
+              {{ summary(operation.actual_details) || '–' }}
               <span
                 v-if="operation.performed_on"
                 class="text-muted"

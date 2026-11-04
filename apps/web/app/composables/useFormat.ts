@@ -10,6 +10,11 @@ export function useFormat() {
     return `${number} ha`
   }
 
+  /** A measured value as entered, with at most two decimals: "6,25". */
+  function decimal(value: number): string {
+    return new Intl.NumberFormat(intlLocale(), { maximumFractionDigits: 2 }).format(value)
+  }
+
   function intlLocale(): string {
     return locale.value === 'en' ? 'en-GB' : 'de-AT'
   }
@@ -26,5 +31,5 @@ export function useFormat() {
       .format(new Date(value))
   }
 
-  return { hectares, day, moment }
+  return { hectares, decimal, day, moment }
 }

@@ -4,8 +4,11 @@ from datetime import UTC, date, datetime, timedelta
 import pytest
 
 from cropstar_api.models import Role, Task, TaskStatus
+from cropstar_api.operation_details import FertilisationDetails, TillageDetails, TillageImplement
 from cropstar_api.policy import Action
 from cropstar_api.tasks.lifecycle import (
+    DetailsTypeMismatchError,
+    DetailsWithoutOperationTypeError,
     ForbiddenError,
     InvalidTransitionError,
     NewTask,
@@ -18,6 +21,15 @@ from cropstar_api.tasks.lifecycle import (
 from tests.test_task_lifecycle import FARM, Clock, InMemoryTasks, member
 
 OPEN, DONE, DISCARDED = TaskStatus.OPEN, TaskStatus.DONE, TaskStatus.DISCARDED
+
+
+def cultivate(depth: float) -> TillageDetails:
+    return TillageDetails(implement=TillageImplement.CULTIVATOR, depth_cm=depth)
+
+
+def stored(depth: float) -> dict[str, object]:
+    """As `cultivate(depth)` is kept in the database."""
+    return {"type": "tillage", "implement": "cultivator", "depth_cm": depth}
 
 
 class Setup:
@@ -34,9 +46,8 @@ class Setup:
         new = NewTask(
             "Striegeln",
             operation_type="tillage",
-            planned_details="Striegel, 2 cm",
             plot_ids=frozenset(self.plots[n - 1].id for n in plots),
-            **overrides,  # type: ignore[arg-type]
+            **({"planned_details": cultivate(2)} | overrides),  # type: ignore[arg-type]
         )
         return self.lifecycle.create(self.worker, FARM, new)
 
@@ -58,7 +69,7 @@ def test_an_operation_task_holds_one_operation_per_plot(s: Setup) -> None:
     assert task.status is OPEN
     assert task.harvest_year == 2027
     assert sorted(o.plot.number for o in task.operations) == [1, 2]
-    assert {o.planned_details for o in task.operations} == {"Striegel, 2 cm"}
+    assert [o.planned_details for o in task.operations] == [stored(2), stored(2)]
     assert s.statuses(task) == [OPEN, OPEN]
 
 
@@ -93,14 +104,14 @@ def test_partial_completion_and_derived_status(s: Setup) -> None:
     assert s.statuses(task) == [DONE, OPEN]
     assert task.status is OPEN
     first = next(o for o in task.operations if o.plot.number == 1)
-    assert (first.actual_details, first.performed_on) == ("Striegel, 2 cm", s.clock.now.date())
+    assert (first.actual_details, first.performed_on) == (stored(2), s.clock.now.date())
 
     s.clock.now += timedelta(days=1)
     s.lifecycle.complete_operation(
-        s.worker, FARM, task.id, s.op(task, 2), "Striegel, 3 cm", date(2027, 3, 15)
+        s.worker, FARM, task.id, s.op(task, 2), cultivate(3), date(2027, 3, 15)
     )
     second = next(o for o in task.operations if o.plot.number == 2)
-    assert (second.actual_details, second.performed_on) == ("Striegel, 3 cm", date(2027, 3, 15))
+    assert (second.actual_details, second.performed_on) == (stored(3), date(2027, 3, 15))
     assert task.status is DONE
     assert task.completed_at == s.clock.now
 
@@ -117,19 +128,19 @@ def test_completing_the_task_completes_every_open_operation(s: Setup) -> None:
 
 def test_reopening_keeps_actual_details_as_a_draft(s: Setup) -> None:
     task = s.harrow(1)
-    s.lifecycle.complete_operation(s.worker, FARM, task.id, s.op(task, 1), "40 kg N")
+    s.lifecycle.complete_operation(s.worker, FARM, task.id, s.op(task, 1), cultivate(8))
 
     s.lifecycle.reopen_operation(s.worker, FARM, task.id, s.op(task, 1))
     operation = task.operations[0]
     assert (operation.status, operation.actual_details, operation.completed_at) == (
         OPEN,
-        "40 kg N",
+        stored(8),
         None,
     )
     assert task.status is OPEN
 
     s.lifecycle.complete_operation(s.worker, FARM, task.id, s.op(task, 1))
-    assert operation.actual_details == "40 kg N"
+    assert operation.actual_details == stored(8)
 
 
 def test_discarding_and_restoring(s: Setup) -> None:
@@ -144,13 +155,15 @@ def test_discarding_and_restoring(s: Setup) -> None:
 
 def test_planned_details_can_differ_per_plot_and_follow_the_task_otherwise(s: Setup) -> None:
     task = s.harrow(1, 2, 3)
-    s.lifecycle.edit_operation(s.worker, FARM, task.id, s.op(task, 2), {"planned_details": "1 cm"})
+    s.lifecycle.edit_operation(
+        s.worker, FARM, task.id, s.op(task, 2), {"planned_details": cultivate(1)}
+    )
     s.lifecycle.complete_operation(s.worker, FARM, task.id, s.op(task, 3))
 
-    s.lifecycle.edit(s.worker, FARM, task.id, {"planned_details": "Striegel, 4 cm"})
+    s.lifecycle.edit(s.worker, FARM, task.id, {"planned_details": cultivate(4)})
 
     planned = {o.plot.number: o.planned_details for o in task.operations}
-    assert planned == {1: "Striegel, 4 cm", 2: "1 cm", 3: "Striegel, 2 cm"}
+    assert planned == {1: stored(4), 2: stored(1), 3: stored(2)}
 
 
 def test_plots_join_any_time_but_done_operations_do_not_vanish(s: Setup) -> None:
@@ -160,7 +173,7 @@ def test_plots_join_any_time_but_done_operations_do_not_vanish(s: Setup) -> None
 
     s.lifecycle.edit(s.worker, FARM, task.id, {"plot_ids": [plot[1], plot[2], plot[3]]})
     assert s.statuses(task) == [DONE, OPEN, OPEN]
-    assert task.operations[-1].planned_details == "Striegel, 2 cm"
+    assert task.operations[-1].planned_details == stored(2)
 
     s.lifecycle.edit(s.worker, FARM, task.id, {"plot_ids": [plot[1], plot[3]]})
     assert sorted(o.plot.number for o in task.operations) == [1, 3]
@@ -185,7 +198,9 @@ def test_recording_after_the_fact_completes_every_operation_on_the_due_date(s: S
 def test_advisors_adjust_plans_but_do_not_record_work(s: Setup) -> None:
     task = s.harrow(1)
 
-    s.lifecycle.edit_operation(s.advisor, FARM, task.id, s.op(task, 1), {"planned_details": "2 cm"})
+    s.lifecycle.edit_operation(
+        s.advisor, FARM, task.id, s.op(task, 1), {"planned_details": cultivate(2)}
+    )
     with pytest.raises(ForbiddenError):
         s.lifecycle.complete_operation(s.advisor, FARM, task.id, s.op(task, 1))
 
@@ -230,3 +245,20 @@ def test_plain_tasks_are_unaffected(s: Setup) -> None:
 
     assert (task.status, task.operations) == (DONE, [])
     assert task.completed_at == datetime(2027, 3, 15, 7, 30, tzinfo=UTC)
+
+
+def test_details_must_be_of_the_tasks_operation_type(s: Setup) -> None:
+    task = s.harrow(1)
+    slurry = FertilisationDetails(amount=20, unit="m3_per_ha")
+
+    with pytest.raises(DetailsTypeMismatchError):
+        s.lifecycle.edit(s.worker, FARM, task.id, {"planned_details": slurry})
+    with pytest.raises(DetailsTypeMismatchError):
+        s.lifecycle.complete_operation(s.worker, FARM, task.id, s.op(task, 1), slurry)
+    with pytest.raises(DetailsTypeMismatchError):
+        s.harrow(1, planned_details=slurry)
+
+
+def test_general_tasks_have_no_planned_details(s: Setup) -> None:
+    with pytest.raises(DetailsWithoutOperationTypeError):
+        s.lifecycle.create(s.worker, FARM, NewTask("Zaun", planned_details=cultivate(2)))

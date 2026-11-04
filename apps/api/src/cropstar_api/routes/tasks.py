@@ -26,9 +26,12 @@ from cropstar_api.models import (
     User,
     task_plots,
 )
+from cropstar_api.operation_details import OperationDetails, from_stored
 from cropstar_api.policy import Action, Actor
 from cropstar_api.tasks.lifecycle import (
     AreaNotFoundError,
+    DetailsTypeMismatchError,
+    DetailsWithoutOperationTypeError,
     ForbiddenError,
     InvalidAssigneeError,
     InvalidTransitionError,
@@ -81,8 +84,8 @@ class OperationOut(BaseModel):
     id: uuid.UUID
     plot: TaskPlotRef
     status: TaskStatus
-    planned_details: str | None
-    actual_details: str | None
+    planned_details: OperationDetails | None
+    actual_details: OperationDetails | None
     performed_on: date | None
     completed_by: PersonOut | None
     completed_at: datetime | None
@@ -95,7 +98,7 @@ class OperationLogEntry(BaseModel):
     task_title: str
     operation_type: str
     performed_on: date | None
-    actual_details: str | None
+    actual_details: OperationDetails | None
     completed_by: PersonOut | None
     completed_at: datetime | None
 
@@ -120,7 +123,7 @@ class TaskOut(BaseModel):
     plots: list[TaskPlotRef]
     # With an Operation Type: one Operation per Plot, and the Status derives from them.
     operation_type: str | None
-    planned_details: str | None
+    planned_details: OperationDetails | None
     operations: list[OperationOut]
     allowed_actions: list[Action]
 
@@ -135,9 +138,10 @@ class TaskCreate(BaseModel):
     field_ids: list[uuid.UUID] = []
     plot_ids: list[uuid.UUID] = []
     operation_type: str | None = None
-    planned_details: Description | None = None
+    # Of the Operation Type's kind; copied into each Operation's Planned Details.
+    planned_details: OperationDetails | None = None
 
-    @field_validator("description", "planned_details")
+    @field_validator("description")
     @classmethod
     def _blank_is_none(cls, value: str | None) -> str | None:
         return value or None
@@ -154,7 +158,7 @@ class TaskUpdate(BaseModel):
     assignee_id: uuid.UUID | None = None
     field_ids: list[uuid.UUID] | None = None
     plot_ids: list[uuid.UUID] | None = None
-    planned_details: Description | None = None
+    planned_details: OperationDetails | None = None
 
     @field_validator("title", "priority")
     @classmethod
@@ -163,7 +167,7 @@ class TaskUpdate(BaseModel):
             raise ValueError("cannot be cleared")
         return value
 
-    @field_validator("description", "planned_details")
+    @field_validator("description")
     @classmethod
     def _blank_is_none(cls, value: str | None) -> str | None:
         return value or None
@@ -172,15 +176,15 @@ class TaskUpdate(BaseModel):
 class OperationUpdate(BaseModel):
     """Only the fields sent are changed; send null to clear one."""
 
-    planned_details: Description | None = None
-    actual_details: Description | None = None
+    planned_details: OperationDetails | None = None
+    actual_details: OperationDetails | None = None
     performed_on: date | None = None
 
 
 class OperationCompletion(BaseModel):
     """Optional when completing: without them the plan becomes the record, dated today."""
 
-    actual_details: Description | None = None
+    actual_details: OperationDetails | None = None
     performed_on: date | None = None
 
 
@@ -256,9 +260,12 @@ def list_tasks(
 @router.post("/tasks", operation_id="createTask", status_code=status.HTTP_201_CREATED)
 def create_task(body: TaskCreate, membership: FarmMembership, db: Db) -> TaskOut:
     with _domain_errors():
-        fields = body.model_dump(exclude={"field_ids", "plot_ids"})
+        fields = body.model_dump(exclude={"field_ids", "plot_ids", "planned_details"})
         new = NewTask(
-            **fields, field_ids=frozenset(body.field_ids), plot_ids=frozenset(body.plot_ids)
+            **fields,
+            field_ids=frozenset(body.field_ids),
+            plot_ids=frozenset(body.plot_ids),
+            planned_details=body.planned_details,
         )
         task = _lifecycle(db).create(_actor(membership), membership.farm_id, new)
     return _out(db, membership, [task])[0]
@@ -381,7 +388,7 @@ def read_operation_log(
             task_title=task.title,
             operation_type=task.operation_type or "",
             performed_on=operation.performed_on,
-            actual_details=operation.actual_details,
+            actual_details=from_stored(operation.actual_details),
             completed_by=people.get(operation.completed_by_id)
             if operation.completed_by_id
             else None,
@@ -432,6 +439,8 @@ def _domain_errors() -> Iterator[None]:
         UnknownOperationTypeError,
         OperationNeedsPlotsError,
         OperationFieldsError,
+        DetailsWithoutOperationTypeError,
+        DetailsTypeMismatchError,
     ) as error:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, detail=error.code) from None
     except TaskError as error:  # pragma: no cover - every subclass is mapped above
@@ -496,14 +505,14 @@ def _out(db: DbSession, membership: Membership, tasks: list[Task]) -> list[TaskO
             fields=[TaskFieldRef(id=f.id, number=f.number, name=f.name) for f in task.fields],
             plots=[_plot_ref(p) for p in task.plots],
             operation_type=task.operation_type,
-            planned_details=task.planned_details,
+            planned_details=from_stored(task.planned_details),
             operations=[
                 OperationOut(
                     id=o.id,
                     plot=_plot_ref(o.plot),
                     status=o.status,
-                    planned_details=o.planned_details,
-                    actual_details=o.actual_details,
+                    planned_details=from_stored(o.planned_details),
+                    actual_details=from_stored(o.actual_details),
                     performed_on=o.performed_on,
                     completed_by=person(o.completed_by_id),
                     completed_at=o.completed_at,

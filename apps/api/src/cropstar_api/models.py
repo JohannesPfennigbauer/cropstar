@@ -20,6 +20,7 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 # Stable constraint names keep Alembic migrations reviewable and reversible.
@@ -180,7 +181,9 @@ class Field(Base):
 
     __tablename__ = "fields"
     __table_args__ = (
-        UniqueConstraint("farm_id", "harvest_year", "number"),
+        UniqueConstraint(
+            "farm_id", "harvest_year", "number", deferrable=True, initially="DEFERRED"
+        ),
         Index("ix_fields_farm_id_harvest_year", "farm_id", "harvest_year"),
     )
 
@@ -206,7 +209,9 @@ class Plot(Base):
     """A Schlag as declared to AMA: part of a Field, one Land Use, one Harvest Year."""
 
     __tablename__ = "plots"
-    __table_args__ = (UniqueConstraint("field_id", "number"),)
+    __table_args__ = (
+        UniqueConstraint("field_id", "number", deferrable=True, initially="DEFERRED"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     field_id: Mapped[uuid.UUID] = mapped_column(
@@ -313,8 +318,8 @@ class Task(Base):
     harvest_year: Mapped[int | None] = mapped_column(SmallInteger)
     # With an Operation Type the Task holds one Operation per Plot; fixed at creation.
     operation_type: Mapped[str | None] = mapped_column(ForeignKey("operation_types.code"))
-    # The template copied into each Operation's Planned Details.
-    planned_details: Mapped[str | None] = mapped_column(Text)
+    # The template copied into each Operation's Planned Details; see `operation_details`.
+    planned_details: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
 
     fields: Mapped[list[Field]] = relationship(secondary=task_fields, order_by=Field.number)
     plots: Mapped[list[Plot]] = relationship(secondary=task_plots)
@@ -335,9 +340,9 @@ class Operation(Base):
         ForeignKey("plots.id", ondelete="CASCADE"), index=True
     )
     status: Mapped[TaskStatus] = mapped_column(_pg_enum(TaskStatus, "task_status"))
-    planned_details: Mapped[str | None] = mapped_column(Text)
+    planned_details: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     # What really happened; kept as a draft when a Done Operation is reopened.
-    actual_details: Mapped[str | None] = mapped_column(Text)
+    actual_details: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     # The day the work was done, which may be long before it was recorded.
     performed_on: Mapped[date | None]
     completed_by_id: Mapped[uuid.UUID | None] = mapped_column(

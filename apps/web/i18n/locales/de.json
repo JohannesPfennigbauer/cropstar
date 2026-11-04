@@ -359,19 +359,61 @@
       "invalid": "Der Export lässt sich nicht lesen",
       "done": "Erntejahr {year} übernommen",
       "doneDetail": "{fields} Feldstücke und {plots} Schläge, wie bei AMA beantragt.",
+      "assignLead": "Ordne jede Fläche des Exports zu: dasselbe Stück Land wie eine bestehende Fläche – dann bleiben ihre Aufgaben und Maßnahmen erhalten – oder neu, ohne Vergangenheit. Unveränderte und weitgehend gleiche Flächen sind vorausgefüllt, du kannst sie ändern.",
+      "status": {
+        "undecided": "Offen",
+        "changed": "Geändert",
+        "new": "Neu",
+        "unchanged": "Unverändert",
+        "removed": "Wird entfernt"
+      },
+      "statusCount": {
+        "undecided": "{n} offen | {n} offen",
+        "changed": "{n} geändert | {n} geändert",
+        "new": "{n} neu | {n} neu",
+        "unchanged": "{n} unverändert | {n} unverändert",
+        "removed": "{n} wird entfernt | {n} werden entfernt"
+      },
+      "changes": {
+        "number": "Nummer",
+        "field": "anderes Feldstück",
+        "name": "Name",
+        "land_use": "Nutzungsart",
+        "declared_area": "beantragte Fläche",
+        "geometry": "Lage",
+        "source": "Quelle jetzt eAMA"
+      },
+      "coverage": "{percent} % überlappend",
+      "overlapping": "Überlappende Flächen",
+      "others": "Weitere Flächen",
+      "newArea": "Neu – ohne Vergangenheit",
+      "choose": "Zuordnen …",
+      "chooseFor": "Zuordnung für {area}",
+      "suggested": "vorgeschlagen",
+      "showUnchanged": "{n} unveränderte anzeigen | {n} unveränderte anzeigen",
+      "hideUnchanged": "Unveränderte ausblenden",
+      "allUnchanged": "Alles unverändert.",
+      "removedTitle": "Wird entfernt",
+      "referencedBy": "Aufgaben verweisen darauf: {tasks}",
+      "referencedHint": "Ordne diese Flächen einer Fläche des Exports zu, damit die erfasste Arbeit erhalten bleibt. Betroffene Aufgaben:",
+      "toTasks": "Zu den Aufgaben",
+      "doneChanges": "{created} neu, {changed} geändert, {removed} entfernt.",
       "sets": {
         "fields": "Feldstücke",
         "plots": "Schläge"
       },
       "blockers": {
         "harvest_year_locked": "Erntejahr {year} ist gesperrt. Entsperre es zuerst unter Betrieb.",
-        "harvest_year_not_empty": "Erntejahr {year} hat schon Feldstücke und Schläge. Das Aktualisieren folgt in einem späteren Schritt."
+        "undecided_areas": "Noch offen: {n}. Entscheide für jede Fläche, ob sie dasselbe Stück Land wie eine bestehende ist oder neu.",
+        "removes_referenced_areas": "Flächen mit Aufgaben würden entfernt"
       },
       "errors": {
         "forbidden_for_role": "Flächen hochladen dürfen nur Admins.",
         "harvest_year_locked": "Das Erntejahr ist gesperrt.",
-        "harvest_year_not_empty": "Das Erntejahr hat schon Feldstücke und Schläge.",
         "upload_too_large": "Die Dateien sind zusammen zu groß (max. 20 MB).",
+        "undecided_areas": "Noch sind nicht alle Flächen zugeordnet.",
+        "removes_referenced_areas": "Inzwischen verweisen Aufgaben auf Flächen, die entfernt würden. Zeig die Vorschau erneut an.",
+        "invalid_assignments": "Die Zuordnung passt nicht mehr zu den Flächen. Zeig die Vorschau erneut an.",
         "unknown": "Das hat nicht geklappt. Bitte versuch es noch einmal."
       },
       "problems": {
@@ -630,6 +672,8 @@
     },
     "operationTypes": {
       "tillage": "Bodenbearbeitung",
+      "mechanical_weed_control": "Mechanische Beikrautregulierung",
+      "mulching": "Mulchen",
       "sowing": "Aussaat",
       "fertilisation": "Düngung",
       "harvest": "Ernte"
@@ -640,7 +684,7 @@
       "anyKind": "Jede Art",
       "kindHelp": "Eine Maßnahme gilt für Schläge: pro Schlag entsteht ein Eintrag im Maßnahmenprotokoll.",
       "planned": "Plan",
-      "plannedHelp": "Was geplant ist, z. B. Gerät, Menge, Tiefe. Wird für jeden Schlag übernommen und lässt sich dort anpassen.",
+      "plannedHelp": "Was geplant ist. Wird für jeden Schlag übernommen und lässt sich dort anpassen. Mengen immer je Hektar.",
       "actual": "Ist",
       "performedOn": "Ausgeführt am",
       "needsPlot": "Eine Maßnahme braucht mindestens einen Schlag.",
@@ -650,6 +694,86 @@
       "completeLead": "Halte fest, was wirklich passiert ist. Der Plan ist vorausgefüllt; Schläge ohne Häkchen bleiben offen.",
       "record": "Nichts ausgewählt | 1 Maßnahme festhalten | {n} Maßnahmen festhalten",
       "recorded": "Nichts festgehalten. | Maßnahme festgehalten. | {n} Maßnahmen festgehalten."
+    },
+    "details": {
+      "fields": {
+        "implement": "Gerät",
+        "depth_cm": "Tiefe (cm)",
+        "material": "Gemulcht",
+        "purpose": "Zweck",
+        "rate": "Saatmenge je ha",
+        "amount": "Menge je ha",
+        "unit": "Einheit",
+        "product": "Erntegut",
+        "yield_t_per_ha": "Ertrag (t/ha, bei Erntefeuchte)",
+        "moisture_percent": "Feuchte (%)",
+        "crude_protein_percent": "Rohprotein (% der TM)",
+        "note": "Notiz"
+      },
+      "values": {
+        "tillageImplement": {
+          "plough": "Pflug",
+          "cultivator": "Grubber",
+          "disc_harrow": "Scheibenegge",
+          "subsoiler": "Tiefenlockerer",
+          "seedbed_combination": "Saatbettkombination",
+          "power_harrow": "Kreiselegge",
+          "roller": "Walze",
+          "other": "Sonstiges Gerät"
+        },
+        "weedControlImplement": {
+          "tine_weeder": "Striegel",
+          "hoe": "Hacke",
+          "finger_weeder": "Fingerhacke",
+          "rotary_hoe": "Rollhacke",
+          "other": "Sonstiges Gerät"
+        },
+        "mulchedMaterial": {
+          "cover_crop": "Zwischenfrucht",
+          "crop_residues": "Ernterückstände/Stroh",
+          "grassland": "Grünland/Brache",
+          "other": "Sonstiges"
+        },
+        "sowingPurpose": {
+          "main_crop": "Hauptkultur",
+          "cover_crop": "Zwischenfrucht",
+          "undersown_crop": "Untersaat"
+        },
+        "sowingUnit": {
+          "kg_per_ha": "kg/ha",
+          "seeds_per_m2": "Körner/m²",
+          "seeds_per_ha": "Körner/ha"
+        },
+        "fertilisationUnit": {
+          "kg_per_ha": "kg/ha",
+          "t_per_ha": "t/ha",
+          "m3_per_ha": "m³/ha",
+          "l_per_ha": "l/ha"
+        },
+        "harvestedProduct": {
+          "grain": "Korn",
+          "straw": "Stroh",
+          "whole_crop": "Ganzpflanze/Silage",
+          "forage": "Heu/Grünfutter",
+          "other": "Sonstiges"
+        }
+      },
+      "summary": {
+        "depth_cm": "{n} cm tief",
+        "yield_t_per_ha": "{n} t/ha",
+        "moisture_percent": "{n} % Feuchte",
+        "crude_protein_percent": "{n} % Rohprotein"
+      },
+      "noteHint": {
+        "sowing": "Was gesät wurde (Kultur, Sorte, Mischung) – bis Betriebsmittel in Cropstar erfasst werden.",
+        "fertilisation": "Welcher Dünger (z. B. Rindergülle, Kompost) – bis Betriebsmittel in Cropstar erfasst werden."
+      },
+      "errors": {
+        "negative": "Werte können nicht negativ sein.",
+        "percent": "Prozentwerte liegen zwischen 0 und 100.",
+        "tooLarge": "Die Tiefe liegt zwischen 0 und 100 cm.",
+        "unitMissing": "Zu einer Menge gehört eine Einheit."
+      }
     }
   }
 }
