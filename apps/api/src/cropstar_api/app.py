@@ -8,7 +8,17 @@ from fastapi import FastAPI
 from cropstar_api.auth.mailer import Mailer, mailer_from_settings
 from cropstar_api.auth.provider import PasswordAuthProvider
 from cropstar_api.db import create_db_engine
-from cropstar_api.routes import area_uploads, areas, auth, farms, harvest_years, status, tasks
+from cropstar_api.routes import (
+    area_uploads,
+    areas,
+    auth,
+    farm_inputs,
+    farms,
+    harvest_years,
+    imports,
+    status,
+    tasks,
+)
 from cropstar_api.settings import Settings
 
 
@@ -41,4 +51,6 @@ def create_app(settings: Settings | None = None, mailer: Mailer | None = None) -
     app.include_router(area_uploads.router, prefix="/api")
     app.include_router(harvest_years.router, prefix="/api")
     app.include_router(tasks.router, prefix="/api")
+    app.include_router(farm_inputs.router, prefix="/api")
+    app.include_router(imports.router, prefix="/api")
     return app

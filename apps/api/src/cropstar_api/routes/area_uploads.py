@@ -33,13 +33,15 @@ from cropstar_api.routes.areas import MultiPolygon
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024
 
 
-class _BoundedUploadRoute(APIRoute):
+class BoundedUploadRoute(APIRoute):
     """Refuses oversized requests before their multipart body is parsed and spooled."""
 
     def get_route_handler(self) -> Callable[[Request], Coroutine[Any, Any, Response]]:
         handler = super().get_route_handler()
 
         async def bounded(request: Request) -> Response:
+            if request.method not in ("POST", "PUT", "PATCH"):
+                return await handler(request)
             length = request.headers.get("content-length")
             if length is None or not length.isdigit():
                 raise HTTPException(status.HTTP_411_LENGTH_REQUIRED, detail="length_required")
@@ -51,7 +53,7 @@ class _BoundedUploadRoute(APIRoute):
 
 
 router = APIRouter(
-    prefix="/farms/{farm_id}/area-uploads", tags=["areas"], route_class=_BoundedUploadRoute
+    prefix="/farms/{farm_id}/area-uploads", tags=["areas"], route_class=BoundedUploadRoute
 )
 
 ExportFiles = Annotated[
@@ -166,7 +168,8 @@ class CurrentFieldProperties(BaseModel):
 class CurrentFieldFeature(BaseModel):
     type: Literal["Feature"] = "Feature"
     id: uuid.UUID
-    geometry: MultiPolygon
+    # Null for areas whose geometry is not known.
+    geometry: MultiPolygon | None
     properties: CurrentFieldProperties
 
 
@@ -191,7 +194,7 @@ class CurrentPlotProperties(BaseModel):
 class CurrentPlotFeature(BaseModel):
     type: Literal["Feature"] = "Feature"
     id: uuid.UUID
-    geometry: MultiPolygon
+    geometry: MultiPolygon | None
     properties: CurrentPlotProperties
 
 
@@ -312,7 +315,7 @@ def preview_area_upload(
             features=[
                 CurrentFieldFeature(
                     id=field.id,
-                    geometry=geometries[field.id],
+                    geometry=geometries.get(field.id),
                     properties=CurrentFieldProperties(
                         id=field.id,
                         number=field.number,
@@ -331,7 +334,7 @@ def preview_area_upload(
             features=[
                 CurrentPlotFeature(
                     id=plot.id,
-                    geometry=geometries[plot.id],
+                    geometry=geometries.get(plot.id),
                     properties=CurrentPlotProperties(
                         id=plot.id,
                         field_id=plot.field_id,
@@ -419,7 +422,11 @@ def _current_geometries(
             )
         ),
     ]
-    return {area_id: MultiPolygon.model_validate_json(geojson) for area_id, geojson in rows}
+    return {
+        area_id: MultiPolygon.model_validate_json(geojson)
+        for area_id, geojson in rows
+        if geojson is not None
+    }
 
 
 def _task_refs(refs: list[area_upload.TaskRef]) -> list[TaskRef]:

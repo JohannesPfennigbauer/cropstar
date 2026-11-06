@@ -82,6 +82,12 @@ Tasks and Operations) or created as new, without history; existing areas nobody 
 assigned to are removed.
 _Avoid_: Import (reserved for farmdok), Sync
 
+**Import Batch** (de: _Import-Charge_):
+Everything one import from another system (e.g. a farmdok field list) created, recorded
+with who imported what and when. Undoing it removes all of it, as long as no Task refers
+to it and its Harvest Year is not locked.
+_Avoid_: Job, Upload (an Area Upload is not an import)
+
 **Provisional Geometry** (de: _vorläufige Geometrie_):
 Geometry a Field or Plot borrows from another Harvest Year because no eAMA export exists for
 its own year. An Area Upload for that year replaces it.
@@ -125,6 +131,13 @@ having happened.
 The machine an Operation was done with, e.g. plough, cultivator or tine weeder; chosen
 from a fixed list per Operation Type.
 _Avoid_: Tool, Maschine
+
+**Farm Input** (de: _Betriebsmittel_):
+A fertiliser, seed or other input a Farm uses, kept per Farm. A fertiliser carries its
+nutrient contents per unit and where those values come from (standard value, lab analysis
+or manufacturer); seed carries the Land Use it is for. Archived instead of deleted once
+Operations refer to it.
+_Avoid_: Product, Material, Produkt
 
 **Operation Log** (de: _Maßnahmenprotokoll_):
 All Done Operations of one Plot, in date order.

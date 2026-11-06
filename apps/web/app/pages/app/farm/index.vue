@@ -160,6 +160,30 @@ async function setLock(year: number, lock: boolean) {
   })
 }
 
+// ── Imports ──────────────────────────────────────────────────────────────
+const importOpen = ref(false)
+const logImportOpen = ref(false)
+const undoing = ref<string | null>(null)
+const { data: batches, refresh: refreshBatches } = await useAsyncData('import-batches', async () => {
+  if (!farm.value) return []
+  return (await api.GET('/api/farms/{farm_id}/import-batches', { params: { path: path.value } })).data ?? []
+}, { watch: [() => farm.value?.id] })
+
+async function onImported() {
+  await Promise.all([refreshBatches(), loadHarvestYears()])
+}
+
+async function undoImport(batchId: string) {
+  undoing.value = batchId
+  const { response, error } = await api.DELETE('/api/farms/{farm_id}/import-batches/{batch_id}', {
+    params: { path: { ...path.value, batch_id: batchId } }
+  })
+  undoing.value = null
+  if (response.status !== 204) return failed(error)
+  await Promise.all([refreshBatches(), loadHarvestYears()])
+  toast.add({ title: t('app.farmdokImport.undone'), color: 'neutral', icon: 'i-lucide-undo-2' })
+}
+
 // ── Danger zone ──────────────────────────────────────────────────────────
 const confirmName = ref('')
 async function deleteFarm() {
@@ -228,6 +252,27 @@ async function deleteFarm() {
             :label="t('app.tasks.save')"
           />
         </UForm>
+      </UCard>
+
+      <UCard>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 class="text-lg font-semibold text-highlighted">
+              {{ t('app.farmInputs.title') }}
+            </h2>
+            <p class="mt-1 text-sm text-muted">
+              {{ t('app.farmInputs.cardLead') }}
+            </p>
+          </div>
+          <UButton
+            :to="localePath('/app/farm/inputs')"
+            color="neutral"
+            variant="outline"
+            trailing-icon="i-lucide-arrow-right"
+            :label="t('app.farmInputs.open')"
+            data-testid="open-farm-inputs"
+          />
+        </div>
       </UCard>
 
       <UCard>
@@ -336,6 +381,70 @@ async function deleteFarm() {
         >
           {{ t('app.farm.harvestYears.empty') }}
         </p>
+      </UCard>
+
+      <UCard v-if="isAdmin">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 class="text-lg font-semibold text-highlighted">
+              {{ t('app.farmdokImport.cardTitle') }}
+            </h2>
+            <p class="mt-1 text-sm text-muted">
+              {{ t('app.farmdokImport.cardLead') }}
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <UButton
+              color="neutral"
+              variant="outline"
+              icon="i-lucide-file-spreadsheet"
+              :label="t('app.farmdokImport.start')"
+              data-testid="farmdok-import"
+              @click="importOpen = true"
+            />
+            <UButton
+              color="neutral"
+              variant="outline"
+              icon="i-lucide-notebook-pen"
+              :label="t('app.farmdokLog.start')"
+              data-testid="farmdok-log-import"
+              @click="logImportOpen = true"
+            />
+          </div>
+        </div>
+        <ul
+          v-if="batches?.length"
+          class="mt-4 divide-y divide-default"
+        >
+          <li
+            v-for="batch in batches"
+            :key="batch.id"
+            class="flex flex-wrap items-center justify-between gap-2 py-2 text-sm"
+            data-testid="import-batch-row"
+          >
+            <span class="min-w-0">
+              <span class="font-medium text-highlighted">
+                {{ t(`app.farmdokImport.kinds.${batch.kind}`) }} · {{ batch.harvest_year }}
+              </span>
+              <span class="block text-xs text-muted">
+                {{ batch.kind === 'farmdok_crop_log'
+                  ? t('app.farmdokLog.batchDetail', { tasks: batch.task_count, file: batch.source_name })
+                  : t('app.farmdokImport.batchDetail', { fields: batch.field_count, plots: batch.plot_count, file: batch.source_name }) }}
+                · {{ batch.created_by ?? t('app.tasks.formerMember') }} · {{ moment(batch.created_at) }}
+              </span>
+            </span>
+            <UButton
+              size="xs"
+              color="neutral"
+              variant="ghost"
+              icon="i-lucide-undo-2"
+              :label="t('app.farmdokImport.undo')"
+              :loading="undoing === batch.id"
+              data-testid="undo-import"
+              @click="undoImport(batch.id)"
+            />
+          </li>
+        </ul>
       </UCard>
 
       <UCard v-if="isAdmin">
@@ -495,5 +604,14 @@ async function deleteFarm() {
         </div>
       </template>
     </UModal>
+
+    <AppFarmdokImportDialog
+      v-model:open="importOpen"
+      @imported="onImported"
+    />
+    <AppFarmdokLogImportDialog
+      v-model:open="logImportOpen"
+      @imported="onImported"
+    />
   </div>
 </template>

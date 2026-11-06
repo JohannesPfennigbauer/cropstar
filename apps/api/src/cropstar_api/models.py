@@ -6,6 +6,7 @@ from typing import Any, ClassVar
 
 from geoalchemy2 import Geometry, WKBElement
 from sqlalchemy import (
+    CheckConstraint,
     Column,
     DateTime,
     Enum,
@@ -127,6 +128,62 @@ class AreaSource(enum.StrEnum):
     EAMA_EXPORT = "eama_export"
     # Public INVEKOS open data (the demo Farm).
     INVEKOS_OPEN_DATA = "invekos_open_data"
+    # Provisional: taken from another Harvest Year's areas, for a year without eAMA export.
+    BORROWED = "borrowed"
+    # Nothing to borrow from: the area is known, its geometry is not.
+    NONE = "none"
+
+
+class ImportKind(enum.StrEnum):
+    FARMDOK_FIELD_LIST = "farmdok_field_list"
+    FARMDOK_CROP_LOG = "farmdok_crop_log"
+
+
+class FarmdokTermKind(enum.StrEnum):
+    CROP = "crop"
+    ACTIVITY = "activity"
+    PRODUCT = "product"
+
+
+class FarmdokAssignment(Base):
+    """An Admin's answer to a farmdok crop, activity or product the import did not know,
+    remembered for later imports."""
+
+    __tablename__ = "farmdok_assignments"
+    __table_args__ = (UniqueConstraint("farm_id", "kind", "name"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    farm_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("farms.id", ondelete="CASCADE"))
+    kind: Mapped[FarmdokTermKind] = mapped_column(_pg_enum(FarmdokTermKind, "farmdok_term_kind"))
+    # As farmdok names it.
+    name: Mapped[str] = mapped_column(String(300))
+    # Crops: the AMA Land Use code.
+    land_use_code: Mapped[str | None] = mapped_column(String(10))
+    # Activities: the Operation Type; null means "skip entries with this activity".
+    operation_type: Mapped[str | None] = mapped_column(ForeignKey("operation_types.code"))
+    # Products: the Farm Input; null means "import without a Farm Input".
+    farm_input_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("farm_inputs.id", ondelete="CASCADE")
+    )
+    updated_at: Mapped[datetime]
+
+
+class ImportBatch(Base):
+    """One import from another system; undoing it removes everything it created."""
+
+    __tablename__ = "import_batches"
+    __table_args__ = (UniqueConstraint("farm_id", "harvest_year", "kind"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    farm_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("farms.id", ondelete="CASCADE"))
+    harvest_year: Mapped[int] = mapped_column(SmallInteger)
+    kind: Mapped[ImportKind] = mapped_column(_pg_enum(ImportKind, "import_kind"))
+    # The uploaded report's file name, for recognising it later; the file is not kept.
+    source_name: Mapped[str] = mapped_column(String(300))
+    created_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
+    created_at: Mapped[datetime]
 
 
 class Membership(Base):
@@ -185,6 +242,9 @@ class Field(Base):
             "farm_id", "harvest_year", "number", deferrable=True, initially="DEFERRED"
         ),
         Index("ix_fields_farm_id_harvest_year", "farm_id", "harvest_year"),
+        CheckConstraint(
+            "(geometry IS NULL) = (geometry_source::text = 'none')", name="geometry_only_when_known"
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
@@ -196,11 +256,17 @@ class Field(Base):
     land_use_code: Mapped[str] = mapped_column(String(10))
     land_use_name: Mapped[str] = mapped_column(String(200))
     declared_area_ha: Mapped[Decimal] = mapped_column(Numeric(10, 4))
-    geometry: Mapped[WKBElement] = mapped_column(
+    # Missing exactly when the source is "none".
+    geometry: Mapped[WKBElement | None] = mapped_column(
         Geometry("MULTIPOLYGON", srid=AMA_SRID, spatial_index=True)
     )
     geometry_source: Mapped[AreaSource] = mapped_column(_pg_enum(AreaSource, "area_source"))
+    # The Harvest Year borrowed geometry comes from.
+    borrowed_from_year: Mapped[int | None] = mapped_column(SmallInteger)
     imported_at: Mapped[datetime]
+    import_batch_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("import_batches.id", ondelete="SET NULL"), index=True
+    )
 
     plots: Mapped[list["Plot"]] = relationship(back_populates="field", cascade="all, delete")
 
@@ -211,6 +277,9 @@ class Plot(Base):
     __tablename__ = "plots"
     __table_args__ = (
         UniqueConstraint("field_id", "number", deferrable=True, initially="DEFERRED"),
+        CheckConstraint(
+            "(geometry IS NULL) = (geometry_source::text = 'none')", name="geometry_only_when_known"
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
@@ -222,11 +291,17 @@ class Plot(Base):
     land_use_code: Mapped[str] = mapped_column(String(10))
     land_use_name: Mapped[str] = mapped_column(String(200))
     declared_area_ha: Mapped[Decimal] = mapped_column(Numeric(10, 4))
-    geometry: Mapped[WKBElement] = mapped_column(
+    # Missing exactly when the source is "none".
+    geometry: Mapped[WKBElement | None] = mapped_column(
         Geometry("MULTIPOLYGON", srid=AMA_SRID, spatial_index=True)
     )
     geometry_source: Mapped[AreaSource] = mapped_column(_pg_enum(AreaSource, "area_source"))
+    # The Harvest Year borrowed geometry comes from.
+    borrowed_from_year: Mapped[int | None] = mapped_column(SmallInteger)
     imported_at: Mapped[datetime]
+    import_batch_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("import_batches.id", ondelete="SET NULL"), index=True
+    )
 
     field: Mapped[Field] = relationship(back_populates="plots")
 
@@ -318,6 +393,10 @@ class Task(Base):
     harvest_year: Mapped[int | None] = mapped_column(SmallInteger)
     # With an Operation Type the Task holds one Operation per Plot; fixed at creation.
     operation_type: Mapped[str | None] = mapped_column(ForeignKey("operation_types.code"))
+    # Set when an import created the Task; undoing the import removes it.
+    import_batch_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("import_batches.id", ondelete="SET NULL"), index=True
+    )
     # The template copied into each Operation's Planned Details; see `operation_details`.
     planned_details: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
 
@@ -352,3 +431,65 @@ class Operation(Base):
 
     task: Mapped[Task] = relationship(back_populates="operations")
     plot: Mapped[Plot] = relationship()
+
+
+class FarmInputKind(enum.StrEnum):
+    FERTILISER = "fertiliser"
+    SEED = "seed"
+    OTHER = "other"
+
+
+class FarmInputUnit(enum.StrEnum):
+    """What a fertiliser's nutrient contents refer to."""
+
+    TONNE = "t"
+    CUBIC_METRE = "m3"
+    # Per 100 kg, the contents read as percentages, as mineral fertilisers declare them.
+    HUNDRED_KG = "100kg"
+
+
+class ValueSource(enum.StrEnum):
+    """Where a Farm Input's nutrient contents come from."""
+
+    STANDARD_VALUE = "standard_value"
+    LAB_ANALYSIS = "lab_analysis"
+    MANUFACTURER = "manufacturer"
+
+
+class FarmInput(Base):
+    """A fertiliser, seed or other input a Farm uses; Operations refer to it."""
+
+    __tablename__ = "farm_inputs"
+    __table_args__ = (Index("ix_farm_inputs_farm_id_kind", "farm_id", "kind"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    farm_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("farms.id", ondelete="CASCADE"))
+    kind: Mapped[FarmInputKind] = mapped_column(_pg_enum(FarmInputKind, "farm_input_kind"))
+    name: Mapped[str] = mapped_column(String(200))
+    note: Mapped[str | None] = mapped_column(Text)
+
+    # Fertilisers: contents per unit, in kg, except dry matter in percent.
+    unit: Mapped[FarmInputUnit | None] = mapped_column(_pg_enum(FarmInputUnit, "farm_input_unit"))
+    dry_matter_percent: Mapped[Decimal | None] = mapped_column(Numeric(6, 2))
+    total_n: Mapped[Decimal | None] = mapped_column(Numeric(8, 3))
+    # Plant-available N in the year of application (jahreswirksamer N).
+    available_n: Mapped[Decimal | None] = mapped_column(Numeric(8, 3))
+    p2o5: Mapped[Decimal | None] = mapped_column(Numeric(8, 3))
+    k2o: Mapped[Decimal | None] = mapped_column(Numeric(8, 3))
+    value_source: Mapped[ValueSource | None] = mapped_column(_pg_enum(ValueSource, "value_source"))
+    # The standard, lab or product sheet the values come from.
+    source_reference: Mapped[str | None] = mapped_column(String(500))
+    analysed_on: Mapped[date | None]
+    # The catalogue entry the values were copied from, if any; the copy is independent.
+    catalogue_entry: Mapped[str | None] = mapped_column(String(50))
+
+    # Seed.
+    land_use_code: Mapped[str | None] = mapped_column(String(10))
+    land_use_name: Mapped[str | None] = mapped_column(String(200))
+    variety: Mapped[str | None] = mapped_column(String(200))
+    thousand_kernel_weight_g: Mapped[Decimal | None] = mapped_column(Numeric(8, 2))
+
+    created_at: Mapped[datetime]
+    updated_at: Mapped[datetime]
+    # Archived inputs stay on past records but are no longer offered.
+    archived_at: Mapped[datetime | None]

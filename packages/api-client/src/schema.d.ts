@@ -622,6 +622,248 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/farms/{farm_id}/farm-inputs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Farm Inputs */
+        get: operations["listFarmInputs"];
+        put?: never;
+        /** Create Farm Input */
+        post: operations["createFarmInput"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/farms/{farm_id}/farm-inputs/{input_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read Farm Input */
+        get: operations["getFarmInput"];
+        /**
+         * Update Farm Input
+         * @description Replaces everything but the kind, e.g. with the values of a new lab analysis.
+         */
+        put: operations["updateFarmInput"];
+        post?: never;
+        /**
+         * Delete Farm Input
+         * @description Only for inputs nothing refers to; archive the others.
+         */
+        delete: operations["deleteFarmInput"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/farms/{farm_id}/farm-inputs/{input_id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Archive Farm Input
+         * @description No longer offered for new Operations; past records keep showing it.
+         */
+        post: operations["archiveFarmInput"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/farms/{farm_id}/farm-inputs/{input_id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Restore Farm Input */
+        post: operations["restoreFarmInput"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/farms/{farm_id}/farm-input-catalogue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Catalogue
+         * @description Standard nutrient contents of farm manure, each with its source and edition.
+         */
+        get: operations["listFarmInputCatalogue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/farms/{farm_id}/land-uses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Land Uses
+         * @description AMA Land Use codes and names, for choosing what seed is for.
+         */
+        get: operations["listLandUses"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/farms/{farm_id}/imports/farmdok-field-list/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview Field List
+         * @description What the field list would create, with geometry borrowed from another year. Writes
+         *     nothing.
+         */
+        post: operations["previewFarmdokFieldList"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/farms/{farm_id}/imports/farmdok-field-list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import Field List
+         * @description Creates the Harvest Year's Fields and Plots as one import batch. The report is read
+         *     and planned again, exactly as for the preview.
+         */
+        post: operations["importFarmdokFieldList"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/farms/{farm_id}/imports/farmdok-crop-log/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview Crop Log
+         * @description The Done Tasks the crop production log would create, and what is left to decide.
+         *     Writes nothing.
+         */
+        post: operations["previewFarmdokCropLog"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/farms/{farm_id}/imports/farmdok-crop-log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import Crop Log
+         * @description Creates the Done Tasks as one import batch and remembers the answers given for
+         *     activities and products. The report is read and planned again, as for the preview.
+         */
+        post: operations["importFarmdokCropLog"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/farms/{farm_id}/import-batches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Import Batches */
+        get: operations["listImportBatches"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/farms/{farm_id}/import-batches/{batch_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Undo Import Batch
+         * @description Removes everything the import created. Refused for a Locked Harvest Year and once
+         *     Tasks refer to the imported areas.
+         */
+        delete: operations["undoImportBatch"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -635,7 +877,7 @@ export interface components {
          * Action
          * @enum {string}
          */
-        Action: "read" | "read_farm_number" | "manage_farm" | "manage_members" | "lock_harvest_year" | "upload_areas" | "create_task" | "edit_task" | "complete_task" | "reopen_task" | "discard_task" | "restore_task" | "delete_task";
+        Action: "read" | "read_farm_number" | "manage_farm" | "manage_members" | "lock_harvest_year" | "upload_areas" | "import_data" | "undo_import" | "manage_farm_inputs" | "create_task" | "edit_task" | "complete_task" | "reopen_task" | "discard_task" | "restore_task" | "delete_task";
         /** ApiStatus */
         ApiStatus: {
             /**
@@ -646,6 +888,14 @@ export interface components {
             /** Version */
             version: string;
             database: components["schemas"]["DatabaseStatus"];
+        };
+        /**
+         * AppliedInput
+         * @description The Farm Input Planned or Actual Details refer to, and what it applied.
+         */
+        AppliedInput: {
+            farm_input: components["schemas"]["FarmInputRef"];
+            nutrients: components["schemas"]["NutrientsApplied"] | null;
         };
         /** AreaCandidate */
         AreaCandidate: {
@@ -690,13 +940,15 @@ export interface components {
              * Format: date-time
              */
             imported_at: string;
+            /** Borrowed From Year */
+            borrowed_from_year: number | null;
         };
         /**
          * AreaSource
          * @description Where the geometry of a Field or Plot came from.
          * @enum {string}
          */
-        AreaSource: "eama_export" | "invekos_open_data";
+        AreaSource: "eama_export" | "invekos_open_data" | "borrowed" | "none";
         /**
          * AreaStatus
          * @enum {string}
@@ -757,6 +1009,37 @@ export interface components {
              */
             assignments?: string | null;
         };
+        /** Body_importFarmdokCropLog */
+        Body_importFarmdokCropLog: {
+            /**
+             * File
+             * @description farmdok's field list (Feldstücksliste), .xls
+             */
+            file: string;
+            /**
+             * Resolutions
+             * @description JSON `LogResolutions`: answers to what the preview could not decide
+             */
+            resolutions?: string | null;
+        };
+        /** Body_importFarmdokFieldList */
+        Body_importFarmdokFieldList: {
+            /**
+             * File
+             * @description farmdok's field list (Feldstücksliste), .xls
+             */
+            file: string;
+            /**
+             * Reference Year
+             * @description Harvest Year to borrow geometry from; default: the nearest with eAMA
+             */
+            reference_year?: number | null;
+            /**
+             * Crop Assignments
+             * @description JSON object: farmdok crop name → AMA Land Use code, for unknown crops
+             */
+            crop_assignments?: string | null;
+        };
         /** Body_previewAreaUpload */
         Body_previewAreaUpload: {
             /**
@@ -770,12 +1053,88 @@ export interface components {
              */
             assignments?: string | null;
         };
+        /** Body_previewFarmdokCropLog */
+        Body_previewFarmdokCropLog: {
+            /**
+             * File
+             * @description farmdok's field list (Feldstücksliste), .xls
+             */
+            file: string;
+            /**
+             * Resolutions
+             * @description JSON `LogResolutions`: answers to what the preview could not decide
+             */
+            resolutions?: string | null;
+        };
+        /** Body_previewFarmdokFieldList */
+        Body_previewFarmdokFieldList: {
+            /**
+             * File
+             * @description farmdok's field list (Feldstücksliste), .xls
+             */
+            file: string;
+            /**
+             * Reference Year
+             * @description Harvest Year to borrow geometry from; default: the nearest with eAMA
+             */
+            reference_year?: number | null;
+            /**
+             * Crop Assignments
+             * @description JSON object: farmdok crop name → AMA Land Use code, for unknown crops
+             */
+            crop_assignments?: string | null;
+        };
+        /** CatalogueEntryOut */
+        CatalogueEntryOut: {
+            /** Code */
+            code: string;
+            /** Name */
+            name: string;
+            unit: components["schemas"]["FarmInputUnit"];
+            /** Dry Matter Percent */
+            dry_matter_percent: number | null;
+            /** Total N */
+            total_n: number | null;
+            /** Available N */
+            available_n: number | null;
+            /** P2O5 */
+            p2o5: number | null;
+            /** K2O */
+            k2o: number | null;
+            /** Source */
+            source: string;
+        };
         /** ChangePasswordRequest */
         ChangePasswordRequest: {
             /** Current Password */
             current_password: string;
             /** New Password */
             new_password: string;
+        };
+        /** CropLogPreview */
+        CropLogPreview: {
+            /** Harvest Year */
+            harvest_year: number;
+            /** Blockers */
+            blockers: components["schemas"]["cropstar_api__farmdok__crop_log_import__Blocker"][];
+            /** Entry Count */
+            entry_count: number;
+            /** Operation Count */
+            operation_count: number;
+            /** Skipped Rows */
+            skipped_rows: number[];
+            /** Tasks */
+            tasks: components["schemas"]["PlannedTaskOut"][];
+            /** Unresolved */
+            unresolved: components["schemas"]["UnresolvedOut"][];
+            /** New Inputs */
+            new_inputs: string[];
+            /** Plots */
+            plots: components["schemas"]["LogPlotRef"][];
+            /** Farm Inputs */
+            farm_inputs: components["schemas"]["LogInputRef"][];
+            /** Operation Types */
+            operation_types: string[];
         };
         /** CurrentFieldCollection */
         CurrentFieldCollection: {
@@ -801,7 +1160,7 @@ export interface components {
              * Format: uuid
              */
             id: string;
-            geometry: components["schemas"]["MultiPolygon"];
+            geometry: components["schemas"]["MultiPolygon"] | null;
             properties: components["schemas"]["CurrentFieldProperties"];
         };
         /** CurrentFieldProperties */
@@ -850,7 +1209,7 @@ export interface components {
              * Format: uuid
              */
             id: string;
-            geometry: components["schemas"]["MultiPolygon"];
+            geometry: components["schemas"]["MultiPolygon"] | null;
             properties: components["schemas"]["CurrentPlotProperties"];
         };
         /** CurrentPlotProperties */
@@ -892,7 +1251,7 @@ export interface components {
         };
         /** ExportProblem */
         ExportProblem: {
-            code: components["schemas"]["ProblemCode"];
+            code: components["schemas"]["cropstar_api__eama__ProblemCode"];
             /** File */
             file: string | null;
             /** Field Number */
@@ -907,6 +1266,150 @@ export interface components {
             /** Name */
             name: string;
         };
+        /**
+         * FarmInputBody
+         * @description A Farm Input as entered. Fertilisers carry a unit and contents per unit with their
+         *     source; seed carries a Land Use. Fields of another kind are refused.
+         */
+        FarmInputBody: {
+            /** Name */
+            name: string;
+            /** Note */
+            note?: string | null;
+            unit?: components["schemas"]["FarmInputUnit"] | null;
+            /** Dry Matter Percent */
+            dry_matter_percent?: number | string | null;
+            /** Total N */
+            total_n?: number | string | null;
+            /** Available N */
+            available_n?: number | string | null;
+            /** P2O5 */
+            p2o5?: number | string | null;
+            /** K2O */
+            k2o?: number | string | null;
+            value_source?: components["schemas"]["ValueSource"] | null;
+            /** Source Reference */
+            source_reference?: string | null;
+            /** Analysed On */
+            analysed_on?: string | null;
+            /** Catalogue Entry */
+            catalogue_entry?: string | null;
+            /** Land Use Code */
+            land_use_code?: string | null;
+            /** Variety */
+            variety?: string | null;
+            /** Thousand Kernel Weight G */
+            thousand_kernel_weight_g?: number | string | null;
+        };
+        /** FarmInputCreate */
+        FarmInputCreate: {
+            /** Name */
+            name: string;
+            /** Note */
+            note?: string | null;
+            unit?: components["schemas"]["FarmInputUnit"] | null;
+            /** Dry Matter Percent */
+            dry_matter_percent?: number | string | null;
+            /** Total N */
+            total_n?: number | string | null;
+            /** Available N */
+            available_n?: number | string | null;
+            /** P2O5 */
+            p2o5?: number | string | null;
+            /** K2O */
+            k2o?: number | string | null;
+            value_source?: components["schemas"]["ValueSource"] | null;
+            /** Source Reference */
+            source_reference?: string | null;
+            /** Analysed On */
+            analysed_on?: string | null;
+            /** Catalogue Entry */
+            catalogue_entry?: string | null;
+            /** Land Use Code */
+            land_use_code?: string | null;
+            /** Variety */
+            variety?: string | null;
+            /** Thousand Kernel Weight G */
+            thousand_kernel_weight_g?: number | string | null;
+            kind: components["schemas"]["FarmInputKind"];
+        };
+        /**
+         * FarmInputKind
+         * @enum {string}
+         */
+        FarmInputKind: "fertiliser" | "seed" | "other";
+        /** FarmInputOut */
+        FarmInputOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            kind: components["schemas"]["FarmInputKind"];
+            /** Name */
+            name: string;
+            /** Note */
+            note: string | null;
+            unit: components["schemas"]["FarmInputUnit"] | null;
+            /** Dry Matter Percent */
+            dry_matter_percent: number | null;
+            /** Total N */
+            total_n: number | null;
+            /** Available N */
+            available_n: number | null;
+            /** P2O5 */
+            p2o5: number | null;
+            /** K2O */
+            k2o: number | null;
+            value_source: components["schemas"]["ValueSource"] | null;
+            /** Source Reference */
+            source_reference: string | null;
+            /** Analysed On */
+            analysed_on: string | null;
+            /** Catalogue Entry */
+            catalogue_entry: string | null;
+            /** Land Use Code */
+            land_use_code: string | null;
+            /** Land Use Name */
+            land_use_name: string | null;
+            /** Variety */
+            variety: string | null;
+            /** Thousand Kernel Weight G */
+            thousand_kernel_weight_g: number | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Archived At */
+            archived_at: string | null;
+            /** In Use */
+            in_use: boolean;
+        };
+        /** FarmInputRef */
+        FarmInputRef: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            kind: components["schemas"]["FarmInputKind"];
+            /** Archived */
+            archived: boolean;
+        };
+        /**
+         * FarmInputUnit
+         * @description What a fertiliser's nutrient contents refer to.
+         * @enum {string}
+         */
+        FarmInputUnit: "t" | "m3" | "100kg";
         /** FarmUpdate */
         FarmUpdate: {
             /** Name */
@@ -923,6 +1426,8 @@ export interface components {
              * @enum {string}
              */
             type: "fertilisation";
+            /** Farm Input Id */
+            farm_input_id?: string | null;
             /** Amount */
             amount?: number | null;
             unit?: components["schemas"]["FertilisationUnit"] | null;
@@ -956,8 +1461,29 @@ export interface components {
              * Format: uuid
              */
             id: string;
-            geometry: components["schemas"]["MultiPolygon"];
+            geometry: components["schemas"]["MultiPolygon"] | null;
             properties: components["schemas"]["FieldProperties"];
+        };
+        /** FieldListPreview */
+        FieldListPreview: {
+            /** Harvest Year */
+            harvest_year: number;
+            /** Reference Year */
+            reference_year: number | null;
+            /** Reference Years */
+            reference_years: number[];
+            /** Blockers */
+            blockers: components["schemas"]["cropstar_api__farmdok__field_list_import__Blocker"][];
+            /** Unknown Crops */
+            unknown_crops: components["schemas"]["UnknownCropOut"][];
+            /** Geometry Counts */
+            geometry_counts: {
+                [key: string]: number;
+            };
+            /** Plot Area Ha */
+            plot_area_ha: number;
+            fields: components["schemas"]["ImportedFieldCollection"];
+            plots: components["schemas"]["ImportedPlotCollection"];
         };
         /** FieldProperties */
         FieldProperties: {
@@ -994,6 +1520,11 @@ export interface components {
             /** Name */
             name: string | null;
         };
+        /**
+         * GeometryMatch
+         * @enum {string}
+         */
+        GeometryMatch: "plot" | "area" | "field" | "none";
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -1027,6 +1558,138 @@ export interface components {
          * @enum {string}
          */
         HarvestedProduct: "grain" | "straw" | "whole_crop" | "forage" | "other";
+        /** ImportBatchOut */
+        ImportBatchOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            kind: components["schemas"]["ImportKind"];
+            /** Harvest Year */
+            harvest_year: number;
+            /** Source Name */
+            source_name: string;
+            /** Created By */
+            created_by: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Field Count */
+            field_count: number;
+            /** Plot Count */
+            plot_count: number;
+            /** Task Count */
+            task_count: number;
+        };
+        /**
+         * ImportKind
+         * @enum {string}
+         */
+        ImportKind: "farmdok_field_list" | "farmdok_crop_log";
+        /** ImportProblem */
+        ImportProblem: {
+            code: components["schemas"]["cropstar_api__farmdok__report__ProblemCode"];
+            /** Row */
+            row: number | null;
+            /** Detail */
+            detail: string | null;
+        };
+        /** ImportedFieldCollection */
+        ImportedFieldCollection: {
+            /**
+             * Type
+             * @default FeatureCollection
+             * @constant
+             */
+            type: "FeatureCollection";
+            /** Features */
+            features: components["schemas"]["ImportedFieldFeature"][];
+        };
+        /** ImportedFieldFeature */
+        ImportedFieldFeature: {
+            /**
+             * Type
+             * @default Feature
+             * @constant
+             */
+            type: "Feature";
+            /** Id */
+            id: string;
+            geometry: components["schemas"]["MultiPolygon"] | null;
+            properties: components["schemas"]["ImportedFieldProperties"];
+        };
+        /** ImportedFieldProperties */
+        ImportedFieldProperties: {
+            /** Id */
+            id: string;
+            /** Number */
+            number: number;
+            /** Name */
+            name: string | null;
+            /** Land Use Name */
+            land_use_name: string;
+            /** Declared Area Ha */
+            declared_area_ha: number;
+            geometry_match: components["schemas"]["GeometryMatch"];
+        };
+        /**
+         * ImportedFrom
+         * @description Where an imported Task came from.
+         */
+        ImportedFrom: {
+            kind: components["schemas"]["ImportKind"];
+            /**
+             * Imported At
+             * Format: date-time
+             */
+            imported_at: string;
+        };
+        /** ImportedPlotCollection */
+        ImportedPlotCollection: {
+            /**
+             * Type
+             * @default FeatureCollection
+             * @constant
+             */
+            type: "FeatureCollection";
+            /** Features */
+            features: components["schemas"]["ImportedPlotFeature"][];
+        };
+        /** ImportedPlotFeature */
+        ImportedPlotFeature: {
+            /**
+             * Type
+             * @default Feature
+             * @constant
+             */
+            type: "Feature";
+            /** Id */
+            id: string;
+            geometry: components["schemas"]["MultiPolygon"] | null;
+            properties: components["schemas"]["ImportedPlotProperties"];
+        };
+        /** ImportedPlotProperties */
+        ImportedPlotProperties: {
+            /** Id */
+            id: string;
+            /** Field Number */
+            field_number: number;
+            /** Number */
+            number: number;
+            /** Crop */
+            crop: string;
+            /** Land Use Code */
+            land_use_code: string | null;
+            /** Land Use Name */
+            land_use_name: string | null;
+            land_use_category: components["schemas"]["LandUseCategory"];
+            /** Declared Area Ha */
+            declared_area_ha: number;
+            geometry_match: components["schemas"]["GeometryMatch"];
+        };
         /** InvalidExport */
         InvalidExport: {
             /**
@@ -1041,6 +1704,21 @@ export interface components {
         /** InvalidExportResponse */
         InvalidExportResponse: {
             detail: components["schemas"]["InvalidExport"];
+        };
+        /** InvalidReport */
+        InvalidReport: {
+            /**
+             * Code
+             * @default invalid_farmdok_report
+             * @constant
+             */
+            code: "invalid_farmdok_report";
+            /** Problems */
+            problems: components["schemas"]["ImportProblem"][];
+        };
+        /** InvalidReportResponse */
+        InvalidReportResponse: {
+            detail: components["schemas"]["InvalidReport"];
         };
         /** InvitationCreate */
         InvitationCreate: {
@@ -1114,6 +1792,13 @@ export interface components {
          * @enum {string}
          */
         LandUseCategory: "cereals" | "legumes" | "root_crops" | "oilseeds" | "fodder" | "vegetables" | "fallow" | "grassland" | "permanent" | "other";
+        /** LandUseOut */
+        LandUseOut: {
+            /** Code */
+            code: string;
+            /** Name */
+            name: string;
+        };
         /** Liveness */
         Liveness: {
             /**
@@ -1135,6 +1820,51 @@ export interface components {
              * Format: date-time
              */
             locked_at: string;
+        };
+        /** LogEntryOut */
+        LogEntryOut: {
+            /** Row */
+            row: number;
+            /**
+             * Performed On
+             * Format: date
+             */
+            performed_on: string;
+            /** Field Numbers */
+            field_numbers: number[];
+            /** Crop */
+            crop: string;
+            /** Activity */
+            activity: string;
+            /** Product */
+            product: string | null;
+        };
+        /** LogInputRef */
+        LogInputRef: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            kind: components["schemas"]["FarmInputKind"];
+            /** Archived */
+            archived: boolean;
+        };
+        /** LogPlotRef */
+        LogPlotRef: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Field Number */
+            field_number: number;
+            /** Number */
+            number: number;
+            /** Land Use Name */
+            land_use_name: string;
         };
         /** Me */
         Me: {
@@ -1200,6 +1930,25 @@ export interface components {
             ][][][];
         };
         /**
+         * NutrientsApplied
+         * @description kg per hectare, from the amount and the input's contents; null where unknown.
+         */
+        NutrientsApplied: {
+            /** Total N */
+            total_n: number | null;
+            /** Available N */
+            available_n: number | null;
+            /** P2O5 */
+            p2o5: number | null;
+            /** K2O */
+            k2o: number | null;
+            value_source: components["schemas"]["ValueSource"] | null;
+            /** Source Reference */
+            source_reference: string | null;
+            /** Analysed On */
+            analysed_on: string | null;
+        };
+        /**
          * OperationCompletion
          * @description Optional when completing: without them the plan becomes the record, dated today.
          */
@@ -1229,6 +1978,7 @@ export interface components {
             performed_on: string | null;
             /** Actual Details */
             actual_details: (components["schemas"]["TillageDetails"] | components["schemas"]["MechanicalWeedControlDetails"] | components["schemas"]["MulchingDetails"] | components["schemas"]["SowingDetails"] | components["schemas"]["FertilisationDetails"] | components["schemas"]["HarvestDetails"]) | null;
+            actual_input: components["schemas"]["AppliedInput"] | null;
             completed_by: components["schemas"]["PersonOut"] | null;
             /** Completed At */
             completed_at: string | null;
@@ -1244,8 +1994,10 @@ export interface components {
             status: components["schemas"]["TaskStatus"];
             /** Planned Details */
             planned_details: (components["schemas"]["TillageDetails"] | components["schemas"]["MechanicalWeedControlDetails"] | components["schemas"]["MulchingDetails"] | components["schemas"]["SowingDetails"] | components["schemas"]["FertilisationDetails"] | components["schemas"]["HarvestDetails"]) | null;
+            planned_input: components["schemas"]["AppliedInput"] | null;
             /** Actual Details */
             actual_details: (components["schemas"]["TillageDetails"] | components["schemas"]["MechanicalWeedControlDetails"] | components["schemas"]["MulchingDetails"] | components["schemas"]["SowingDetails"] | components["schemas"]["FertilisationDetails"] | components["schemas"]["HarvestDetails"]) | null;
+            actual_input: components["schemas"]["AppliedInput"] | null;
             /** Performed On */
             performed_on: string | null;
             completed_by: components["schemas"]["PersonOut"] | null;
@@ -1299,6 +2051,26 @@ export interface components {
             /** Email */
             email: string;
         };
+        /** PlannedTaskOut */
+        PlannedTaskOut: {
+            /** Row */
+            row: number;
+            /**
+             * Performed On
+             * Format: date
+             */
+            performed_on: string;
+            /** Title */
+            title: string;
+            /** Operation Type */
+            operation_type: string;
+            /** Plots */
+            plots: components["schemas"]["LogPlotRef"][];
+            /** Details */
+            details: components["schemas"]["TillageDetails"] | components["schemas"]["MechanicalWeedControlDetails"] | components["schemas"]["MulchingDetails"] | components["schemas"]["SowingDetails"] | components["schemas"]["FertilisationDetails"] | components["schemas"]["HarvestDetails"];
+            /** Farm Input Name */
+            farm_input_name: string | null;
+        };
         /** PlotCollection */
         PlotCollection: {
             /**
@@ -1323,7 +2095,7 @@ export interface components {
              * Format: uuid
              */
             id: string;
-            geometry: components["schemas"]["MultiPolygon"];
+            geometry: components["schemas"]["MultiPolygon"] | null;
             properties: components["schemas"]["PlotProperties"];
         };
         /** PlotProperties */
@@ -1355,10 +2127,10 @@ export interface components {
          */
         Priority: "none" | "low" | "normal" | "high";
         /**
-         * ProblemCode
+         * Problem
          * @enum {string}
          */
-        ProblemCode: "no_files" | "too_large" | "unreadable_archive" | "conflicting_files" | "missing_component" | "unreadable_shapefile" | "wrong_projection" | "unknown_set" | "missing_attribute" | "not_polygons" | "duplicate_set" | "missing_set" | "missing_harvest_year" | "mixed_harvest_years" | "invalid_record" | "duplicate_area" | "plot_without_field";
+        Problem: "unknown_activity" | "unknown_product" | "unit_mismatch" | "unknown_field" | "unknown_crop" | "no_matching_plot";
         /** RegisterRequest */
         RegisterRequest: {
             /**
@@ -1399,6 +2171,8 @@ export interface components {
              */
             type: "sowing";
             purpose?: components["schemas"]["SowingPurpose"] | null;
+            /** Farm Input Id */
+            farm_input_id?: string | null;
             /** Rate */
             rate?: number | null;
             unit?: components["schemas"]["SowingUnit"] | null;
@@ -1497,10 +2271,12 @@ export interface components {
             operation_type: string | null;
             /** Planned Details */
             planned_details: (components["schemas"]["TillageDetails"] | components["schemas"]["MechanicalWeedControlDetails"] | components["schemas"]["MulchingDetails"] | components["schemas"]["SowingDetails"] | components["schemas"]["FertilisationDetails"] | components["schemas"]["HarvestDetails"]) | null;
+            planned_input: components["schemas"]["AppliedInput"] | null;
             /** Operations */
             operations: components["schemas"]["OperationOut"][];
             /** Allowed Actions */
             allowed_actions: components["schemas"]["Action"][];
+            imported: components["schemas"]["ImportedFrom"] | null;
         };
         /** TaskPlotRef */
         TaskPlotRef: {
@@ -1572,6 +2348,24 @@ export interface components {
          * @enum {string}
          */
         TillageImplement: "plough" | "cultivator" | "disc_harrow" | "subsoiler" | "seedbed_combination" | "power_harrow" | "roller" | "other";
+        /** UnknownCropOut */
+        UnknownCropOut: {
+            /** Name */
+            name: string;
+            /** Plot Count */
+            plot_count: number;
+        };
+        /** UnresolvedOut */
+        UnresolvedOut: {
+            problem: components["schemas"]["Problem"];
+            /** Key */
+            key: string;
+            /** Entries */
+            entries: components["schemas"]["LogEntryOut"][];
+            input_kind: components["schemas"]["FarmInputKind"] | null;
+            /** Can Create */
+            can_create: boolean;
+        };
         /** UploadedFieldCollection */
         UploadedFieldCollection: {
             /**
@@ -1677,10 +2471,36 @@ export interface components {
             ctx?: Record<string, never>;
         };
         /**
+         * ValueSource
+         * @description Where a Farm Input's nutrient contents come from.
+         * @enum {string}
+         */
+        ValueSource: "standard_value" | "lab_analysis" | "manufacturer";
+        /**
          * WeedControlImplement
          * @enum {string}
          */
         WeedControlImplement: "tine_weeder" | "hoe" | "finger_weeder" | "rotary_hoe" | "other";
+        /**
+         * ProblemCode
+         * @enum {string}
+         */
+        cropstar_api__eama__ProblemCode: "no_files" | "too_large" | "unreadable_archive" | "conflicting_files" | "missing_component" | "unreadable_shapefile" | "wrong_projection" | "unknown_set" | "missing_attribute" | "not_polygons" | "duplicate_set" | "missing_set" | "missing_harvest_year" | "mixed_harvest_years" | "invalid_record" | "duplicate_area" | "plot_without_field";
+        /**
+         * Blocker
+         * @enum {string}
+         */
+        cropstar_api__farmdok__crop_log_import__Blocker: "harvest_year_locked" | "already_imported" | "unresolved";
+        /**
+         * Blocker
+         * @enum {string}
+         */
+        cropstar_api__farmdok__field_list_import__Blocker: "harvest_year_locked" | "harvest_year_not_empty" | "unknown_crops";
+        /**
+         * ProblemCode
+         * @enum {string}
+         */
+        cropstar_api__farmdok__report__ProblemCode: "unreadable_file" | "not_a_field_list" | "missing_column" | "invalid_row" | "duplicate_plot" | "empty" | "not_a_crop_log";
         /** FarmOut */
         cropstar_api__routes__auth__FarmOut: {
             /**
@@ -2991,6 +3811,501 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["OperationLogEntry"][];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listFarmInputs: {
+        parameters: {
+            query?: {
+                kind?: components["schemas"]["FarmInputKind"] | null;
+                /** @description Only archived (true) or only current (false) inputs */
+                archived?: boolean | null;
+            };
+            header?: never;
+            path: {
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FarmInputOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    createFarmInput: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FarmInputCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FarmInputOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    getFarmInput: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                input_id: string;
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FarmInputOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    updateFarmInput: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                input_id: string;
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FarmInputBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FarmInputOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    deleteFarmInput: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                input_id: string;
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    archiveFarmInput: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                input_id: string;
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FarmInputOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    restoreFarmInput: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                input_id: string;
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FarmInputOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listFarmInputCatalogue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogueEntryOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listLandUses: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LandUseOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    previewFarmdokFieldList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_previewFarmdokFieldList"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FieldListPreview"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvalidReportResponse"];
+                };
+            };
+        };
+    };
+    importFarmdokFieldList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_importFarmdokFieldList"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportBatchOut"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvalidReportResponse"];
+                };
+            };
+        };
+    };
+    previewFarmdokCropLog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_previewFarmdokCropLog"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CropLogPreview"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvalidReportResponse"];
+                };
+            };
+        };
+    };
+    importFarmdokCropLog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_importFarmdokCropLog"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportBatchOut"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvalidReportResponse"];
+                };
+            };
+        };
+    };
+    listImportBatches: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportBatchOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    undoImportBatch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                batch_id: string;
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

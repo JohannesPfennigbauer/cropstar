@@ -31,6 +31,8 @@ class AreaProvenance(BaseModel):
 
     source: AreaSource
     imported_at: datetime
+    # For borrowed geometry: the Harvest Year it comes from.
+    borrowed_from_year: int | None
 
 
 class FieldRef(BaseModel):
@@ -54,7 +56,8 @@ class FieldProperties(BaseModel):
 class FieldFeature(BaseModel):
     type: Literal["Feature"] = "Feature"
     id: uuid.UUID
-    geometry: MultiPolygon
+    # Null when the geometry is not known (source "none").
+    geometry: MultiPolygon | None
     properties: FieldProperties
 
 
@@ -79,7 +82,7 @@ class PlotProperties(BaseModel):
 class PlotFeature(BaseModel):
     type: Literal["Feature"] = "Feature"
     id: uuid.UUID
-    geometry: MultiPolygon
+    geometry: MultiPolygon | None
     properties: PlotProperties
 
 
@@ -100,7 +103,7 @@ def list_fields(membership: FarmMembership, db: Db, harvest_year: HarvestYear) -
         features=[
             FieldFeature(
                 id=field.id,
-                geometry=MultiPolygon.model_validate(json.loads(geometry)),
+                geometry=parse_geometry(geometry),
                 properties=FieldProperties(
                     id=field.id,
                     harvest_year=field.harvest_year,
@@ -137,7 +140,7 @@ def read_plot(membership: FarmMembership, db: Db, plot_id: uuid.UUID) -> PlotFea
     return _plot_feature(plot, field, geometry)
 
 
-def _plots(farm_id: uuid.UUID) -> Select[Plot, Field, str]:
+def _plots(farm_id: uuid.UUID) -> Select[Plot, Field, str | None]:
     return (
         select(Plot, Field, to_wgs84_geojson(Plot.geometry))
         .join(Field, Plot.field_id == Field.id)
@@ -145,10 +148,14 @@ def _plots(farm_id: uuid.UUID) -> Select[Plot, Field, str]:
     )
 
 
-def _plot_feature(plot: Plot, field: Field, geometry: str) -> PlotFeature:
+def parse_geometry(geojson: str | None) -> MultiPolygon | None:
+    return None if geojson is None else MultiPolygon.model_validate(json.loads(geojson))
+
+
+def _plot_feature(plot: Plot, field: Field, geometry: str | None) -> PlotFeature:
     return PlotFeature(
         id=plot.id,
-        geometry=MultiPolygon.model_validate(json.loads(geometry)),
+        geometry=parse_geometry(geometry),
         properties=PlotProperties(
             id=plot.id,
             harvest_year=field.harvest_year,
@@ -165,4 +172,8 @@ def _plot_feature(plot: Plot, field: Field, geometry: str) -> PlotFeature:
 
 
 def _provenance(area: Field | Plot) -> AreaProvenance:
-    return AreaProvenance(source=area.geometry_source, imported_at=area.imported_at)
+    return AreaProvenance(
+        source=area.geometry_source,
+        imported_at=area.imported_at,
+        borrowed_from_year=area.borrowed_from_year,
+    )

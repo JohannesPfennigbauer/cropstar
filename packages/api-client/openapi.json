@@ -2064,6 +2064,811 @@
           }
         }
       }
+    },
+    "/api/farms/{farm_id}/farm-inputs": {
+      "get": {
+        "tags": [
+          "farm inputs"
+        ],
+        "summary": "List Farm Inputs",
+        "operationId": "listFarmInputs",
+        "parameters": [
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/FarmInputKind"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "archived",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only archived (true) or only current (false) inputs",
+              "title": "Archived"
+            },
+            "description": "Only archived (true) or only current (false) inputs"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FarmInputOut"
+                  },
+                  "title": "Response Listfarminputs"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "farm inputs"
+        ],
+        "summary": "Create Farm Input",
+        "operationId": "createFarmInput",
+        "parameters": [
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FarmInputCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FarmInputOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/farms/{farm_id}/farm-inputs/{input_id}": {
+      "get": {
+        "tags": [
+          "farm inputs"
+        ],
+        "summary": "Read Farm Input",
+        "operationId": "getFarmInput",
+        "parameters": [
+          {
+            "name": "input_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Input Id"
+            }
+          },
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FarmInputOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "farm inputs"
+        ],
+        "summary": "Update Farm Input",
+        "description": "Replaces everything but the kind, e.g. with the values of a new lab analysis.",
+        "operationId": "updateFarmInput",
+        "parameters": [
+          {
+            "name": "input_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Input Id"
+            }
+          },
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FarmInputBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FarmInputOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "farm inputs"
+        ],
+        "summary": "Delete Farm Input",
+        "description": "Only for inputs nothing refers to; archive the others.",
+        "operationId": "deleteFarmInput",
+        "parameters": [
+          {
+            "name": "input_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Input Id"
+            }
+          },
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/farms/{farm_id}/farm-inputs/{input_id}/archive": {
+      "post": {
+        "tags": [
+          "farm inputs"
+        ],
+        "summary": "Archive Farm Input",
+        "description": "No longer offered for new Operations; past records keep showing it.",
+        "operationId": "archiveFarmInput",
+        "parameters": [
+          {
+            "name": "input_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Input Id"
+            }
+          },
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FarmInputOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/farms/{farm_id}/farm-inputs/{input_id}/restore": {
+      "post": {
+        "tags": [
+          "farm inputs"
+        ],
+        "summary": "Restore Farm Input",
+        "operationId": "restoreFarmInput",
+        "parameters": [
+          {
+            "name": "input_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Input Id"
+            }
+          },
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FarmInputOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/farms/{farm_id}/farm-input-catalogue": {
+      "get": {
+        "tags": [
+          "farm inputs"
+        ],
+        "summary": "List Catalogue",
+        "description": "Standard nutrient contents of farm manure, each with its source and edition.",
+        "operationId": "listFarmInputCatalogue",
+        "parameters": [
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogueEntryOut"
+                  },
+                  "title": "Response Listfarminputcatalogue"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/farms/{farm_id}/land-uses": {
+      "get": {
+        "tags": [
+          "farm inputs"
+        ],
+        "summary": "List Land Uses",
+        "description": "AMA Land Use codes and names, for choosing what seed is for.",
+        "operationId": "listLandUses",
+        "parameters": [
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LandUseOut"
+                  },
+                  "title": "Response Listlanduses"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/farms/{farm_id}/imports/farmdok-field-list/preview": {
+      "post": {
+        "tags": [
+          "imports"
+        ],
+        "summary": "Preview Field List",
+        "description": "What the field list would create, with geometry borrowed from another year. Writes\nnothing.",
+        "operationId": "previewFarmdokFieldList",
+        "parameters": [
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_previewFarmdokFieldList"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FieldListPreview"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidReportResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        }
+      }
+    },
+    "/api/farms/{farm_id}/imports/farmdok-field-list": {
+      "post": {
+        "tags": [
+          "imports"
+        ],
+        "summary": "Import Field List",
+        "description": "Creates the Harvest Year's Fields and Plots as one import batch. The report is read\nand planned again, exactly as for the preview.",
+        "operationId": "importFarmdokFieldList",
+        "parameters": [
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_importFarmdokFieldList"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportBatchOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidReportResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        }
+      }
+    },
+    "/api/farms/{farm_id}/imports/farmdok-crop-log/preview": {
+      "post": {
+        "tags": [
+          "imports"
+        ],
+        "summary": "Preview Crop Log",
+        "description": "The Done Tasks the crop production log would create, and what is left to decide.\nWrites nothing.",
+        "operationId": "previewFarmdokCropLog",
+        "parameters": [
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_previewFarmdokCropLog"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CropLogPreview"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidReportResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        }
+      }
+    },
+    "/api/farms/{farm_id}/imports/farmdok-crop-log": {
+      "post": {
+        "tags": [
+          "imports"
+        ],
+        "summary": "Import Crop Log",
+        "description": "Creates the Done Tasks as one import batch and remembers the answers given for\nactivities and products. The report is read and planned again, as for the preview.",
+        "operationId": "importFarmdokCropLog",
+        "parameters": [
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_importFarmdokCropLog"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportBatchOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidReportResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        }
+      }
+    },
+    "/api/farms/{farm_id}/import-batches": {
+      "get": {
+        "tags": [
+          "imports"
+        ],
+        "summary": "List Import Batches",
+        "operationId": "listImportBatches",
+        "parameters": [
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ImportBatchOut"
+                  },
+                  "title": "Response Listimportbatches"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/farms/{farm_id}/import-batches/{batch_id}": {
+      "delete": {
+        "tags": [
+          "imports"
+        ],
+        "summary": "Undo Import Batch",
+        "description": "Removes everything the import created. Refused for a Locked Harvest Year and once\nTasks refer to the imported areas.",
+        "operationId": "undoImportBatch",
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Batch Id"
+            }
+          },
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2091,6 +2896,9 @@
           "manage_members",
           "lock_harvest_year",
           "upload_areas",
+          "import_data",
+          "undo_import",
+          "manage_farm_inputs",
           "create_task",
           "edit_task",
           "complete_task",
@@ -2123,6 +2931,30 @@
           "database"
         ],
         "title": "ApiStatus"
+      },
+      "AppliedInput": {
+        "properties": {
+          "farm_input": {
+            "$ref": "#/components/schemas/FarmInputRef"
+          },
+          "nutrients": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NutrientsApplied"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "farm_input",
+          "nutrients"
+        ],
+        "title": "AppliedInput",
+        "description": "The Farm Input Planned or Actual Details refer to, and what it applied."
       },
       "AreaCandidate": {
         "properties": {
@@ -2217,12 +3049,24 @@
             "type": "string",
             "format": "date-time",
             "title": "Imported At"
+          },
+          "borrowed_from_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Borrowed From Year"
           }
         },
         "type": "object",
         "required": [
           "source",
-          "imported_at"
+          "imported_at",
+          "borrowed_from_year"
         ],
         "title": "AreaProvenance",
         "description": "Where the geometry came from and when it arrived."
@@ -2231,7 +3075,9 @@
         "type": "string",
         "enum": [
           "eama_export",
-          "invekos_open_data"
+          "invekos_open_data",
+          "borrowed",
+          "none"
         ],
         "title": "AreaSource",
         "description": "Where the geometry of a Field or Plot came from."
@@ -2388,6 +3234,72 @@
         ],
         "title": "Body_applyAreaUpload"
       },
+      "Body_importFarmdokCropLog": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "farmdok's field list (Feldstücksliste), .xls"
+          },
+          "resolutions": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolutions",
+            "description": "JSON `LogResolutions`: answers to what the preview could not decide"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_importFarmdokCropLog"
+      },
+      "Body_importFarmdokFieldList": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "farmdok's field list (Feldstücksliste), .xls"
+          },
+          "reference_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Year",
+            "description": "Harvest Year to borrow geometry from; default: the nearest with eAMA"
+          },
+          "crop_assignments": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Crop Assignments",
+            "description": "JSON object: farmdok crop name → AMA Land Use code, for unknown crops"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_importFarmdokFieldList"
+      },
       "Body_previewAreaUpload": {
         "properties": {
           "files": {
@@ -2418,6 +3330,159 @@
         ],
         "title": "Body_previewAreaUpload"
       },
+      "Body_previewFarmdokCropLog": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "farmdok's field list (Feldstücksliste), .xls"
+          },
+          "resolutions": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolutions",
+            "description": "JSON `LogResolutions`: answers to what the preview could not decide"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_previewFarmdokCropLog"
+      },
+      "Body_previewFarmdokFieldList": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "farmdok's field list (Feldstücksliste), .xls"
+          },
+          "reference_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Year",
+            "description": "Harvest Year to borrow geometry from; default: the nearest with eAMA"
+          },
+          "crop_assignments": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Crop Assignments",
+            "description": "JSON object: farmdok crop name → AMA Land Use code, for unknown crops"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_previewFarmdokFieldList"
+      },
+      "CatalogueEntryOut": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/FarmInputUnit"
+          },
+          "dry_matter_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dry Matter Percent"
+          },
+          "total_n": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total N"
+          },
+          "available_n": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available N"
+          },
+          "p2o5": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P2O5"
+          },
+          "k2o": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "K2O"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "unit",
+          "dry_matter_percent",
+          "total_n",
+          "available_n",
+          "p2o5",
+          "k2o",
+          "source"
+        ],
+        "title": "CatalogueEntryOut"
+      },
       "ChangePasswordRequest": {
         "properties": {
           "current_password": {
@@ -2438,6 +3503,93 @@
           "new_password"
         ],
         "title": "ChangePasswordRequest"
+      },
+      "CropLogPreview": {
+        "properties": {
+          "harvest_year": {
+            "type": "integer",
+            "title": "Harvest Year"
+          },
+          "blockers": {
+            "items": {
+              "$ref": "#/components/schemas/cropstar_api__farmdok__crop_log_import__Blocker"
+            },
+            "type": "array",
+            "title": "Blockers"
+          },
+          "entry_count": {
+            "type": "integer",
+            "title": "Entry Count"
+          },
+          "operation_count": {
+            "type": "integer",
+            "title": "Operation Count"
+          },
+          "skipped_rows": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Skipped Rows"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/PlannedTaskOut"
+            },
+            "type": "array",
+            "title": "Tasks"
+          },
+          "unresolved": {
+            "items": {
+              "$ref": "#/components/schemas/UnresolvedOut"
+            },
+            "type": "array",
+            "title": "Unresolved"
+          },
+          "new_inputs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "New Inputs"
+          },
+          "plots": {
+            "items": {
+              "$ref": "#/components/schemas/LogPlotRef"
+            },
+            "type": "array",
+            "title": "Plots"
+          },
+          "farm_inputs": {
+            "items": {
+              "$ref": "#/components/schemas/LogInputRef"
+            },
+            "type": "array",
+            "title": "Farm Inputs"
+          },
+          "operation_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Operation Types"
+          }
+        },
+        "type": "object",
+        "required": [
+          "harvest_year",
+          "blockers",
+          "entry_count",
+          "operation_count",
+          "skipped_rows",
+          "tasks",
+          "unresolved",
+          "new_inputs",
+          "plots",
+          "farm_inputs",
+          "operation_types"
+        ],
+        "title": "CropLogPreview"
       },
       "CurrentFieldCollection": {
         "properties": {
@@ -2475,7 +3627,14 @@
             "title": "Id"
           },
           "geometry": {
-            "$ref": "#/components/schemas/MultiPolygon"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MultiPolygon"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "properties": {
             "$ref": "#/components/schemas/CurrentFieldProperties"
@@ -2584,7 +3743,14 @@
             "title": "Id"
           },
           "geometry": {
-            "$ref": "#/components/schemas/MultiPolygon"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MultiPolygon"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "properties": {
             "$ref": "#/components/schemas/CurrentPlotProperties"
@@ -2700,7 +3866,7 @@
       "ExportProblem": {
         "properties": {
           "code": {
-            "$ref": "#/components/schemas/ProblemCode"
+            "$ref": "#/components/schemas/cropstar_api__eama__ProblemCode"
           },
           "file": {
             "anyOf": [
@@ -2772,6 +3938,694 @@
         ],
         "title": "FarmCreate"
       },
+      "FarmInputBody": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 5000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FarmInputUnit"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dry_matter_percent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dry Matter Percent"
+          },
+          "total_n": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total N"
+          },
+          "available_n": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available N"
+          },
+          "p2o5": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P2O5"
+          },
+          "k2o": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "K2O"
+          },
+          "value_source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ValueSource"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_reference": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference"
+          },
+          "analysed_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysed On"
+          },
+          "catalogue_entry": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalogue Entry"
+          },
+          "land_use_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Land Use Code"
+          },
+          "variety": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variety"
+          },
+          "thousand_kernel_weight_g": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 2000.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thousand Kernel Weight G"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "FarmInputBody",
+        "description": "A Farm Input as entered. Fertilisers carry a unit and contents per unit with their\nsource; seed carries a Land Use. Fields of another kind are refused."
+      },
+      "FarmInputCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 5000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FarmInputUnit"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dry_matter_percent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dry Matter Percent"
+          },
+          "total_n": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total N"
+          },
+          "available_n": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available N"
+          },
+          "p2o5": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P2O5"
+          },
+          "k2o": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "K2O"
+          },
+          "value_source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ValueSource"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_reference": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference"
+          },
+          "analysed_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysed On"
+          },
+          "catalogue_entry": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalogue Entry"
+          },
+          "land_use_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Land Use Code"
+          },
+          "variety": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variety"
+          },
+          "thousand_kernel_weight_g": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 2000.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thousand Kernel Weight G"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/FarmInputKind"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "kind"
+        ],
+        "title": "FarmInputCreate"
+      },
+      "FarmInputKind": {
+        "type": "string",
+        "enum": [
+          "fertiliser",
+          "seed",
+          "other"
+        ],
+        "title": "FarmInputKind"
+      },
+      "FarmInputOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/FarmInputKind"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FarmInputUnit"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dry_matter_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dry Matter Percent"
+          },
+          "total_n": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total N"
+          },
+          "available_n": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available N"
+          },
+          "p2o5": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P2O5"
+          },
+          "k2o": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "K2O"
+          },
+          "value_source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ValueSource"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference"
+          },
+          "analysed_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysed On"
+          },
+          "catalogue_entry": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalogue Entry"
+          },
+          "land_use_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Land Use Code"
+          },
+          "land_use_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Land Use Name"
+          },
+          "variety": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variety"
+          },
+          "thousand_kernel_weight_g": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thousand Kernel Weight G"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "archived_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archived At"
+          },
+          "in_use": {
+            "type": "boolean",
+            "title": "In Use"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "name",
+          "note",
+          "unit",
+          "dry_matter_percent",
+          "total_n",
+          "available_n",
+          "p2o5",
+          "k2o",
+          "value_source",
+          "source_reference",
+          "analysed_on",
+          "catalogue_entry",
+          "land_use_code",
+          "land_use_name",
+          "variety",
+          "thousand_kernel_weight_g",
+          "created_at",
+          "updated_at",
+          "archived_at",
+          "in_use"
+        ],
+        "title": "FarmInputOut"
+      },
+      "FarmInputRef": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/FarmInputKind"
+          },
+          "archived": {
+            "type": "boolean",
+            "title": "Archived"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "archived"
+        ],
+        "title": "FarmInputRef"
+      },
+      "FarmInputUnit": {
+        "type": "string",
+        "enum": [
+          "t",
+          "m3",
+          "100kg"
+        ],
+        "title": "FarmInputUnit",
+        "description": "What a fertiliser's nutrient contents refer to."
+      },
       "FarmUpdate": {
         "properties": {
           "name": {
@@ -2822,6 +4676,18 @@
             "const": "fertilisation",
             "title": "Type",
             "default": "fertilisation"
+          },
+          "farm_input_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Farm Input Id"
           },
           "amount": {
             "anyOf": [
@@ -2896,7 +4762,14 @@
             "title": "Id"
           },
           "geometry": {
-            "$ref": "#/components/schemas/MultiPolygon"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MultiPolygon"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "properties": {
             "$ref": "#/components/schemas/FieldProperties"
@@ -2909,6 +4782,79 @@
           "properties"
         ],
         "title": "FieldFeature"
+      },
+      "FieldListPreview": {
+        "properties": {
+          "harvest_year": {
+            "type": "integer",
+            "title": "Harvest Year"
+          },
+          "reference_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Year"
+          },
+          "reference_years": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Reference Years"
+          },
+          "blockers": {
+            "items": {
+              "$ref": "#/components/schemas/cropstar_api__farmdok__field_list_import__Blocker"
+            },
+            "type": "array",
+            "title": "Blockers"
+          },
+          "unknown_crops": {
+            "items": {
+              "$ref": "#/components/schemas/UnknownCropOut"
+            },
+            "type": "array",
+            "title": "Unknown Crops"
+          },
+          "geometry_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/GeometryMatch"
+            },
+            "type": "object",
+            "title": "Geometry Counts"
+          },
+          "plot_area_ha": {
+            "type": "number",
+            "title": "Plot Area Ha"
+          },
+          "fields": {
+            "$ref": "#/components/schemas/ImportedFieldCollection"
+          },
+          "plots": {
+            "$ref": "#/components/schemas/ImportedPlotCollection"
+          }
+        },
+        "type": "object",
+        "required": [
+          "harvest_year",
+          "reference_year",
+          "reference_years",
+          "blockers",
+          "unknown_crops",
+          "geometry_counts",
+          "plot_area_ha",
+          "fields",
+          "plots"
+        ],
+        "title": "FieldListPreview"
       },
       "FieldProperties": {
         "properties": {
@@ -3000,6 +4946,16 @@
           "name"
         ],
         "title": "FieldRef"
+      },
+      "GeometryMatch": {
+        "type": "string",
+        "enum": [
+          "plot",
+          "area",
+          "field",
+          "none"
+        ],
+        "title": "GeometryMatch"
       },
       "HTTPValidationError": {
         "properties": {
@@ -3122,6 +5078,351 @@
         ],
         "title": "HarvestedProduct"
       },
+      "ImportBatchOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ImportKind"
+          },
+          "harvest_year": {
+            "type": "integer",
+            "title": "Harvest Year"
+          },
+          "source_name": {
+            "type": "string",
+            "title": "Source Name"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "field_count": {
+            "type": "integer",
+            "title": "Field Count"
+          },
+          "plot_count": {
+            "type": "integer",
+            "title": "Plot Count"
+          },
+          "task_count": {
+            "type": "integer",
+            "title": "Task Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "harvest_year",
+          "source_name",
+          "created_by",
+          "created_at",
+          "field_count",
+          "plot_count",
+          "task_count"
+        ],
+        "title": "ImportBatchOut"
+      },
+      "ImportKind": {
+        "type": "string",
+        "enum": [
+          "farmdok_field_list",
+          "farmdok_crop_log"
+        ],
+        "title": "ImportKind"
+      },
+      "ImportProblem": {
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/cropstar_api__farmdok__report__ProblemCode"
+          },
+          "row": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Row"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "row",
+          "detail"
+        ],
+        "title": "ImportProblem"
+      },
+      "ImportedFieldCollection": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "FeatureCollection",
+            "title": "Type",
+            "default": "FeatureCollection"
+          },
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/ImportedFieldFeature"
+            },
+            "type": "array",
+            "title": "Features"
+          }
+        },
+        "type": "object",
+        "required": [
+          "features"
+        ],
+        "title": "ImportedFieldCollection"
+      },
+      "ImportedFieldFeature": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "Feature",
+            "title": "Type",
+            "default": "Feature"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "geometry": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MultiPolygon"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "properties": {
+            "$ref": "#/components/schemas/ImportedFieldProperties"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "geometry",
+          "properties"
+        ],
+        "title": "ImportedFieldFeature"
+      },
+      "ImportedFieldProperties": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "land_use_name": {
+            "type": "string",
+            "title": "Land Use Name"
+          },
+          "declared_area_ha": {
+            "type": "number",
+            "title": "Declared Area Ha"
+          },
+          "geometry_match": {
+            "$ref": "#/components/schemas/GeometryMatch"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "number",
+          "name",
+          "land_use_name",
+          "declared_area_ha",
+          "geometry_match"
+        ],
+        "title": "ImportedFieldProperties"
+      },
+      "ImportedFrom": {
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/ImportKind"
+          },
+          "imported_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Imported At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "imported_at"
+        ],
+        "title": "ImportedFrom",
+        "description": "Where an imported Task came from."
+      },
+      "ImportedPlotCollection": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "FeatureCollection",
+            "title": "Type",
+            "default": "FeatureCollection"
+          },
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/ImportedPlotFeature"
+            },
+            "type": "array",
+            "title": "Features"
+          }
+        },
+        "type": "object",
+        "required": [
+          "features"
+        ],
+        "title": "ImportedPlotCollection"
+      },
+      "ImportedPlotFeature": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "Feature",
+            "title": "Type",
+            "default": "Feature"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "geometry": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MultiPolygon"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "properties": {
+            "$ref": "#/components/schemas/ImportedPlotProperties"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "geometry",
+          "properties"
+        ],
+        "title": "ImportedPlotFeature"
+      },
+      "ImportedPlotProperties": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "field_number": {
+            "type": "integer",
+            "title": "Field Number"
+          },
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "crop": {
+            "type": "string",
+            "title": "Crop"
+          },
+          "land_use_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Land Use Code"
+          },
+          "land_use_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Land Use Name"
+          },
+          "land_use_category": {
+            "$ref": "#/components/schemas/LandUseCategory"
+          },
+          "declared_area_ha": {
+            "type": "number",
+            "title": "Declared Area Ha"
+          },
+          "geometry_match": {
+            "$ref": "#/components/schemas/GeometryMatch"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "field_number",
+          "number",
+          "crop",
+          "land_use_code",
+          "land_use_name",
+          "land_use_category",
+          "declared_area_ha",
+          "geometry_match"
+        ],
+        "title": "ImportedPlotProperties"
+      },
       "InvalidExport": {
         "properties": {
           "code": {
@@ -3155,6 +5456,40 @@
           "detail"
         ],
         "title": "InvalidExportResponse"
+      },
+      "InvalidReport": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "const": "invalid_farmdok_report",
+            "title": "Code",
+            "default": "invalid_farmdok_report"
+          },
+          "problems": {
+            "items": {
+              "$ref": "#/components/schemas/ImportProblem"
+            },
+            "type": "array",
+            "title": "Problems"
+          }
+        },
+        "type": "object",
+        "required": [
+          "problems"
+        ],
+        "title": "InvalidReport"
+      },
+      "InvalidReportResponse": {
+        "properties": {
+          "detail": {
+            "$ref": "#/components/schemas/InvalidReport"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "InvalidReportResponse"
       },
       "InvitationCreate": {
         "properties": {
@@ -3332,6 +5667,24 @@
         ],
         "title": "LandUseCategory"
       },
+      "LandUseOut": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "name"
+        ],
+        "title": "LandUseOut"
+      },
       "Liveness": {
         "properties": {
           "status": {
@@ -3376,6 +5729,112 @@
           "locked_at"
         ],
         "title": "LockOut"
+      },
+      "LogEntryOut": {
+        "properties": {
+          "row": {
+            "type": "integer",
+            "title": "Row"
+          },
+          "performed_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Performed On"
+          },
+          "field_numbers": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Field Numbers"
+          },
+          "crop": {
+            "type": "string",
+            "title": "Crop"
+          },
+          "activity": {
+            "type": "string",
+            "title": "Activity"
+          },
+          "product": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product"
+          }
+        },
+        "type": "object",
+        "required": [
+          "row",
+          "performed_on",
+          "field_numbers",
+          "crop",
+          "activity",
+          "product"
+        ],
+        "title": "LogEntryOut"
+      },
+      "LogInputRef": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/FarmInputKind"
+          },
+          "archived": {
+            "type": "boolean",
+            "title": "Archived"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "archived"
+        ],
+        "title": "LogInputRef"
+      },
+      "LogPlotRef": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "field_number": {
+            "type": "integer",
+            "title": "Field Number"
+          },
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "land_use_name": {
+            "type": "string",
+            "title": "Land Use Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "field_number",
+          "number",
+          "land_use_name"
+        ],
+        "title": "LogPlotRef"
       },
       "Me": {
         "properties": {
@@ -3558,6 +6017,99 @@
         ],
         "title": "MultiPolygon"
       },
+      "NutrientsApplied": {
+        "properties": {
+          "total_n": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total N"
+          },
+          "available_n": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available N"
+          },
+          "p2o5": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P2O5"
+          },
+          "k2o": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "K2O"
+          },
+          "value_source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ValueSource"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference"
+          },
+          "analysed_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysed On"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_n",
+          "available_n",
+          "p2o5",
+          "k2o",
+          "value_source",
+          "source_reference",
+          "analysed_on"
+        ],
+        "title": "NutrientsApplied",
+        "description": "kg per hectare, from the amount and the input's contents; null where unknown."
+      },
       "OperationCompletion": {
         "properties": {
           "actual_details": {
@@ -3691,6 +6243,16 @@
             ],
             "title": "Actual Details"
           },
+          "actual_input": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AppliedInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "completed_by": {
             "anyOf": [
               {
@@ -3722,6 +6284,7 @@
           "operation_type",
           "performed_on",
           "actual_details",
+          "actual_input",
           "completed_by",
           "completed_at"
         ],
@@ -3781,6 +6344,16 @@
             ],
             "title": "Planned Details"
           },
+          "planned_input": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AppliedInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "actual_details": {
             "anyOf": [
               {
@@ -3821,6 +6394,16 @@
               }
             ],
             "title": "Actual Details"
+          },
+          "actual_input": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AppliedInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "performed_on": {
             "anyOf": [
@@ -3870,7 +6453,9 @@
           "plot",
           "status",
           "planned_details",
+          "planned_input",
           "actual_details",
+          "actual_input",
           "performed_on",
           "completed_by",
           "completed_at",
@@ -4055,6 +6640,90 @@
         ],
         "title": "PersonOut"
       },
+      "PlannedTaskOut": {
+        "properties": {
+          "row": {
+            "type": "integer",
+            "title": "Row"
+          },
+          "performed_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Performed On"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "operation_type": {
+            "type": "string",
+            "title": "Operation Type"
+          },
+          "plots": {
+            "items": {
+              "$ref": "#/components/schemas/LogPlotRef"
+            },
+            "type": "array",
+            "title": "Plots"
+          },
+          "details": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TillageDetails"
+              },
+              {
+                "$ref": "#/components/schemas/MechanicalWeedControlDetails"
+              },
+              {
+                "$ref": "#/components/schemas/MulchingDetails"
+              },
+              {
+                "$ref": "#/components/schemas/SowingDetails"
+              },
+              {
+                "$ref": "#/components/schemas/FertilisationDetails"
+              },
+              {
+                "$ref": "#/components/schemas/HarvestDetails"
+              }
+            ],
+            "title": "Details",
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "fertilisation": "#/components/schemas/FertilisationDetails",
+                "harvest": "#/components/schemas/HarvestDetails",
+                "mechanical_weed_control": "#/components/schemas/MechanicalWeedControlDetails",
+                "mulching": "#/components/schemas/MulchingDetails",
+                "sowing": "#/components/schemas/SowingDetails",
+                "tillage": "#/components/schemas/TillageDetails"
+              }
+            }
+          },
+          "farm_input_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Farm Input Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "row",
+          "performed_on",
+          "title",
+          "operation_type",
+          "plots",
+          "details",
+          "farm_input_name"
+        ],
+        "title": "PlannedTaskOut"
+      },
       "PlotCollection": {
         "properties": {
           "type": {
@@ -4091,7 +6760,14 @@
             "title": "Id"
           },
           "geometry": {
-            "$ref": "#/components/schemas/MultiPolygon"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MultiPolygon"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "properties": {
             "$ref": "#/components/schemas/PlotProperties"
@@ -4178,28 +6854,17 @@
         ],
         "title": "Priority"
       },
-      "ProblemCode": {
+      "Problem": {
         "type": "string",
         "enum": [
-          "no_files",
-          "too_large",
-          "unreadable_archive",
-          "conflicting_files",
-          "missing_component",
-          "unreadable_shapefile",
-          "wrong_projection",
-          "unknown_set",
-          "missing_attribute",
-          "not_polygons",
-          "duplicate_set",
-          "missing_set",
-          "missing_harvest_year",
-          "mixed_harvest_years",
-          "invalid_record",
-          "duplicate_area",
-          "plot_without_field"
+          "unknown_activity",
+          "unknown_product",
+          "unit_mismatch",
+          "unknown_field",
+          "unknown_crop",
+          "no_matching_plot"
         ],
-        "title": "ProblemCode"
+        "title": "Problem"
       },
       "RegisterRequest": {
         "properties": {
@@ -4317,6 +6982,18 @@
                 "type": "null"
               }
             ]
+          },
+          "farm_input_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Farm Input Id"
           },
           "rate": {
             "anyOf": [
@@ -4693,6 +7370,16 @@
             ],
             "title": "Planned Details"
           },
+          "planned_input": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AppliedInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "operations": {
             "items": {
               "$ref": "#/components/schemas/OperationOut"
@@ -4706,6 +7393,16 @@
             },
             "type": "array",
             "title": "Allowed Actions"
+          },
+          "imported": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImportedFrom"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -4727,8 +7424,10 @@
           "plots",
           "operation_type",
           "planned_details",
+          "planned_input",
           "operations",
-          "allowed_actions"
+          "allowed_actions",
+          "imported"
         ],
         "title": "TaskOut"
       },
@@ -4992,6 +7691,65 @@
         ],
         "title": "TillageImplement"
       },
+      "UnknownCropOut": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "plot_count": {
+            "type": "integer",
+            "title": "Plot Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "plot_count"
+        ],
+        "title": "UnknownCropOut"
+      },
+      "UnresolvedOut": {
+        "properties": {
+          "problem": {
+            "$ref": "#/components/schemas/Problem"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/LogEntryOut"
+            },
+            "type": "array",
+            "title": "Entries"
+          },
+          "input_kind": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FarmInputKind"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "can_create": {
+            "type": "boolean",
+            "title": "Can Create"
+          }
+        },
+        "type": "object",
+        "required": [
+          "problem",
+          "key",
+          "entries",
+          "input_kind",
+          "can_create"
+        ],
+        "title": "UnresolvedOut"
+      },
       "UploadedFieldCollection": {
         "properties": {
           "type": {
@@ -5244,6 +8002,16 @@
         ],
         "title": "ValidationError"
       },
+      "ValueSource": {
+        "type": "string",
+        "enum": [
+          "standard_value",
+          "lab_analysis",
+          "manufacturer"
+        ],
+        "title": "ValueSource",
+        "description": "Where a Farm Input's nutrient contents come from."
+      },
       "WeedControlImplement": {
         "type": "string",
         "enum": [
@@ -5254,6 +8022,60 @@
           "other"
         ],
         "title": "WeedControlImplement"
+      },
+      "cropstar_api__eama__ProblemCode": {
+        "type": "string",
+        "enum": [
+          "no_files",
+          "too_large",
+          "unreadable_archive",
+          "conflicting_files",
+          "missing_component",
+          "unreadable_shapefile",
+          "wrong_projection",
+          "unknown_set",
+          "missing_attribute",
+          "not_polygons",
+          "duplicate_set",
+          "missing_set",
+          "missing_harvest_year",
+          "mixed_harvest_years",
+          "invalid_record",
+          "duplicate_area",
+          "plot_without_field"
+        ],
+        "title": "ProblemCode"
+      },
+      "cropstar_api__farmdok__crop_log_import__Blocker": {
+        "type": "string",
+        "enum": [
+          "harvest_year_locked",
+          "already_imported",
+          "unresolved"
+        ],
+        "title": "Blocker"
+      },
+      "cropstar_api__farmdok__field_list_import__Blocker": {
+        "type": "string",
+        "enum": [
+          "harvest_year_locked",
+          "harvest_year_not_empty",
+          "unknown_crops"
+        ],
+        "title": "Blocker"
+      },
+      "cropstar_api__farmdok__report__ProblemCode": {
+        "type": "string",
+        "enum": [
+          "unreadable_file",
+          "not_a_field_list",
+          "missing_column",
+          "invalid_row",
+          "duplicate_plot",
+          "empty",
+          "not_a_crop_log"
+        ],
+        "title": "ProblemCode"
       },
       "cropstar_api__routes__auth__FarmOut": {
         "properties": {

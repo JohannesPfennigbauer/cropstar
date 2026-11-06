@@ -12,10 +12,11 @@ setWorkerUrl(workerUrl)
 
 // Deliberately narrow: any GeoJSON MultiPolygon features with an id and a Land Use code.
 // A `color` overrides the Land Use colour, e.g. to show what an upload changes.
+// Areas whose geometry is not known (null) are left off the map.
 interface AreaFeature {
   type: 'Feature'
   id: string
-  geometry: { type: 'MultiPolygon', coordinates: number[][][][] }
+  geometry: { type: 'MultiPolygon', coordinates: number[][][][] } | null
   properties: { land_use_category?: LandUseCategory, color?: string } & Record<string, unknown>
 }
 interface AreaCollection {
@@ -60,10 +61,14 @@ const AREAS_ATTRIBUTION = 'Feldstücke/Schläge: AMA INVEKOS'
 // basemap.at covers Austria only; outside it every tile request would be a 404.
 const AUSTRIA: [number, number, number, number] = [9.4, 46.3, 17.2, 49.1]
 
+function mapped(collection: AreaCollection) {
+  return { type: 'FeatureCollection' as const, features: collection.features.filter(f => f.geometry !== null) }
+}
+
 function plotData() {
   return {
     type: 'FeatureCollection' as const,
-    features: props.plots.features.map(feature => ({
+    features: mapped(props.plots).features.map(feature => ({
       ...feature,
       properties: {
         ...feature.properties,
@@ -76,17 +81,17 @@ function plotData() {
 const EMPTY = { type: 'FeatureCollection' as const, features: [] }
 
 function fieldData() {
-  return props.fields ?? EMPTY
+  return props.fields ? mapped(props.fields) : EMPTY
 }
 
 function removedData() {
-  return props.removed ?? EMPTY
+  return props.removed ? mapped(props.removed) : EMPTY
 }
 
 function bounds(): LngLatBoundsLike | null {
   let west = Infinity, south = Infinity, east = -Infinity, north = -Infinity
   for (const feature of [...props.plots.features, ...(props.removed?.features ?? [])]) {
-    for (const polygon of feature.geometry.coordinates) {
+    for (const polygon of feature.geometry?.coordinates ?? []) {
       for (const ring of polygon) {
         for (const position of ring) {
           const lon = position[0]!

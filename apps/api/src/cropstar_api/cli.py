@@ -11,6 +11,7 @@ from pathlib import Path
 import uvicorn
 from sqlalchemy.orm import Session
 
+from cropstar_api import verify_reference
 from cropstar_api.app import create_app
 from cropstar_api.auth.provider import (
     MAX_PASSWORD_LENGTH,
@@ -43,8 +44,19 @@ def main(argv: list[str] | None = None) -> None:
     )
     seed.add_argument("--email", default="demo@cropstar.local")
     seed.add_argument("--password", default="cropstar-demo")
+    verify = commands.add_parser(
+        "verify-reference",
+        help="check a Farm on a Cropstar instance against its eAMA and farmdok reports",
+    )
+    verify.add_argument("directory", type=Path, help="folder with the reports")
+    verify.add_argument("--base-url", default="http://localhost:8000")
+    verify.add_argument("--email", required=True, help="a member of the Farm")
+    verify.add_argument("--farm", required=True, help="the Farm's name or id")
 
     args = parser.parse_args(argv)
+    if args.command == "verify-reference":
+        # Talks to an instance over HTTP; needs no database or settings of its own.
+        sys.exit(verify_reference.run(args.base_url, args.email, args.farm, args.directory))
     # Makes Alembic report which migrations ran.
     logging.basicConfig(level=logging.INFO, format="%(levelname)s:     %(name)s: %(message)s")
     settings = Settings()

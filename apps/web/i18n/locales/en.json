@@ -442,7 +442,9 @@
       "plotCount": "{n} plot | {n} plots",
       "provenance": {
         "eama_export": "As declared to AMA · harvest year {year} · uploaded {date}",
-        "invekos_open_data": "Public INVEKOS data (AMA, CC BY 4.0) · harvest year {year}"
+        "invekos_open_data": "Public INVEKOS data (AMA, CC BY 4.0) · harvest year {year}",
+        "borrowed": "Provisional geometry, borrowed from harvest year {from} · imported on {date}",
+        "none": "Without geometry · imported on {date}"
       },
       "upload": "Upload areas",
       "field": "Field {number}",
@@ -457,14 +459,19 @@
       "source": "Source",
       "sourceValue": {
         "eama_export": "AMA application {year}, uploaded {date}",
-        "invekos_open_data": "Public INVEKOS data {year} (AMA, CC BY 4.0)"
+        "invekos_open_data": "Public INVEKOS data {year} (AMA, CC BY 4.0)",
+        "borrowed": "Provisional: geometry from harvest year {from}, areas from farmdok (imported on {date})",
+        "none": "No geometry known; areas from farmdok (imported on {date})"
       },
       "tasks": "Tasks",
       "log": "Operation log",
       "category": "Category",
       "newTask": "New task",
       "noTasks": "No open tasks for this plot.",
-      "logEmpty": "No completed operations on this plot yet."
+      "logEmpty": "No completed operations on this plot yet.",
+      "withoutGeometry": "{n} plot without geometry | {n} plots without geometry",
+      "provisional": "provisional",
+      "noGeometry": "no geometry"
     },
     "landUseCategory": {
       "cereals": "Cereals",
@@ -572,7 +579,9 @@
       "plotRef": "Plot {field}.{plot}",
       "wholeFarm": "Whole farm",
       "searchAreas": "Search …",
-      "areasHelp": "Fields and plots of harvest year {year}. Without an area, the task is for the whole farm."
+      "areasHelp": "Fields and plots of harvest year {year}. Without an area, the task is for the whole farm.",
+      "source": "Source",
+      "importedFrom": "Imported from farmdok on {date}"
     },
     "roles": {
       "admin": "Admin",
@@ -633,7 +642,11 @@
         "forbidden_for_role": "Only admins can do that.",
         "member_not_found": "This member no longer exists.",
         "invitation_not_found": "This invitation no longer exists.",
-        "harvest_year_not_found": "This farm has no such harvest year."
+        "harvest_year_not_found": "This farm has no such harvest year.",
+        "import_in_use": "Tasks refer to imported areas. Delete or change them first.",
+        "harvest_year_locked": "The harvest year is locked. Unlock it first.",
+        "import_batch_not_found": "This import no longer exists.",
+        "import_edited": "Imported tasks were changed since. Undoing would discard those changes."
       },
       "harvestYears": {
         "title": "Harvest years",
@@ -645,6 +658,218 @@
         "didLock": "Harvest year {year} locked.",
         "didUnlock": "Harvest year {year} unlocked.",
         "empty": "No harvest years yet – they arrive with the field import."
+      }
+    },
+    "farmInputs": {
+      "title": "Farm inputs",
+      "lead": "Your farm's fertilisers, seed and other inputs. Operations refer to them, and nutrients applied follow from their contents – always with their source.",
+      "cardLead": "Fertilisers with nutrient contents and their source, seed and other inputs.",
+      "open": "Open farm inputs",
+      "new": "New input",
+      "newTitle": "New farm input",
+      "newLead": "Contents always refer to the chosen unit.",
+      "create": "Create",
+      "created": "Farm input created.",
+      "saved": "Saved.",
+      "deleted": "Farm input deleted.",
+      "archive": "Archive",
+      "restore": "Restore",
+      "delete": "Delete",
+      "deleteTitle": "Delete for good?",
+      "deleteWarning": "The input disappears completely. If you just no longer use it, archive it instead.",
+      "deleteForever": "Delete for good",
+      "did": {
+        "archive": "Archived – no longer offered.",
+        "restore": "Restored."
+      },
+      "archived": "Archived",
+      "archivedHint": "Archived: not offered for new operations, still shown on past ones.",
+      "inUseHint": "Operations refer to it – archive instead of deleting.",
+      "showArchived": "Show {n} archived | Show {n} archived",
+      "hideArchived": "Hide archived",
+      "kinds": {
+        "fertiliser": "Fertiliser",
+        "seed": "Seed",
+        "other": "Other"
+      },
+      "kindsPlural": {
+        "fertiliser": "Fertilisers",
+        "seed": "Seed",
+        "other": "Other inputs"
+      },
+      "empty": {
+        "fertiliser": "No fertilisers yet. Start e.g. with slurry or manure from the catalogue.",
+        "seed": "No seed yet.",
+        "other": "No other inputs yet."
+      },
+      "units": {
+        "t": "per tonne (t)",
+        "m3": "per cubic metre (m³)",
+        "100kg": "per 100 kg (≙ %)"
+      },
+      "unitsShort": {
+        "t": "t",
+        "m3": "m³",
+        "100kg": "100 kg"
+      },
+      "per": "per {unit}",
+      "contentsPer": "Contents in kg per {unit}",
+      "percentHint": "For mineral fertilisers: kg per 100 kg equals the content in %.",
+      "availableShort": "({n} available this year)",
+      "availableOnly": "{n} kg N available this year",
+      "tkw": "TKW {g} g",
+      "fields": {
+        "kind": "Kind",
+        "name": "Name",
+        "unit": "Unit",
+        "dry_matter_percent": "Dry matter (%)",
+        "total_n": "Total N",
+        "available_n": "Available N",
+        "p2o5": "P₂O₅",
+        "k2o": "K₂O",
+        "value_source": "Source of values",
+        "analysed_on": "Analysed on",
+        "land_use": "Crop (AMA land use)",
+        "variety": "Variety",
+        "thousand_kernel_weight_g": "Thousand-kernel weight (g)"
+      },
+      "sources": {
+        "standard_value": "Standard value",
+        "lab_analysis": "Lab analysis",
+        "manufacturer": "Manufacturer"
+      },
+      "referenceLabel": {
+        "standard_value": "Reference",
+        "lab_analysis": "Lab / sample",
+        "manufacturer": "Product / data sheet"
+      },
+      "sourceHelp": "Every number needs its source. Your own lab analysis is the most accurate.",
+      "fromCatalogue": "Start from catalogue",
+      "fromCatalogueHelp": "Standard values for undiluted farm manure, derived from the Austrian guidelines for appropriate fertilisation (8th edition). Values are copied – your changes affect only your farm.",
+      "chooseEntry": "Choose a farm manure …",
+      "searchCatalogue": "Search the catalogue",
+      "searchLandUse": "Search land uses",
+      "copiedFrom": "Values copied from the catalogue: {name}. Dilution and your own feeding change the contents – an analysis replaces them.",
+      "errors": {
+        "name_required": "Enter a name.",
+        "land_use_required": "Choose the crop the seed is for.",
+        "negative": "Contents cannot be negative.",
+        "percent": "Dry matter lies between 0 and 100 %.",
+        "available_above_total": "Available N cannot exceed total N.",
+        "value_source_required": "Say where the values come from.",
+        "analysed_on_required": "Enter the date of the lab analysis.",
+        "unit_required": "Choose a unit.",
+        "farm_input_in_use": "Operations refer to it. Archive it instead.",
+        "forbidden_for_role": "Only admins and workers keep the farm inputs.",
+        "unknown": "That did not work. Please try again."
+      }
+    },
+    "farmdokImport": {
+      "cardTitle": "Import from farmdok",
+      "cardLead": "Older harvest years without eAMA export: fields and plots from the farmdok field list, with provisional geometry.",
+      "start": "Import field list",
+      "title": "Import a field list from farmdok",
+      "lead": "For a harvest year without eAMA export. Geometry is borrowed provisionally from a year with an eAMA export – by field and plot number.",
+      "file": "Drop the field list (.xls) here",
+      "fileHint": "In farmdok, export Reports › Feldstücksliste as Excel.",
+      "invalid": "The file cannot be read as a field list",
+      "referenceYear": "Borrow geometry from",
+      "noReference": "No harvest year with eAMA export – the plots get no geometry.",
+      "geometrySummary": "Geometry: {plot} plots by field and plot number, {area} by their area (renumbered in eAMA), {field} by their field, {none} without.",
+      "match": {
+        "plot": "plot borrowed",
+        "area": "plot by area",
+        "field": "field borrowed",
+        "none": "no geometry"
+      },
+      "unknownCrops": "Unknown crops",
+      "unknownCropsLead": "These farmdok names do not map to one AMA land use. Choose it yourself.",
+      "chooseLandUse": "Choose a land use …",
+      "provisionalHint": "Borrowed geometry stays marked as provisional. Uploading the eAMA export for the year later replaces it.",
+      "confirm": "Import",
+      "done": "Harvest year {year} imported",
+      "doneDetail": "{fields} fields and {plots} plots from farmdok.",
+      "undo": "Undo",
+      "undone": "Import undone.",
+      "kinds": {
+        "farmdok_field_list": "farmdok field list",
+        "farmdok_crop_log": "farmdok crop production log"
+      },
+      "batchDetail": "{fields} fields, {plots} plots · {file}",
+      "blockers": {
+        "harvest_year_locked": "Harvest year {year} is locked.",
+        "harvest_year_not_empty": "Harvest year {year} already has fields and plots. The field list only creates new years."
+      },
+      "errors": {
+        "forbidden_for_role": "Only admins import.",
+        "harvest_year_locked": "The harvest year is locked.",
+        "harvest_year_not_empty": "The harvest year already has fields and plots.",
+        "unknown_crops": "Assign all unknown crops first.",
+        "invalid_reference_year": "Geometry cannot be borrowed from this harvest year.",
+        "invalid_crop_assignments": "The crop assignment no longer fits. Show the preview again.",
+        "upload_too_large": "The file is too large (max. 20 MB).",
+        "unknown": "That did not work. Please try again."
+      },
+      "problems": {
+        "unreadable_file": "The file cannot be opened. Is it farmdok's Excel export (.xls)?",
+        "not_a_field_list": "This is not a farmdok field list.",
+        "missing_column": "The column \"{detail}\" is missing.",
+        "invalid_row": "Row {row}: {detail}",
+        "duplicate_plot": "Row {row}: plot {detail} appears twice.",
+        "empty": "The list contains no plots.",
+        "not_a_crop_log": "This is not a farmdok crop production log."
+      },
+      "back": "Another file"
+    },
+    "farmdokLog": {
+      "start": "Import crop production log",
+      "title": "Import a crop production log from farmdok",
+      "lead": "Every entry becomes a done task with one operation per plot – matched by field number and crop. Create the harvest year's areas first.",
+      "file": "Drop the crop production log (.xls) here",
+      "fileHint": "In farmdok, export Reports › Pflanzenbaujournal as Excel.",
+      "invalid": "The file cannot be read as a crop production log",
+      "entries": "Entries",
+      "tasks": "Tasks",
+      "skipped": "Skipped",
+      "taskCount": "{tasks} with {operations} operations",
+      "unresolvedTitle": "1 open question | {n} open questions",
+      "unresolvedLead": "What Cropstar cannot assign on its own. Your answers on activities and products are remembered for later imports.",
+      "unknownActivity": "Unknown activity \"{name}\"",
+      "unknownProduct": "Unknown product \"{name}\"",
+      "unitMismatch": "\"{name}\": the chosen fertiliser's contents do not fit the amount's unit",
+      "entryCount": "{n} entry | {n} entries",
+      "chooseType": "Choose an operation type …",
+      "skipActivity": "Skip these entries",
+      "chooseInput": "Choose a farm input …",
+      "createInput": "Create \"{name}\"",
+      "withoutInput": "Without farm input (name as note)",
+      "choosePlots": "Choose plots …",
+      "assign": "Assign",
+      "skipEntry": "Skip",
+      "fields": "Field {fields}",
+      "problems": {
+        "unknown_field": "The field does not exist in this harvest year",
+        "unknown_crop": "The crop maps to no land use",
+        "no_matching_plot": "No plot with this crop on the field"
+      },
+      "planned": "These tasks will be created",
+      "newInputs": "Will be created: {names}",
+      "confirm": "Import",
+      "done": "Crop production log {year} imported",
+      "doneDetail": "{tasks} done tasks from farmdok.",
+      "batchDetail": "{tasks} tasks · {file}",
+      "blockers": {
+        "harvest_year_locked": "Harvest year {year} is locked.",
+        "already_imported": "The crop production log {year} was imported already. Undo that import first."
+      },
+      "errors": {
+        "forbidden_for_role": "Only admins import.",
+        "harvest_year_locked": "The harvest year is locked.",
+        "already_imported": "This harvest year was imported already.",
+        "unresolved": "Answer all open questions first.",
+        "invalid_resolutions": "The answers no longer fit the file. Show the preview again.",
+        "upload_too_large": "The file is too large (max. 20 MB).",
+        "unknown": "That did not work. Please try again."
       }
     },
     "invite": {
@@ -708,7 +933,11 @@
         "yield_t_per_ha": "Yield (t/ha, at harvest moisture)",
         "moisture_percent": "Moisture (%)",
         "crude_protein_percent": "Crude protein (% of DM)",
-        "note": "Note"
+        "note": "Note",
+        "input": {
+          "seed": "Seed",
+          "fertiliser": "Fertiliser"
+        }
       },
       "values": {
         "tillageImplement": {
@@ -764,16 +993,14 @@
         "moisture_percent": "{n} % moisture",
         "crude_protein_percent": "{n} % crude protein"
       },
-      "noteHint": {
-        "sowing": "What was sown (crop, variety, mixture) – until farm inputs can be recorded in Cropstar.",
-        "fertilisation": "Which fertiliser (e.g. cattle slurry, compost) – until farm inputs can be recorded in Cropstar."
-      },
       "errors": {
         "negative": "Values cannot be negative.",
         "percent": "Percentages lie between 0 and 100.",
         "tooLarge": "Depth lies between 0 and 100 cm.",
         "unitMissing": "An amount needs its unit."
-      }
+      },
+      "noInputs": "Add some under Farm › Farm inputs to choose them here.",
+      "nutrientsApplied": "≙ {nutrients} per ha"
     }
   }
 }

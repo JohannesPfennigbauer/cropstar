@@ -435,6 +435,12 @@ async function remove() {
             <dt>{{ t('app.tasks.completedBy') }}</dt>
             <dd>{{ person(task.completed_by) }} · {{ moment(task.completed_at) }}</dd>
           </template>
+          <template v-if="task.imported">
+            <dt>{{ t('app.tasks.source') }}</dt>
+            <dd data-testid="task-imported">
+              {{ t('app.tasks.importedFrom', { date: moment(task.imported.imported_at) }) }}
+            </dd>
+          </template>
         </dl>
       </UForm>
     </template>

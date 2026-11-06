@@ -1,0 +1,13 @@
+# farmdok crop names whose AMA Land Use code is unambiguous but whose wording differs from
+# AMA's. Verified against an eAMA export of the same Plots (Harvest Year 2026) where noted;
+# the others follow from AMA's code list by name.
+farmdok_name,ama_code,evidence
+Winterweichweizen < 14 % Rohprotein,138,eAMA 2026
+Sojabohne,308,eAMA 2026
+Sommerbraugerste,111,eAMA 2026
+Luzerne 2 Nutzungen (>90% Legum.),635,eAMA 2026
+Biodiversitätsfläche,771,eAMA 2026 (declared as GRÜNBRACHE)
+sonstige Ackerfläche,661,AMA code list (SONSTIGE ACKERFLÄCHEN)
+"Sonstiges Feldfutter 1 Nutzung, gräserreich (<40% Leg.)",679,AMA code list (SONSTIGES FELDFUTTER)
+Winterweichweizen ≥ 14 % Rohprotein,138,AMA declares wheat without protein class (WINTERWEICHWEIZEN)
+Klee 2 Nutzungen (>90% Legum.),633,AMA code list (KLEE); like Luzerne 2 Nutzungen

@@ -3,12 +3,19 @@ from datetime import UTC, date, datetime, timedelta
 
 import pytest
 
-from cropstar_api.models import Role, Task, TaskStatus
-from cropstar_api.operation_details import FertilisationDetails, TillageDetails, TillageImplement
+from cropstar_api.models import FarmInput, FarmInputKind, FarmInputUnit, Role, Task, TaskStatus
+from cropstar_api.operation_details import (
+    FertilisationDetails,
+    SowingDetails,
+    TillageDetails,
+    TillageImplement,
+)
 from cropstar_api.policy import Action
 from cropstar_api.tasks.lifecycle import (
     DetailsTypeMismatchError,
     DetailsWithoutOperationTypeError,
+    FarmInputKindError,
+    FarmInputNotFoundError,
     ForbiddenError,
     InvalidTransitionError,
     NewTask,
@@ -16,6 +23,7 @@ from cropstar_api.tasks.lifecycle import (
     OperationFieldsError,
     OperationNeedsPlotsError,
     TaskLifecycle,
+    UnitMismatchError,
     UnknownOperationTypeError,
 )
 from tests.test_task_lifecycle import FARM, Clock, InMemoryTasks, member
@@ -262,3 +270,48 @@ def test_details_must_be_of_the_tasks_operation_type(s: Setup) -> None:
 def test_general_tasks_have_no_planned_details(s: Setup) -> None:
     with pytest.raises(DetailsWithoutOperationTypeError):
         s.lifecycle.create(s.worker, FARM, NewTask("Zaun", planned_details=cultivate(2)))
+
+
+def _input(s: Setup, kind: FarmInputKind, unit: FarmInputUnit | None = None) -> FarmInput:
+    item = FarmInput(id=uuid.uuid4(), farm_id=FARM, kind=kind, name=str(kind), unit=unit)
+    s.repo.inputs.append(item)
+    return item
+
+
+def _sow(s: Setup, details: SowingDetails) -> Task:
+    new = NewTask(
+        "Säen",
+        operation_type="sowing",
+        plot_ids=frozenset({s.plots[0].id}),
+        planned_details=details,
+    )
+    return s.lifecycle.create(s.worker, FARM, new)
+
+
+def test_sowing_refers_to_seed_of_the_farm(s: Setup) -> None:
+    seed = _input(s, FarmInputKind.SEED)
+    slurry = _input(s, FarmInputKind.FERTILISER, FarmInputUnit.CUBIC_METRE)
+
+    task = _sow(s, SowingDetails(farm_input_id=seed.id))
+
+    assert task.planned_details == {"type": "sowing", "farm_input_id": str(seed.id)}
+    with pytest.raises(FarmInputKindError):
+        _sow(s, SowingDetails(farm_input_id=slurry.id))
+    with pytest.raises(FarmInputNotFoundError):
+        _sow(s, SowingDetails(farm_input_id=uuid.uuid4()))
+
+
+def test_fertilisation_amounts_must_fit_the_inputs_unit(s: Setup) -> None:
+    slurry = _input(s, FarmInputKind.FERTILISER, FarmInputUnit.CUBIC_METRE)
+    task = s.lifecycle.create(
+        s.worker,
+        FARM,
+        NewTask("Gülle", operation_type="fertilisation", plot_ids=frozenset({s.plots[0].id})),
+    )
+    by_volume = FertilisationDetails(farm_input_id=slurry.id, amount=20, unit="m3_per_ha")
+    by_mass = FertilisationDetails(farm_input_id=slurry.id, amount=20, unit="t_per_ha")
+
+    s.lifecycle.complete_operation(s.worker, FARM, task.id, s.op(task, 1), by_volume)
+    s.lifecycle.reopen_operation(s.worker, FARM, task.id, s.op(task, 1))
+    with pytest.raises(UnitMismatchError):
+        s.lifecycle.complete_operation(s.worker, FARM, task.id, s.op(task, 1), by_mass)

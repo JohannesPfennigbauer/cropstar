@@ -5,6 +5,23 @@ test('plots, an Operation on two of them, its log, and a locked season', async (
   const { email, password } = seedDemoAdmin('e2e-happy-path')
   await signIn(page, email, password)
 
+  // A fertiliser with its contents and their source, as kept under Farm › Farm inputs.
+  const me = await (await page.request.get('/api/me')).json()
+  const created = await page.request.post(`/api/farms/${me.memberships[0].farm.id}/farm-inputs`, {
+    data: {
+      kind: 'fertiliser',
+      name: 'Rindergülle',
+      unit: 'm3',
+      total_n: 3.51,
+      available_n: 2.14,
+      p2o5: 1.39,
+      k2o: 6.94,
+      value_source: 'standard_value',
+      source_reference: 'RSD, 8. Auflage'
+    }
+  })
+  expect(created.status()).toBe(201)
+
   // The seeded Plots are on the list and on the map.
   await page.getByRole('link', { name: 'Schläge', exact: true }).click()
   await expect(page.getByRole('link', { name: /Winterroggen/ })).toBeVisible()
@@ -25,10 +42,12 @@ test('plots, an Operation on two of them, its log, and a locked season', async (
     await expect(page.getByRole('listbox')).toBeHidden({ timeout: 500 })
   }).toPass()
   const plan = editor.getByTestId('planned-details')
+  await plan.getByTestId('details-farm_input_id').click()
+  await page.getByRole('option', { name: 'Rindergülle' }).click()
+  // Choosing slurry with contents per m³ leaves only units by volume.
+  await expect(plan.getByTestId('details-unit')).toHaveText('m³/ha')
   await plan.getByLabel('Menge je ha').fill('20')
-  await plan.getByTestId('details-unit').click()
-  await page.getByRole('option', { name: 'm³/ha' }).click()
-  await plan.getByLabel('Notiz').fill('Rindergülle, Schleppschuh')
+  await plan.getByLabel('Notiz').fill('Schleppschuh')
   await editor.getByRole('button', { name: 'Anlegen' }).click()
 
   const row = page.getByTestId('task-row').filter({ hasText: 'Gülle ausbringen' })
@@ -39,7 +58,7 @@ test('plots, an Operation on two of them, its log, and a locked season', async (
   const completion = page.getByRole('dialog', { name: 'Gülle ausbringen erledigen' })
   const rows = completion.getByTestId('complete-row')
   await expect(rows.first().getByLabel('Menge je ha')).toHaveValue('20')
-  await expect(rows.first().getByLabel('Notiz')).toHaveValue('Rindergülle, Schleppschuh')
+  await expect(rows.first().getByLabel('Notiz')).toHaveValue('Schleppschuh')
   await rows.nth(1).getByRole('checkbox').click()
   await rows.first().getByLabel('Menge je ha').fill('18')
   await completion.getByTestId('record-operations').click()
@@ -48,7 +67,9 @@ test('plots, an Operation on two of them, its log, and a locked season', async (
   await page.getByRole('link', { name: 'Schläge', exact: true }).click()
   await page.getByRole('link', { name: /Winterroggen/ }).click()
   await expect(page.getByTestId('operation-log')).toContainText('Düngung · Gülle ausbringen')
-  await expect(page.getByTestId('operation-log')).toContainText('18 m³/ha · Rindergülle, Schleppschuh')
+  await expect(page.getByTestId('operation-log')).toContainText('Rindergülle · 18 m³/ha · Schleppschuh')
+  await expect(page.getByTestId('nutrients-applied')).toContainText('≙ 63,2 kg N (38,5 jahreswirksam) · 25 kg P₂O₅ · 124,9 kg K₂O je ha')
+  await expect(page.getByTestId('nutrients-applied')).toContainText('Richtwert · RSD, 8. Auflage')
   const plotPage = page.url()
 
   // The season is closed: everything referring to it becomes read-only.

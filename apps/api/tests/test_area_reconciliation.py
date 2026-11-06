@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Any
 
 import pytest
-from shapely.geometry import box, shape
+from shapely.geometry import Polygon, box, shape
 
 from cropstar_api.area_reconciliation import (
     AreaChange,
@@ -288,3 +288,13 @@ def test_geometry_from_elsewhere_counts_as_changed() -> None:
 def test_invalid_assignments_are_refused(assignments: dict[str, uuid.UUID | None]) -> None:
     with pytest.raises(InvalidAssignmentError):
         reconcile([FIELD], [LEFT, RIGHT], same_export(), assignments)
+
+
+def test_an_area_without_geometry_is_assigned_by_hand() -> None:
+    unknown_ground = ExistingArea(**{**LEFT.__dict__, "geometry": Polygon(), "from_eama": False})
+
+    open_ = reconcile([FIELD], [unknown_ground, RIGHT], same_export(), {})
+    assigned = reconcile([FIELD], [unknown_ground, RIGHT], same_export(), {"plot-1-1": LEFT.id})
+
+    assert (open_.plots[0].status, open_.plots[0].candidates) == (AreaStatus.UNDECIDED, ())
+    assert assigned.plots[0].changes == (AreaChange.GEOMETRY, AreaChange.SOURCE)

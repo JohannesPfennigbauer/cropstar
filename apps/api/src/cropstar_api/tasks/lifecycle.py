@@ -13,8 +13,24 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from typing import Any, Protocol
 
-from cropstar_api.models import Field, Operation, Plot, Priority, Role, Task, TaskStatus
-from cropstar_api.operation_details import OperationDetails, to_stored
+from cropstar_api.models import (
+    FarmInput,
+    FarmInputKind,
+    Field,
+    Operation,
+    Plot,
+    Priority,
+    Role,
+    Task,
+    TaskStatus,
+)
+from cropstar_api.nutrients import compatible
+from cropstar_api.operation_details import (
+    FertilisationDetails,
+    OperationDetails,
+    SowingDetails,
+    to_stored,
+)
 from cropstar_api.policy import (
     TASK_ACTIONS,
     Action,
@@ -44,6 +60,8 @@ class TaskRepository(Protocol):
     def operation_type_exists(self, code: str) -> bool: ...
 
     def locked_years(self, farm_id: uuid.UUID) -> frozenset[int]: ...
+
+    def farm_input(self, farm_id: uuid.UUID, input_id: uuid.UUID) -> FarmInput | None: ...
 
 
 class TaskError(Exception):
@@ -104,6 +122,22 @@ class DetailsWithoutOperationTypeError(TaskError):
 
 class DetailsTypeMismatchError(TaskError):
     code = "details_type_mismatch"
+
+
+class FarmInputNotFoundError(TaskError):
+    code = "farm_input_not_found"
+
+
+class FarmInputKindError(TaskError):
+    """Sowing takes seed, fertilisation a fertiliser."""
+
+    code = "farm_input_wrong_kind"
+
+
+class UnitMismatchError(TaskError):
+    """An amount in m³/ha cannot be applied with contents per t, and so on."""
+
+    code = "unit_mismatch"
 
 
 class OperationDoneError(TaskError):
@@ -171,7 +205,7 @@ class TaskLifecycle:
             if not self._repository.operation_type_exists(new.operation_type):
                 raise UnknownOperationTypeError(new.operation_type)
             self._check_operation_areas(new.field_ids, new.plot_ids)
-        planned = _stored_details(new.operation_type, new.planned_details)
+        planned = self._stored_details(farm_id, new.operation_type, new.planned_details)
         self._check_assignee(farm_id, new.assignee_id)
         now = self._clock()
         task = Task(
@@ -212,7 +246,9 @@ class TaskLifecycle:
         self._require(actor, Action.EDIT_TASK, task)
         if "planned_details" in changes:
             changes = changes | {
-                "planned_details": _stored_details(task.operation_type, changes["planned_details"])
+                "planned_details": self._stored_details(
+                    farm_id, task.operation_type, changes["planned_details"]
+                )
             }
         if "assignee_id" in changes:
             self._check_assignee(farm_id, changes["assignee_id"])
@@ -278,7 +314,7 @@ class TaskLifecycle:
         task, operation = self._operation(
             actor, farm_id, task_id, operation_id, Action.COMPLETE_TASK
         )
-        actual = _stored_details(task.operation_type, actual_details)
+        actual = self._stored_details(farm_id, task.operation_type, actual_details)
         self._complete(operation, actor, self._clock(), actual, performed_on)
         return self._touch(task)
 
@@ -323,7 +359,7 @@ class TaskLifecycle:
         task, operation = self._operation(actor, farm_id, task_id, operation_id, Action.EDIT_TASK)
         for name, value in changes.items():
             if name in ("planned_details", "actual_details"):
-                value = _stored_details(task.operation_type, value)
+                value = self._stored_details(farm_id, task.operation_type, value)
             setattr(operation, name, value)
         return self._touch(task)
 
@@ -532,14 +568,34 @@ class TaskLifecycle:
         if role is None or not can_be_assigned(role):
             raise InvalidAssigneeError(str(assignee_id))
 
+    def _stored_details(
+        self, farm_id: uuid.UUID, operation_type: str | None, details: OperationDetails | None
+    ) -> dict[str, Any] | None:
+        if details is None:
+            return None
+        if operation_type is None:
+            raise DetailsWithoutOperationTypeError("a general Task has no Planned Details")
+        if details.type != operation_type:
+            raise DetailsTypeMismatchError(f"{details.type} details for a {operation_type} Task")
+        if isinstance(details, SowingDetails | FertilisationDetails):
+            self._check_farm_input(farm_id, details)
+        return to_stored(details)
 
-def _stored_details(
-    operation_type: str | None, details: OperationDetails | None
-) -> dict[str, Any] | None:
-    if details is None:
-        return None
-    if operation_type is None:
-        raise DetailsWithoutOperationTypeError("a general Task has no Planned Details")
-    if details.type != operation_type:
-        raise DetailsTypeMismatchError(f"{details.type} details for a {operation_type} Task")
-    return to_stored(details)
+    def _check_farm_input(
+        self, farm_id: uuid.UUID, details: SowingDetails | FertilisationDetails
+    ) -> None:
+        if details.farm_input_id is None:
+            return
+        found = self._repository.farm_input(farm_id, details.farm_input_id)
+        if found is None:
+            raise FarmInputNotFoundError(str(details.farm_input_id))
+        wanted = FarmInputKind.SEED if details.type == "sowing" else FarmInputKind.FERTILISER
+        if found.kind is not wanted:
+            raise FarmInputKindError(f"{details.type} needs a {wanted}")
+        if (
+            isinstance(details, FertilisationDetails)
+            and details.unit is not None
+            and found.unit is not None
+            and not compatible(details.unit, found.unit)
+        ):
+            raise UnitMismatchError(f"{details.unit} with contents per {found.unit}")

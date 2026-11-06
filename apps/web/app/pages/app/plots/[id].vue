@@ -143,7 +143,8 @@ useSeoMeta({ title })
               <dd class="text-highlighted">
                 {{ t(`app.plots.sourceValue.${plot.properties.provenance.source}`, {
                   year: plot.properties.harvest_year,
-                  date: moment(plot.properties.provenance.imported_at)
+                  date: moment(plot.properties.provenance.imported_at),
+                  from: plot.properties.provenance.borrowed_from_year
                 }) }}
               </dd>
             </dl>
@@ -225,7 +226,8 @@ useSeoMeta({ title })
                 <span
                   v-if="entry.actual_details"
                   class="block text-toned"
-                >{{ summary(entry.actual_details) }}</span>
+                >{{ summary(entry.actual_details, entry.actual_input) }}</span>
+                <AppNutrientsApplied :applied="entry.actual_input" />
                 <span class="block text-xs text-dimmed">{{ entry.completed_by?.email ?? t('app.tasks.formerMember') }}</span>
               </li>
             </ol>

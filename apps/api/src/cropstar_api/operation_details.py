@@ -7,6 +7,7 @@ area share when Plots are split or merged. Pure: no database, no Farm.
 """
 
 import enum
+import uuid
 from typing import Annotated, Any, Literal, Self
 
 from pydantic import (
@@ -80,8 +81,7 @@ class HarvestedProduct(enum.StrEnum):
 class _Details(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    # Anything the structured fields do not cover. Until Farm Inputs exist, also what was
-    # sown or spread.
+    # Anything the structured fields do not cover.
     note: Note | None = None
 
     @field_validator("note")
@@ -109,6 +109,8 @@ class MulchingDetails(_Details):
 class SowingDetails(_Details):
     type: Literal["sowing"] = "sowing"
     purpose: SowingPurpose | None = None
+    # Seed from the Farm Inputs.
+    farm_input_id: uuid.UUID | None = None
     rate: PerHectare | None = None
     unit: SowingUnit | None = None
 
@@ -120,6 +122,8 @@ class SowingDetails(_Details):
 
 class FertilisationDetails(_Details):
     type: Literal["fertilisation"] = "fertilisation"
+    # A fertiliser from the Farm Inputs; its contents turn the amount into nutrients.
+    farm_input_id: uuid.UUID | None = None
     amount: PerHectare | None = None
     unit: FertilisationUnit | None = None
 

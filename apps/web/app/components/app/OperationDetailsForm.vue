@@ -1,12 +1,25 @@
 <script setup lang="ts">
 import type { DetailField, OperationDetails } from '~/utils/operation-details'
-import { DETAIL_FIELDS } from '~/utils/operation-details'
+import { DETAIL_FIELDS, unitsFor } from '~/utils/operation-details'
 
 /** The structured form for one Operation's Planned or Actual Details. */
 const details = defineModel<OperationDetails>({ required: true })
 defineProps<{ size?: 'sm' | 'md' }>()
 
-const { t, te } = useI18n()
+const { t } = useI18n()
+const api = useApi()
+const { farm } = useAuth()
+
+const { data: farmInputs } = useAsyncData(
+  () => `farm-inputs-picker-${farm.value?.id}`,
+  async () => {
+    if (!farm.value) return []
+    return (await api.GET('/api/farms/{farm_id}/farm-inputs', {
+      params: { path: { farm_id: farm.value.id } }
+    })).data ?? []
+  },
+  { watch: [() => farm.value?.id] }
+)
 
 // Reka's select cannot hold an empty value, so "nothing chosen" has its own.
 const NONE = '__none'
@@ -27,12 +40,47 @@ function setNumber(key: string, raw: unknown) {
   set(key, Number.isNaN(parsed) ? undefined : parsed)
 }
 
+const chosenInput = computed(() => {
+  const id = values.value.farm_input_id
+  return (farmInputs.value ?? []).find(i => i.id === id) ?? null
+})
+
 function choiceItems(field: DetailField) {
   if (field.kind !== 'choice') return []
+  // Once a fertiliser is chosen, only units that fit its contents make sense.
+  const fitting = field.key === 'unit' && details.value.type === 'fertilisation' ? unitsFor(chosenInput.value?.unit) : null
   return [
     { label: '–', value: NONE },
-    ...field.options.map(option => ({ label: t(`app.details.values.${field.group}.${option}`), value: option }))
+    ...field.options
+      .filter(option => !fitting || fitting.includes(option))
+      .map(option => ({ label: t(`app.details.values.${field.group}.${option}`), value: option }))
   ]
+}
+
+function inputItems(field: DetailField) {
+  if (field.kind !== 'input') return []
+  const current = values.value.farm_input_id
+  // Archived inputs are not offered, but one already chosen stays visible.
+  const offered = (farmInputs.value ?? []).filter(i => i.kind === field.inputKind && (!i.archived_at || i.id === current))
+  return [
+    { label: '–', value: NONE },
+    ...offered.map(i => ({
+      label: i.archived_at ? `${i.name} (${t('app.farmInputs.archived')})` : i.name,
+      value: i.id
+    }))
+  ]
+}
+
+function setInput(value: string) {
+  const id = value === NONE ? undefined : value
+  const next: Record<string, unknown> = { ...details.value, farm_input_id: id }
+  if (details.value.type === 'fertilisation') {
+    // The model updates only after the parent re-renders, so look the input up directly.
+    const fitting = unitsFor((farmInputs.value ?? []).find(i => i.id === id)?.unit)
+    const unit = next.unit
+    if (fitting && (typeof unit !== 'string' || !fitting.includes(unit))) next.unit = fitting[0]
+  }
+  details.value = next as OperationDetails
 }
 
 function choiceOf(key: string): string {
@@ -55,11 +103,20 @@ function numberOf(key: string): string | number {
     <UFormField
       v-for="field in shown"
       :key="field.key"
-      :label="t(`app.details.fields.${field.key}`)"
+      :label="field.kind === 'input' ? t(`app.details.fields.input.${field.inputKind}`) : t(`app.details.fields.${field.key}`)"
+      :help="field.kind === 'input' && !inputItems(field).slice(1).length ? t('app.details.noInputs') : undefined"
       :size="size"
     >
       <USelect
-        v-if="field.kind === 'choice'"
+        v-if="field.kind === 'input'"
+        :model-value="choiceOf(field.key)"
+        :items="inputItems(field)"
+        class="w-full"
+        :data-testid="`details-${field.key}`"
+        @update:model-value="setInput"
+      />
+      <USelect
+        v-else-if="field.kind === 'choice'"
         :model-value="choiceOf(field.key)"
         :items="choiceItems(field)"
         class="w-full"
@@ -94,7 +151,6 @@ function numberOf(key: string): string | number {
     </UFormField>
     <UFormField
       :label="t('app.details.fields.note')"
-      :help="te(`app.details.noteHint.${details.type}`) ? t(`app.details.noteHint.${details.type}`) : undefined"
       :size="size"
       class="sm:col-span-2"
     >

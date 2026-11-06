@@ -146,7 +146,7 @@ const STATUS_ICON = { open: 'i-lucide-circle', done: 'i-lucide-circle-check', di
               v-else
               class="inline-flex items-start gap-1 text-toned"
             >
-              {{ summary(operation.planned_details) || '–' }}
+              {{ summary(operation.planned_details, operation.planned_input) || '–' }}
               <UButton
                 v-if="operation.status === 'open' && operation.allowed_actions.includes('edit_task')"
                 size="xs"
@@ -158,17 +158,22 @@ const STATUS_ICON = { open: 'i-lucide-circle', done: 'i-lucide-circle-check', di
                 @click="startEditing(operation)"
               />
             </span>
+            <AppNutrientsApplied
+              v-if="editing !== operation.id && operation.status !== 'done'"
+              :applied="operation.planned_input"
+            />
           </dd>
           <template v-if="operation.status === 'done'">
             <dt class="text-muted">
               {{ t('app.operations.actual') }}
             </dt>
             <dd class="text-highlighted">
-              {{ summary(operation.actual_details) || '–' }}
+              {{ summary(operation.actual_details, operation.actual_input) || '–' }}
               <span
                 v-if="operation.performed_on"
                 class="text-muted"
               >· {{ day(operation.performed_on) }}</span>
+              <AppNutrientsApplied :applied="operation.actual_input" />
             </dd>
           </template>
         </dl>

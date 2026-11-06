@@ -44,9 +44,20 @@ _BY_HCAT_PREFIX: tuple[tuple[str, LandUseCategory], ...] = (
 
 
 @cache
-def _hcat_by_ama_code() -> dict[str, str]:
+def _rows() -> tuple[dict[str, str], ...]:
     text = (files("cropstar_api.land_use") / "ama_hcat.csv").read_text("utf-8")
-    return {row["ama_code"]: row["hcat_code"] for row in csv.DictReader(text.splitlines())}
+    return tuple(csv.DictReader(text.splitlines()))
+
+
+@cache
+def _hcat_by_ama_code() -> dict[str, str]:
+    return {row["ama_code"]: row["hcat_code"] for row in _rows()}
+
+
+@cache
+def land_use_names() -> dict[str, str]:
+    """Every known AMA Land Use code with its name, as AMA spells it."""
+    return {row["ama_code"]: row["ama_name"] for row in _rows()}
 
 
 def land_use_category(ama_code: str) -> LandUseCategory:

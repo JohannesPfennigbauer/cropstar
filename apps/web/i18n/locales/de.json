@@ -442,7 +442,9 @@
       "plotCount": "{n} Schlag | {n} Schläge",
       "provenance": {
         "eama_export": "Wie bei AMA beantragt · Erntejahr {year} · hochgeladen am {date}",
-        "invekos_open_data": "Öffentliche INVEKOS-Daten (AMA, CC BY 4.0) · Erntejahr {year}"
+        "invekos_open_data": "Öffentliche INVEKOS-Daten (AMA, CC BY 4.0) · Erntejahr {year}",
+        "borrowed": "Vorläufige Geometrie, übernommen aus Erntejahr {from} · importiert am {date}",
+        "none": "Ohne Geometrie · importiert am {date}"
       },
       "upload": "Flächen hochladen",
       "field": "Feldstück {number}",
@@ -457,14 +459,19 @@
       "source": "Quelle",
       "sourceValue": {
         "eama_export": "AMA-Mehrfachantrag {year}, hochgeladen am {date}",
-        "invekos_open_data": "Öffentliche INVEKOS-Daten {year} (AMA, CC BY 4.0)"
+        "invekos_open_data": "Öffentliche INVEKOS-Daten {year} (AMA, CC BY 4.0)",
+        "borrowed": "Vorläufig: Geometrie aus Erntejahr {from}, Flächen aus farmdok (importiert am {date})",
+        "none": "Keine Geometrie bekannt; Flächen aus farmdok (importiert am {date})"
       },
       "tasks": "Aufgaben",
       "log": "Maßnahmenprotokoll",
       "category": "Kategorie",
       "newTask": "Neue Aufgabe",
       "noTasks": "Keine offenen Aufgaben für diesen Schlag.",
-      "logEmpty": "Noch keine erledigten Maßnahmen auf diesem Schlag."
+      "logEmpty": "Noch keine erledigten Maßnahmen auf diesem Schlag.",
+      "withoutGeometry": "{n} Schlag ohne Geometrie | {n} Schläge ohne Geometrie",
+      "provisional": "vorläufig",
+      "noGeometry": "ohne Geometrie"
     },
     "landUseCategory": {
       "cereals": "Getreide",
@@ -572,7 +579,9 @@
       "plotRef": "Schlag {field}.{plot}",
       "wholeFarm": "Ganzer Betrieb",
       "searchAreas": "Suchen …",
-      "areasHelp": "Feldstücke und Schläge aus dem Erntejahr {year}. Ohne Fläche gilt die Aufgabe für den ganzen Betrieb."
+      "areasHelp": "Feldstücke und Schläge aus dem Erntejahr {year}. Ohne Fläche gilt die Aufgabe für den ganzen Betrieb.",
+      "source": "Quelle",
+      "importedFrom": "Importiert aus farmdok am {date}"
     },
     "roles": {
       "admin": "Admin",
@@ -633,7 +642,11 @@
         "forbidden_for_role": "Das dürfen nur Admins.",
         "member_not_found": "Dieses Mitglied gibt es nicht mehr.",
         "invitation_not_found": "Diese Einladung gibt es nicht mehr.",
-        "harvest_year_not_found": "Dieses Erntejahr gibt es in diesem Betrieb nicht."
+        "harvest_year_not_found": "Dieses Erntejahr gibt es in diesem Betrieb nicht.",
+        "import_in_use": "Aufgaben verweisen auf importierte Flächen. Lösche oder ändere sie zuerst.",
+        "harvest_year_locked": "Das Erntejahr ist gesperrt. Entsperre es zuerst.",
+        "import_batch_not_found": "Diesen Import gibt es nicht mehr.",
+        "import_edited": "Importierte Aufgaben wurden seither geändert. Rückgängig machen würde diese Änderungen verwerfen."
       },
       "harvestYears": {
         "title": "Erntejahre",
@@ -645,6 +658,218 @@
         "didLock": "Erntejahr {year} gesperrt.",
         "didUnlock": "Erntejahr {year} entsperrt.",
         "empty": "Noch keine Erntejahre – sie entstehen mit dem Import der Feldstücke."
+      }
+    },
+    "farmInputs": {
+      "title": "Betriebsmittel",
+      "lead": "Dünger, Saatgut und weitere Betriebsmittel deines Betriebs. Maßnahmen verweisen darauf, und aus den Gehalten folgen die ausgebrachten Nährstoffe – immer mit ihrer Quelle.",
+      "cardLead": "Dünger mit Nährstoffgehalten und Quelle, Saatgut und weitere Betriebsmittel.",
+      "open": "Betriebsmittel öffnen",
+      "new": "Neues Betriebsmittel",
+      "newTitle": "Neues Betriebsmittel",
+      "newLead": "Gehalte beziehen sich immer auf die gewählte Einheit.",
+      "create": "Anlegen",
+      "created": "Betriebsmittel angelegt.",
+      "saved": "Gespeichert.",
+      "deleted": "Betriebsmittel gelöscht.",
+      "archive": "Archivieren",
+      "restore": "Wiederherstellen",
+      "delete": "Löschen",
+      "deleteTitle": "Endgültig löschen?",
+      "deleteWarning": "Das Betriebsmittel verschwindet ganz. Wenn du es nur nicht mehr verwendest, archiviere es stattdessen.",
+      "deleteForever": "Endgültig löschen",
+      "did": {
+        "archive": "Archiviert – wird nicht mehr angeboten.",
+        "restore": "Wiederhergestellt."
+      },
+      "archived": "Archiviert",
+      "archivedHint": "Archiviert: wird für neue Maßnahmen nicht angeboten, bleibt bei vergangenen sichtbar.",
+      "inUseHint": "Maßnahmen verweisen darauf – archivieren statt löschen.",
+      "showArchived": "{n} archiviertes anzeigen | {n} archivierte anzeigen",
+      "hideArchived": "Archivierte ausblenden",
+      "kinds": {
+        "fertiliser": "Dünger",
+        "seed": "Saatgut",
+        "other": "Sonstiges"
+      },
+      "kindsPlural": {
+        "fertiliser": "Dünger",
+        "seed": "Saatgut",
+        "other": "Sonstige Betriebsmittel"
+      },
+      "empty": {
+        "fertiliser": "Noch keine Dünger. Starte z. B. mit Gülle oder Mist aus dem Katalog.",
+        "seed": "Noch kein Saatgut.",
+        "other": "Noch keine sonstigen Betriebsmittel."
+      },
+      "units": {
+        "t": "je Tonne (t)",
+        "m3": "je Kubikmeter (m³)",
+        "100kg": "je 100 kg (≙ %)"
+      },
+      "unitsShort": {
+        "t": "t",
+        "m3": "m³",
+        "100kg": "100 kg"
+      },
+      "per": "je {unit}",
+      "contentsPer": "Gehalte in kg je {unit}",
+      "percentHint": "Bei Mineraldünger: kg je 100 kg entspricht dem Gehalt in %.",
+      "availableShort": "({n} jahreswirksam)",
+      "availableOnly": "{n} kg N jahreswirksam",
+      "tkw": "TKG {g} g",
+      "fields": {
+        "kind": "Art",
+        "name": "Bezeichnung",
+        "unit": "Einheit",
+        "dry_matter_percent": "Trockenmasse (%)",
+        "total_n": "N gesamt",
+        "available_n": "N jahreswirksam",
+        "p2o5": "P₂O₅",
+        "k2o": "K₂O",
+        "value_source": "Quelle der Werte",
+        "analysed_on": "Analysiert am",
+        "land_use": "Kultur (AMA-Nutzungsart)",
+        "variety": "Sorte",
+        "thousand_kernel_weight_g": "Tausendkorngewicht (g)"
+      },
+      "sources": {
+        "standard_value": "Richtwert",
+        "lab_analysis": "Laboranalyse",
+        "manufacturer": "Herstellerangabe"
+      },
+      "referenceLabel": {
+        "standard_value": "Fundstelle",
+        "lab_analysis": "Labor / Probe",
+        "manufacturer": "Produkt / Datenblatt"
+      },
+      "sourceHelp": "Jede Zahl braucht ihre Quelle. Eine eigene Laboranalyse ist am genauesten.",
+      "fromCatalogue": "Aus Katalog übernehmen",
+      "fromCatalogueHelp": "Richtwerte für unverdünnte Wirtschaftsdünger, abgeleitet aus den Richtlinien für die sachgerechte Düngung (8. Auflage). Die Werte werden kopiert – deine Änderungen betreffen nur deinen Betrieb.",
+      "chooseEntry": "Wirtschaftsdünger wählen …",
+      "searchCatalogue": "Im Katalog suchen",
+      "searchLandUse": "Nutzungsart suchen",
+      "copiedFrom": "Werte aus dem Katalog übernommen: {name}. Verdünnung und eigene Fütterung verändern die Gehalte – eine Analyse ersetzt sie.",
+      "errors": {
+        "name_required": "Gib eine Bezeichnung an.",
+        "land_use_required": "Wähle die Kultur, für die das Saatgut ist.",
+        "negative": "Gehalte können nicht negativ sein.",
+        "percent": "Die Trockenmasse liegt zwischen 0 und 100 %.",
+        "available_above_total": "Jahreswirksamer N kann nicht höher sein als N gesamt.",
+        "value_source_required": "Gib an, woher die Werte stammen.",
+        "analysed_on_required": "Gib das Datum der Laboranalyse an.",
+        "unit_required": "Wähle eine Einheit.",
+        "farm_input_in_use": "Maßnahmen verweisen darauf. Archiviere es stattdessen.",
+        "forbidden_for_role": "Betriebsmittel pflegen dürfen nur Admins und Mitarbeitende.",
+        "unknown": "Das hat nicht geklappt. Bitte versuch es noch einmal."
+      }
+    },
+    "farmdokImport": {
+      "cardTitle": "Import aus farmdok",
+      "cardLead": "Ältere Erntejahre ohne eAMA-Export: Feldstücke und Schläge aus der farmdok-Feldstücksliste, mit vorläufiger Geometrie.",
+      "start": "Feldstücksliste importieren",
+      "title": "Feldstücksliste aus farmdok importieren",
+      "lead": "Für ein Erntejahr ohne eAMA-Export. Die Geometrie wird vorläufig aus einem Erntejahr mit eAMA-Export übernommen – über Feldstück- und Schlagnummer.",
+      "file": "Feldstücksliste (.xls) hier ablegen",
+      "fileHint": "In farmdok unter Berichte › Feldstücksliste als Excel exportieren.",
+      "invalid": "Die Datei lässt sich nicht als Feldstücksliste lesen",
+      "referenceYear": "Geometrie übernehmen aus",
+      "noReference": "Kein Erntejahr mit eAMA-Export – die Schläge bekommen keine Geometrie.",
+      "geometrySummary": "Geometrie: {plot} Schläge über Feldstück- und Schlagnummer, {area} über die Fläche (in eAMA umnummeriert), {field} über das Feldstück, {none} ohne.",
+      "match": {
+        "plot": "Schlag übernommen",
+        "area": "Schlag über Fläche",
+        "field": "Feldstück übernommen",
+        "none": "ohne Geometrie"
+      },
+      "unknownCrops": "Unbekannte Kulturen",
+      "unknownCropsLead": "Diese farmdok-Bezeichnungen lassen sich keiner AMA-Nutzungsart eindeutig zuordnen. Wähle sie selbst.",
+      "chooseLandUse": "Nutzungsart wählen …",
+      "provisionalHint": "Übernommene Geometrie bleibt als vorläufig markiert. Lädst du für das Jahr später den eAMA-Export hoch, ersetzt er sie.",
+      "confirm": "Importieren",
+      "done": "Erntejahr {year} importiert",
+      "doneDetail": "{fields} Feldstücke und {plots} Schläge aus farmdok.",
+      "undo": "Rückgängig",
+      "undone": "Import rückgängig gemacht.",
+      "kinds": {
+        "farmdok_field_list": "farmdok-Feldstücksliste",
+        "farmdok_crop_log": "farmdok-Pflanzenbaujournal"
+      },
+      "batchDetail": "{fields} Feldstücke, {plots} Schläge · {file}",
+      "blockers": {
+        "harvest_year_locked": "Erntejahr {year} ist gesperrt.",
+        "harvest_year_not_empty": "Erntejahr {year} hat schon Feldstücke und Schläge. Die Feldstücksliste legt nur neue Jahre an."
+      },
+      "errors": {
+        "forbidden_for_role": "Importieren dürfen nur Admins.",
+        "harvest_year_locked": "Das Erntejahr ist gesperrt.",
+        "harvest_year_not_empty": "Das Erntejahr hat schon Feldstücke und Schläge.",
+        "unknown_crops": "Ordne zuerst alle unbekannten Kulturen zu.",
+        "invalid_reference_year": "Aus diesem Erntejahr lässt sich keine Geometrie übernehmen.",
+        "invalid_crop_assignments": "Die Zuordnung der Kulturen passt nicht mehr. Zeig die Vorschau erneut an.",
+        "upload_too_large": "Die Datei ist zu groß (max. 20 MB).",
+        "unknown": "Das hat nicht geklappt. Bitte versuch es noch einmal."
+      },
+      "problems": {
+        "unreadable_file": "Die Datei lässt sich nicht öffnen. Ist es der Excel-Export (.xls) aus farmdok?",
+        "not_a_field_list": "Das ist keine farmdok-Feldstücksliste.",
+        "missing_column": "Die Spalte „{detail}“ fehlt.",
+        "invalid_row": "Zeile {row}: {detail}",
+        "duplicate_plot": "Zeile {row}: Schlag {detail} kommt doppelt vor.",
+        "empty": "Die Liste enthält keine Schläge.",
+        "not_a_crop_log": "Das ist kein farmdok-Pflanzenbaujournal."
+      },
+      "back": "Andere Datei"
+    },
+    "farmdokLog": {
+      "start": "Pflanzenbaujournal importieren",
+      "title": "Pflanzenbaujournal aus farmdok importieren",
+      "lead": "Jeder Eintrag wird eine erledigte Aufgabe mit einer Maßnahme pro Schlag – zugeordnet über Feldstücknummer und Kultur. Lege vorher die Flächen des Erntejahres an.",
+      "file": "Pflanzenbaujournal (.xls) hier ablegen",
+      "fileHint": "In farmdok unter Berichte › Pflanzenbaujournal als Excel exportieren.",
+      "invalid": "Die Datei lässt sich nicht als Pflanzenbaujournal lesen",
+      "entries": "Einträge",
+      "tasks": "Aufgaben",
+      "skipped": "Übersprungen",
+      "taskCount": "{tasks} mit {operations} Maßnahmen",
+      "unresolvedTitle": "1 offene Frage | {n} offene Fragen",
+      "unresolvedLead": "Was Cropstar nicht eindeutig zuordnen kann. Deine Antworten zu Tätigkeiten und Produkten merkt sich Cropstar für spätere Importe.",
+      "unknownActivity": "Unbekannte Tätigkeit „{name}“",
+      "unknownProduct": "Unbekanntes Produkt „{name}“",
+      "unitMismatch": "„{name}“: die Gehalte des gewählten Düngers passen nicht zur Mengeneinheit",
+      "entryCount": "{n} Eintrag | {n} Einträge",
+      "chooseType": "Maßnahmen-Typ wählen …",
+      "skipActivity": "Diese Einträge überspringen",
+      "chooseInput": "Betriebsmittel wählen …",
+      "createInput": "„{name}“ neu anlegen",
+      "withoutInput": "Ohne Betriebsmittel (Name als Notiz)",
+      "choosePlots": "Schläge wählen …",
+      "assign": "Zuordnen",
+      "skipEntry": "Überspringen",
+      "fields": "Feldstück {fields}",
+      "problems": {
+        "unknown_field": "Feldstück gibt es in diesem Erntejahr nicht",
+        "unknown_crop": "Kultur keiner Nutzungsart zuordenbar",
+        "no_matching_plot": "Kein Schlag mit dieser Kultur auf dem Feldstück"
+      },
+      "planned": "Diese Aufgaben entstehen",
+      "newInputs": "Neu angelegt werden: {names}",
+      "confirm": "Importieren",
+      "done": "Pflanzenbaujournal {year} importiert",
+      "doneDetail": "{tasks} erledigte Aufgaben aus farmdok.",
+      "batchDetail": "{tasks} Aufgaben · {file}",
+      "blockers": {
+        "harvest_year_locked": "Erntejahr {year} ist gesperrt.",
+        "already_imported": "Das Pflanzenbaujournal {year} wurde schon importiert. Mach den Import zuerst rückgängig."
+      },
+      "errors": {
+        "forbidden_for_role": "Importieren dürfen nur Admins.",
+        "harvest_year_locked": "Das Erntejahr ist gesperrt.",
+        "already_imported": "Dieses Erntejahr wurde schon importiert.",
+        "unresolved": "Beantworte zuerst alle offenen Fragen.",
+        "invalid_resolutions": "Die Antworten passen nicht mehr zur Datei. Zeig die Vorschau erneut an.",
+        "upload_too_large": "Die Datei ist zu groß (max. 20 MB).",
+        "unknown": "Das hat nicht geklappt. Bitte versuch es noch einmal."
       }
     },
     "invite": {
@@ -708,7 +933,11 @@
         "yield_t_per_ha": "Ertrag (t/ha, bei Erntefeuchte)",
         "moisture_percent": "Feuchte (%)",
         "crude_protein_percent": "Rohprotein (% der TM)",
-        "note": "Notiz"
+        "note": "Notiz",
+        "input": {
+          "seed": "Saatgut",
+          "fertiliser": "Dünger"
+        }
       },
       "values": {
         "tillageImplement": {
@@ -764,16 +993,14 @@
         "moisture_percent": "{n} % Feuchte",
         "crude_protein_percent": "{n} % Rohprotein"
       },
-      "noteHint": {
-        "sowing": "Was gesät wurde (Kultur, Sorte, Mischung) – bis Betriebsmittel in Cropstar erfasst werden.",
-        "fertilisation": "Welcher Dünger (z. B. Rindergülle, Kompost) – bis Betriebsmittel in Cropstar erfasst werden."
-      },
       "errors": {
         "negative": "Werte können nicht negativ sein.",
         "percent": "Prozentwerte liegen zwischen 0 und 100.",
         "tooLarge": "Die Tiefe liegt zwischen 0 und 100 cm.",
         "unitMissing": "Zu einer Menge gehört eine Einheit."
-      }
+      },
+      "noInputs": "Lege unter Betrieb › Betriebsmittel welche an, um sie hier zu wählen.",
+      "nutrientsApplied": "≙ {nutrients} je ha"
     }
   }
 }

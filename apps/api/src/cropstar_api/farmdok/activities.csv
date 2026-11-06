@@ -1,0 +1,28 @@
+# farmdok activities as Operation Types with the detail they imply. Columns: the activity as
+# farmdok names it, the Operation Type, and one detail: an implement (tillage, mechanical
+# weed control), a sowing purpose, or a harvested product.
+activity,operation_type,detail
+Pflügen,tillage,plough
+Grubber flach,tillage,cultivator
+Grubber tief,tillage,cultivator
+Scheibenegge,tillage,disc_harrow
+Saatbettvorbereitung,tillage,seedbed_combination
+Kreiselegge,tillage,power_harrow
+Tiefenlockern,tillage,subsoiler
+Walzen,tillage,roller
+Striegeln,mechanical_weed_control,tine_weeder
+Hacken,mechanical_weed_control,hoe
+Fingerhacken,mechanical_weed_control,finger_weeder
+Rollhacke,mechanical_weed_control,rotary_hoe
+Schlägeln/Mulchen,mulching,
+Mulchen,mulching,
+Aussaat Hauptkultur,sowing,main_crop
+Aussaat Zwischenfrucht,sowing,cover_crop
+Untersaat Hauptkultur,sowing,undersown_crop
+Untersaat Zwischenfrucht,sowing,undersown_crop
+Wirtschaftsdünger Mist,fertilisation,
+Wirtschaftsdünger Gülle,fertilisation,
+Mineraldüngung,fertilisation,
+Ernte,harvest,grain
+Mähdrusch,harvest,grain
+Kürbisernte,harvest,grain

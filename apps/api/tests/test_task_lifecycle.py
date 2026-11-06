@@ -3,7 +3,7 @@ from datetime import UTC, date, datetime, timedelta
 
 import pytest
 
-from cropstar_api.models import Field, Plot, Priority, Role, Task, TaskStatus
+from cropstar_api.models import FarmInput, Field, Plot, Priority, Role, Task, TaskStatus
 from cropstar_api.policy import Action, Actor
 from cropstar_api.tasks.lifecycle import (
     AreaNotFoundError,
@@ -27,6 +27,7 @@ class InMemoryTasks:
         self.all_fields: list[Field] = []
         self.all_plots: list[Plot] = []
         self.locks: set[tuple[uuid.UUID, int]] = set()
+        self.inputs: list[FarmInput] = []
 
     def get(self, farm_id: uuid.UUID, task_id: uuid.UUID) -> Task | None:
         task = self.tasks.get(task_id)
@@ -52,6 +53,9 @@ class InMemoryTasks:
 
     def locked_years(self, farm_id: uuid.UUID) -> frozenset[int]:
         return frozenset(year for farm, year in self.locks if farm == farm_id)
+
+    def farm_input(self, farm_id: uuid.UUID, input_id: uuid.UUID) -> FarmInput | None:
+        return next((i for i in self.inputs if i.farm_id == farm_id and i.id == input_id), None)
 
     def add_field(self, farm_id: uuid.UUID, year: int, number: int) -> Field:
         field = Field(id=uuid.uuid4(), farm_id=farm_id, harvest_year=year, number=number)

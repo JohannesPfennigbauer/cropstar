@@ -34,11 +34,15 @@ const { data, status, refresh } = await useAsyncData('plots', async () => {
 
 const hovered = ref<string | null>(null)
 
+// One line for the year: imported areas may mix borrowed geometry and none at all.
 const provenance = computed(() => {
-  const first = data.value?.plots.features[0] ?? data.value?.fields.features[0]
+  const features = data.value?.plots.features ?? []
+  const first = features.find(f => f.properties.provenance.source !== 'none') ?? features[0] ?? data.value?.fields.features[0]
   if (!first) return null
-  const { source, imported_at } = first.properties.provenance
-  return t(`app.plots.provenance.${source}`, { year: harvestYear.value, date: moment(imported_at) })
+  const { source, imported_at, borrowed_from_year } = first.properties.provenance
+  const text = t(`app.plots.provenance.${source}`, { year: harvestYear.value, date: moment(imported_at), from: borrowed_from_year })
+  const missing = features.filter(f => f.geometry === null).length
+  return missing && source !== 'none' ? `${text} · ${t('app.plots.withoutGeometry', missing)}` : text
 })
 
 const groups = computed(() => {
@@ -173,6 +177,12 @@ function openPlot(id: string) {
                     </span>
                     <span class="block text-xs text-muted">
                       {{ t('app.plots.plot', { number: plot.number }) }}
+                      <template v-if="plot.provenance.source === 'borrowed'">
+                        · {{ t('app.plots.provisional') }}
+                      </template>
+                      <template v-else-if="plot.provenance.source === 'none'">
+                        · {{ t('app.plots.noGeometry') }}
+                      </template>
                     </span>
                   </span>
                   <span class="shrink-0 text-sm tabular-nums text-toned">

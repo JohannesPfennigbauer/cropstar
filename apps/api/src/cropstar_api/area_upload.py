@@ -11,7 +11,10 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
 
+import shapely
+from geoalchemy2 import WKBElement
 from geoalchemy2.shape import to_shape
+from shapely.geometry.base import BaseGeometry
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
@@ -99,7 +102,7 @@ def reconcile(
                 land_use_code=field.land_use_code,
                 land_use_name=field.land_use_name,
                 declared_area_ha=field.declared_area_ha,
-                geometry=to_shape(field.geometry),
+                geometry=_shape(field.geometry),
                 from_eama=field.geometry_source == AreaSource.EAMA_EXPORT,
                 referenced=field.id in current.tasks,
             )
@@ -113,7 +116,7 @@ def reconcile(
                 land_use_code=plot.land_use_code,
                 land_use_name=plot.land_use_name,
                 declared_area_ha=plot.declared_area_ha,
-                geometry=to_shape(plot.geometry),
+                geometry=_shape(plot.geometry),
                 from_eama=plot.geometry_source == AreaSource.EAMA_EXPORT,
                 referenced=plot.id in current.tasks,
             )
@@ -123,6 +126,11 @@ def reconcile(
         assignments,
         locked=current.locked,
     )
+
+
+def _shape(geometry: WKBElement | None) -> BaseGeometry:
+    # An area without geometry overlaps nothing; it can only be assigned by hand.
+    return shapely.Polygon() if geometry is None else to_shape(geometry)
 
 
 def apply(
@@ -153,7 +161,11 @@ def apply(
         field.declared_area_ha = declared.declared_area_ha
         field.geometry = from_ama_geojson(declared.geometry)
         field.geometry_source = AreaSource.EAMA_EXPORT
+        field.borrowed_from_year = None
         field.imported_at = imported_at
+        # The declaration replaces whatever an import provided; undoing that import
+        # must not take the declared area along.
+        field.import_batch_id = None
         fields[declared.number] = field
 
     for declared_plot, entry in zip(declaration.plots, plan.plots, strict=True):
@@ -165,7 +177,9 @@ def apply(
         plot.declared_area_ha = declared_plot.declared_area_ha
         plot.geometry = from_ama_geojson(declared_plot.geometry)
         plot.geometry_source = AreaSource.EAMA_EXPORT
+        plot.borrowed_from_year = None
         plot.imported_at = imported_at
+        plot.import_batch_id = None
         db.add(plot)
     # Moved Plots must have left their old Field before a removed Field takes its Plots along.
     db.flush()

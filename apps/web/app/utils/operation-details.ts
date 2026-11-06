@@ -12,7 +12,9 @@ export type OperationTypeCode = OperationDetails['type']
 
 export interface ChoiceField { key: string, kind: 'choice', options: readonly string[], group: string }
 interface NumberField { key: string, kind: 'number', max?: number, step: number, unitKey?: string }
-export type DetailField = ChoiceField | NumberField
+// A Farm Input of the given kind, chosen from the Farm's list.
+interface InputField { key: 'farm_input_id', kind: 'input', inputKind: 'seed' | 'fertiliser' }
+export type DetailField = ChoiceField | NumberField | InputField
 
 // The structured fields of each Operation Type, in form order. A number with `unitKey`
 // is shown together with that choice. Values mirror the API's enums.
@@ -29,10 +31,12 @@ export const DETAIL_FIELDS: Record<OperationTypeCode, DetailField[]> = {
   ],
   sowing: [
     { key: 'purpose', kind: 'choice', group: 'sowingPurpose', options: ['main_crop', 'cover_crop', 'undersown_crop'] },
+    { key: 'farm_input_id', kind: 'input', inputKind: 'seed' },
     { key: 'rate', kind: 'number', step: 0.1, unitKey: 'unit' },
     { key: 'unit', kind: 'choice', group: 'sowingUnit', options: ['kg_per_ha', 'seeds_per_m2', 'seeds_per_ha'] }
   ],
   fertilisation: [
+    { key: 'farm_input_id', kind: 'input', inputKind: 'fertiliser' },
     { key: 'amount', kind: 'number', step: 0.1, unitKey: 'unit' },
     { key: 'unit', kind: 'choice', group: 'fertilisationUnit', options: ['kg_per_ha', 't_per_ha', 'm3_per_ha', 'l_per_ha'] }
   ],
@@ -76,4 +80,16 @@ export function detailsProblem(details: OperationDetails | null | undefined): st
     if (field.unitKey && !values[field.unitKey]) return 'unitMissing'
   }
   return null
+}
+
+// Amounts by mass go with contents per t or per 100 kg, amounts by volume with contents per m³.
+const UNITS_FOR_CONTENTS: Record<string, readonly string[]> = {
+  't': ['kg_per_ha', 't_per_ha'],
+  '100kg': ['kg_per_ha', 't_per_ha'],
+  'm3': ['m3_per_ha', 'l_per_ha']
+}
+
+/** The fertilisation units that fit an input whose contents are per `inputUnit`. */
+export function unitsFor(inputUnit: string | null | undefined): readonly string[] | null {
+  return inputUnit ? UNITS_FOR_CONTENTS[inputUnit] ?? null : null
 }

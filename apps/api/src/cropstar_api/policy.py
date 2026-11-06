@@ -18,6 +18,9 @@ class Action(enum.StrEnum):
     MANAGE_MEMBERS = "manage_members"
     LOCK_HARVEST_YEAR = "lock_harvest_year"
     UPLOAD_AREAS = "upload_areas"
+    IMPORT_DATA = "import_data"
+    UNDO_IMPORT = "undo_import"
+    MANAGE_FARM_INPUTS = "manage_farm_inputs"
     CREATE_TASK = "create_task"
     EDIT_TASK = "edit_task"
     COMPLETE_TASK = "complete_task"
@@ -63,6 +66,8 @@ _ADMIN_ONLY = frozenset(
         Action.MANAGE_MEMBERS,
         Action.LOCK_HARVEST_YEAR,
         Action.UPLOAD_AREAS,
+        Action.IMPORT_DATA,
+        Action.UNDO_IMPORT,
     }
 )
 # Confirming that work happened is for people who work on the Farm, not Advisors.
@@ -86,7 +91,8 @@ def decide(actor: Actor, action: Action, task: TaskFacts | None = None) -> Decis
         return Decision(False, Denial.LOCKED)
     if action in _ADMIN_ONLY:
         return ALLOW if actor.role is Role.ADMIN else Decision(False, Denial.ROLE)
-    if action in _STATUS_CHANGES:
+    # Advisors read the Farm Inputs to advise on them; keeping them is the Farm's job.
+    if action in _STATUS_CHANGES or action is Action.MANAGE_FARM_INPUTS:
         return Decision(False, Denial.ROLE) if actor.role is Role.ADVISOR else ALLOW
     if action is Action.DELETE_TASK:
         if actor.role is Role.ADMIN:

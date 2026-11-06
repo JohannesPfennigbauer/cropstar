@@ -193,3 +193,120 @@ def test_a_harvest_records_yield_and_quality(farm: Farm, areas: Areas) -> None:
         op_url(farm, task, 0), json={"actual_details": harvest | {"crude_protein_percent": 101}}
     )
     assert too_much.status_code == 422
+
+
+def _slurry(farm: Farm) -> Any:
+    response = farm.admin.client.post(
+        f"/api/farms/{farm.id}/farm-inputs",
+        json={
+            "kind": "fertiliser",
+            "name": "Rindergülle",
+            "unit": "m3",
+            "total_n": 3.51,
+            "available_n": 2.14,
+            "p2o5": 1.39,
+            "k2o": 6.94,
+            "value_source": "standard_value",
+            "source_reference": "RSD, 8. Auflage",
+        },
+    )
+    assert response.status_code == 201, response.text
+    return response.json()
+
+
+def test_a_fertilisation_shows_the_nutrients_it_applied_with_their_source(
+    farm: Farm, areas: Areas
+) -> None:
+    slurry = _slurry(farm)
+    plan = {
+        "type": "fertilisation",
+        "farm_input_id": slurry["id"],
+        "amount": 20,
+        "unit": "m3_per_ha",
+    }
+    task = create(
+        farm.worker,
+        farm,
+        title="Gülle",
+        operation_type="fertilisation",
+        plot_ids=[areas.plot_2027_a],
+        planned_details=plan,
+    )
+    done = farm.worker.client.post(
+        op_url(farm, task, 0, "/complete"),
+        json={"actual_details": plan | {"amount": 18}, "performed_on": "2027-03-20"},
+    ).json()
+    farm.admin.client.post(f"/api/farms/{farm.id}/farm-inputs/{slurry['id']}/archive")
+    log = farm.advisor.client.get(f"/api/farms/{farm.id}/plots/{areas.plot_2027_a}/operations")
+
+    assert task["planned_input"]["nutrients"]["total_n"] == 70.2
+    actual = done["operations"][0]["actual_input"]
+    assert actual["nutrients"] == {
+        "total_n": 63.2,
+        "available_n": 38.5,
+        "p2o5": 25.0,
+        "k2o": 124.9,
+        "value_source": "standard_value",
+        "source_reference": "RSD, 8. Auflage",
+        "analysed_on": None,
+    }
+    entry = log.json()[0]["actual_input"]
+    assert (entry["farm_input"]["name"], entry["farm_input"]["archived"]) == ("Rindergülle", True)
+    in_use = farm.admin.client.delete(f"/api/farms/{farm.id}/farm-inputs/{slurry['id']}")
+    assert (in_use.status_code, in_use.json()["detail"]) == (409, "farm_input_in_use")
+
+
+def test_fertiliser_references_are_checked(farm: Farm, areas: Areas) -> None:
+    slurry = _slurry(farm)
+    seed = farm.admin.client.post(
+        f"/api/farms/{farm.id}/farm-inputs",
+        json={"kind": "seed", "name": "Weizen", "land_use_code": "138"},
+    ).json()
+
+    def plan(details: dict[str, Any]) -> Any:
+        return farm.worker.client.post(
+            tasks_url(farm),
+            json={
+                "title": "Düngen",
+                "operation_type": "fertilisation",
+                "plot_ids": [areas.plot_2027_a],
+                "planned_details": {"type": "fertilisation"} | details,
+            },
+        )
+
+    mismatch = plan({"farm_input_id": slurry["id"], "amount": 20, "unit": "t_per_ha"})
+    wrong_kind = plan({"farm_input_id": seed["id"]})
+    unknown = plan({"farm_input_id": "00000000-0000-0000-0000-000000000000"})
+
+    assert [(r.status_code, r.json()["detail"]) for r in (mismatch, wrong_kind, unknown)] == [
+        (422, "unit_mismatch"),
+        (422, "farm_input_wrong_kind"),
+        (422, "farm_input_not_found"),
+    ]
+
+
+def test_sowing_refers_to_seed(farm: Farm, areas: Areas) -> None:
+    seed = farm.admin.client.post(
+        f"/api/farms/{farm.id}/farm-inputs",
+        json={"kind": "seed", "name": "Weizen Capo", "land_use_code": "138"},
+    ).json()
+
+    task = create(
+        farm.worker,
+        farm,
+        title="Säen",
+        operation_type="sowing",
+        plot_ids=[areas.plot_2027_a],
+        planned_details={
+            "type": "sowing",
+            "purpose": "main_crop",
+            "farm_input_id": seed["id"],
+            "rate": 180,
+            "unit": "kg_per_ha",
+        },
+    )
+
+    assert task["planned_input"] == {
+        "farm_input": {"id": seed["id"], "name": "Weizen Capo", "kind": "seed", "archived": False},
+        "nutrients": None,
+    }

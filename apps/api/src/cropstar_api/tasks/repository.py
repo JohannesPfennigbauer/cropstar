@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
 from cropstar_api.models import (
+    FarmInput,
     Field,
     HarvestYearLock,
     Membership,
@@ -60,3 +61,7 @@ class SqlTaskRepository:
                 select(HarvestYearLock.harvest_year).where(HarvestYearLock.farm_id == farm_id)
             )
         )
+
+    def farm_input(self, farm_id: uuid.UUID, input_id: uuid.UUID) -> FarmInput | None:
+        found = self._db.get(FarmInput, input_id)
+        return found if found is not None and found.farm_id == farm_id else None

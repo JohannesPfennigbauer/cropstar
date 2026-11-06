@@ -1,0 +1,19 @@
+# Inputs from: Richtlinien für die sachgerechte Düngung im Ackerbau und Grünland (RSD),
+# 8. Auflage, aktualisierte Version 2023, BMLUK. Values per Stallplatz, transcribed exactly:
+#   nal: Tab. 64 N ab Lager, kg/Stallplatz/Jahr (column of the manure system)
+#   p2o5, k2o: Tab. 70, kg/Stallplatz/Jahr (one total per animal, not split by manure system)
+#   volume_6m: Tab. 71, m³/Stallplatz/6 Monate, undiluted (column of the manure system)
+#   herd_factor: nutrient-relevant herd per average place (pig fattening: 1,26 = 365/290, p. 165)
+#   spreading_loss: Tab. 63 Ausbringungsverluste (Gülle/Jauche 13 %, Mist 9 %)
+#   availability: Tab. 67 Jahreswirksamkeit (share of N feldfallend)
+code,name,animal,system,nal,p2o5,k2o,volume_6m,herd_factor,spreading_loss,availability
+rindergulle_milchkuh_6000,Rindergülle (Milchkühe 6.000 kg Milch),Milchkühe (6.000 kg Milch),Gülle,82.8,32.8,163.8,11.8,1,0.13,0.7
+rindergulle_milchkuh_8000,Rindergülle (Milchkühe 8.000 kg Milch),Milchkühe (8.000 kg Milch),Gülle,97.3,41.9,193.6,12.0,1,0.13,0.7
+rinderstallmist_milchkuh_6000,Rinder-Stallmist (Milchkühe 6.000 kg Milch),Milchkühe (6.000 kg Milch),Mist,45.1,,,7.6,1,0.09,0.5
+rinderjauche_milchkuh_6000,Rinderjauche (Milchkühe 6.000 kg Milch),Milchkühe (6.000 kg Milch),Jauche,22.5,,,3.9,1,0.13,1
+rindertiefstallmist_milchkuh_6000,Rinder-Tiefstallmist (Milchkühe 6.000 kg Milch),Milchkühe (6.000 kg Milch),Tiefstallmist,67.6,32.8,163.8,12.1,1,0.09,0.5
+rindertiefstallmist_jungvieh,Rinder-Tiefstallmist (Jungvieh 1–2 Jahre),Jungvieh 1 bis 2 Jahr,Tiefstallmist,37.5,19.6,74.8,6.2,1,0.09,0.5
+schweinegulle_mast,Schweinegülle (Mastschweine ab 32 kg),Mastschweine ab 32 kg LG bis Mastende (P-Standardfütterung),Gülle,7.5,4.4,5.0,0.7,1.26,0.13,0.8
+legehennengulle,Hühnergülle (Legehennen),Legehennen,Gülle,0.51,0.45,0.33,0.033,1,0.13,0.85
+pferdemist,Pferdemist (Pferde über 500 kg),"Pferde, Widerristhöhe > 1,48 m, Endgewicht > 500 kg",Tiefstallmist,36.8,18.4,36.8,6.7,1,0.09,0.5
+schafmist,Schafmist (Mutterschafe),Mutterschafe,Tiefstallmist,7.7,4,13.4,0.52,1,0.09,0.5
