@@ -16,6 +16,10 @@ export interface Activity {
   priority: ActivityPriority
   task?: Schemas['TaskOut']
   applied?: Schemas['AppliedInput'] | null
+  /** Harvest Year the Activity belongs to; marks the transitions on the spiral. */
+  harvestYear?: number
+  /** For Operations of an earlier Harvest Year: the Plot they were done on and how much of this Plot it covers. */
+  origin?: { fieldNumber: number, plotNumber: number, overlap: number }
 }
 
 const PRIORITY_RANK: Record<ActivityPriority, number> = { high: 0, normal: 1, low: 2, none: 3 }
@@ -203,4 +207,18 @@ export function operationIcon(operationType: string | null): string {
 /** Priority as a symbol: ⇈ high, ↑ normal, ↓ low, nothing for none. */
 export function priorityIcon(priority: ActivityPriority): string | null {
   return { high: 'i-lucide-chevrons-up', normal: 'i-lucide-chevron-up', low: 'i-lucide-chevron-down', none: null }[priority]
+}
+
+/** Where the Harvest Year changes between two neighbouring dated Activities, in timeline slots. */
+export function harvestYearTransitions(ordered: Activity[], layout: TimelineLayout): { slot: number, harvestYear: number }[] {
+  const dated = ordered.filter(a => a.date && a.harvestYear !== undefined)
+  const out: { slot: number, harvestYear: number }[] = []
+  for (let i = 1; i < dated.length; i++) {
+    const before = dated[i - 1]!
+    const after = dated[i]!
+    if (after.harvestYear !== before.harvestYear) {
+      out.push({ slot: (layout.slotOf.get(before.key)! + layout.slotOf.get(after.key)!) / 2, harvestYear: after.harvestYear! })
+    }
+  }
+  return out
 }

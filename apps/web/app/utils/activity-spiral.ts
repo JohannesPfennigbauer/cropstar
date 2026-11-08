@@ -18,8 +18,9 @@ const END = { cx: 391, cy: 273, a: 272, b: 120 }
 const Y_MID = 273
 const SCALE_BACK = 0.22
 const SCALE_FRONT = 1
-/** Tilt of the spiral plane; 0.75 is the designed look. */
-const TILT = 0.75
+/** Tilt of the spiral plane, 0 (from above) to 1 (flattest). The shape is drawn for 0.75 and squashed from there. */
+const TILT = 1
+const SQUASH = (1 - 0.6 * TILT) / (1 - 0.6 * 0.75)
 
 export interface SpiralPoint { x: number, y: number, s: number, depthScale: number, phase: 'spiral' | 'tail' }
 
@@ -50,7 +51,8 @@ export function buildSpiralPath(): SpiralPath {
     const u = i / 1600
     const t = THETA0 + (THETA1 - THETA0) * u
     const y = lerp(START.cy, END.cy, u) - lerp(START.b, END.b, u) * Math.sin(t)
-    push(lerp(START.cx, END.cx, u) + lerp(START.a, END.a, u) * Math.cos(t), y, 1 + 0.15 * TILT * ((y - Y_MID) / END.b), 'spiral')
+    const depthScale = 1 + 0.15 * TILT * ((y - Y_MID) / END.b)
+    push(lerp(START.cx, END.cx, u) + lerp(START.a, END.a, u) * Math.cos(t), Y_MID + (y - Y_MID) * SQUASH, depthScale, 'spiral')
   }
   const spiralEndIndex = pts.length - 1
   const end = pts[spiralEndIndex]!

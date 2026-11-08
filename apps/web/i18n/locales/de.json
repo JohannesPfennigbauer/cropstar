@@ -1060,7 +1060,9 @@
         "stubble": "Stoppel seit {since} am {sinceDate}",
         "soil": "offener Boden seit {since} am {sinceDate}",
         "undated": "Ohne Datum · Hintergrund nach Priorität: {priority}"
-      }
+      },
+      "origin": "Erntejahr {year}, Feldstück {field} · Schlag {plot}, deckt {overlap} % dieses Schlags",
+      "harvestYear": "Erntejahr {year}"
     }
   }
 }

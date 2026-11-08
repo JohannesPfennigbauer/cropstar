@@ -1060,7 +1060,9 @@
         "stubble": "stubble since {since} on {sinceDate}",
         "soil": "bare soil since {since} on {sinceDate}",
         "undated": "No date · background by priority: {priority}"
-      }
+      },
+      "origin": "harvest year {year}, field {field} · plot {plot}, covers {overlap} % of this plot",
+      "harvestYear": "Harvest year {year}"
     }
   }
 }

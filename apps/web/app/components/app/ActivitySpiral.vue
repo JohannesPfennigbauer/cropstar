@@ -14,11 +14,13 @@ const { t, locale } = useI18n()
 const { coverAt, look } = useActivityCover(() => props.activities)
 
 // The part of the 960 × 640 stage the spiral actually uses, so it shrinks less in a narrow panel.
-const VIEW = { x: 30, y: 100, w: 780, h: 450 }
+const VIEW = { x: 30, y: 135, w: 780, h: 360 }
 const { frame, fit } = useFitToWidth(VIEW.w)
-// In a narrow panel cards are partly enlarged again and fewer of them fit on the spiral.
+// 17 cards fit on the spiral at full size. In a narrow panel cards are partly enlarged again and
+// fewer of them fit, keeping the ratio of card size to spacing.
+const CARDS_ON_SPIRAL = 17
 const boost = computed(() => Math.min(1.6, Math.max(1, 1 / Math.sqrt(fit.value))))
-const slots = computed(() => Math.max(6, Math.round(11 / boost.value)))
+const slots = computed(() => Math.max(8, Math.round(CARDS_ON_SPIRAL / boost.value)))
 
 const geo = buildSpiralPath()
 const spiralG = geo.G[geo.spiralEndIndex]!
@@ -178,6 +180,25 @@ const placed = computed(() => ordered.value
   .filter(p => p !== null)
   .sort((a, b) => a.scale - b.scale))
 
+// Harvest Year transitions, marked like the start of a calendar year but dashed and labelled inside.
+const harvestYearMarks = computed(() => harvestYearTransitions(ordered.value, layout.value).flatMap(({ slot, harvestYear }) => {
+  const index = geo.indexAtG(slotToG(slot))
+  if (index < 0 || index > bandEndIndex.value) return []
+  const p = geo.pts[index]!
+  const { nx, ny } = normalAt(index)
+  const half = (bandWidth(p) / 2) * 1.9
+  const size = geo.sizeAt(p.s)
+  return [{
+    key: harvestYear,
+    x1: p.x - nx * half, y1: p.y - ny * half, x2: p.x + nx * half, y2: p.y + ny * half,
+    lx: p.x - nx * (half + 4 + 8 * size),
+    ly: p.y - ny * (half + 4 + 8 * size),
+    fontSize: 8 + 6 * size,
+    label: t('app.activities.harvestYear', { year: harvestYear }),
+    opacity: fade(p)
+  }]
+}))
+
 const todayMark = computed(() => {
   if (!Number.isFinite(layout.value.bandEndSlot)) return null
   const index = indexAtDay(today)
@@ -268,6 +289,31 @@ const todayMark = computed(() => {
               dominant-baseline="central"
               class="font-display font-semibold"
             >{{ tick.label }}</text>
+          </g>
+          <g
+            v-for="mark in harvestYearMarks"
+            :key="`h${mark.key}`"
+            :opacity="mark.opacity"
+            data-testid="harvest-year-mark"
+          >
+            <line
+              :x1="mark.x1"
+              :y1="mark.y1"
+              :x2="mark.x2"
+              :y2="mark.y2"
+              stroke="var(--color-soil-800)"
+              stroke-width="2.5"
+              stroke-dasharray="4 3"
+            />
+            <text
+              :x="mark.lx"
+              :y="mark.ly"
+              :font-size="mark.fontSize"
+              fill="var(--color-soil-800)"
+              text-anchor="middle"
+              dominant-baseline="central"
+              class="font-display font-semibold"
+            >{{ mark.label }}</text>
           </g>
           <g
             v-if="todayMark"

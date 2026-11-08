@@ -27,7 +27,15 @@ export function useActivityCover(activities: () => Activity[]) {
       }
     }
     const cover = coverAt.value(isoToDay(activity.date))
-    return { background: tint(cover.color, percent), why: why(cover) }
+    const origin = activity.origin
+      ? ` · ${t('app.activities.origin', {
+        year: activity.harvestYear!,
+        field: activity.origin.fieldNumber,
+        plot: activity.origin.plotNumber,
+        overlap: Math.round(activity.origin.overlap * 100)
+      })}`
+      : ''
+    return { background: tint(cover.color, percent), why: why(cover) + origin }
   }
 
   return { coverAt, why, look }

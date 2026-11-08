@@ -1,5 +1,9 @@
+from datetime import UTC, datetime
 from typing import Any
 
+from sqlalchemy.orm import Session
+
+from cropstar_api.models import AreaSource, Field, Plot
 from tests.farm_fixtures import Areas, Farm, create, tasks_url
 
 
@@ -310,3 +314,81 @@ def test_sowing_refers_to_seed(farm: Farm, areas: Areas) -> None:
         "farm_input": {"id": seed["id"], "name": "Weizen Capo", "kind": "seed", "archived": False},
         "nutrients": None,
     }
+
+
+def till_and_complete(farm: Farm, plot_id: str, title: str, performed_on: str) -> None:
+    task = create(
+        farm.worker,
+        farm,
+        title=title,
+        operation_type="tillage",
+        planned_details=cultivate(10),
+        plot_ids=[plot_id],
+    )
+    response = farm.worker.client.post(
+        op_url(farm, task, 0, "/complete"), json={"performed_on": performed_on}
+    )
+    assert response.status_code == 200, response.text
+
+
+def earlier_log(farm: Farm, plot_id: str) -> Any:
+    return farm.advisor.client.get(
+        f"/api/farms/{farm.id}/plots/{plot_id}/operations/earlier"
+    ).json()
+
+
+def test_earlier_harvest_years_on_the_same_ground(farm: Farm, areas: Areas) -> None:
+    till_and_complete(farm, areas.plot_2026, "Grubbern", "2025-09-20")
+    till_and_complete(farm, areas.plot_2027_a, "Pflügen", "2026-10-01")
+
+    earlier = earlier_log(farm, areas.plot_2027_a)
+
+    assert [
+        (e["task_title"], e["performed_on"], e["harvest_year"], e["field_number"], e["plot_number"])
+        for e in earlier
+    ] == [("Grubbern", "2025-09-20", 2026, 1, 1)]
+    assert earlier[0]["overlap"] > 0.95
+    assert earlier_log(farm, areas.plot_2026) == []
+
+
+def test_ground_covered_less_than_half_is_not_the_same(
+    farm: Farm, areas: Areas, db: Session
+) -> None:
+    # A 2025 Plot shifted by 60 m covers only 40 % of the 2027 Plot.
+    ring = "600260 502027, 600360 502027, 600360 502127, 600260 502127, 600260 502027"
+    field = Field(
+        farm_id=farm.id,
+        harvest_year=2025,
+        number=1,
+        name="Feld 1",
+        land_use_code="A",
+        land_use_name="ACKERLAND",
+        declared_area_ha=1,
+        geometry=f"SRID=31287;MULTIPOLYGON((({ring})))",
+        geometry_source=AreaSource.EAMA_EXPORT,
+        imported_at=datetime.now(UTC),
+    )
+    db.add(field)
+    db.flush()
+    shifted = Plot(
+        field_id=field.id,
+        number=1,
+        land_use_code="142",
+        land_use_name="WINTERROGGEN",
+        declared_area_ha=0.5,
+        geometry=field.geometry,
+        geometry_source=AreaSource.EAMA_EXPORT,
+        imported_at=datetime.now(UTC),
+    )
+    db.add(shifted)
+    db.commit()
+    till_and_complete(farm, str(shifted.id), "Grubbern", "2024-09-20")
+
+    assert earlier_log(farm, areas.plot_2027_a) == []
+
+
+def test_earlier_operations_stay_within_the_farm(farm: Farm, areas: Areas) -> None:
+    assert farm.stranger.client.get(
+        f"/api/farms/{farm.id}/plots/{areas.plot_2027_a}/operations/earlier"
+    ).status_code in (403, 404)
+    assert earlier_log(farm, areas.elsewhere_plot) == []

@@ -31,6 +31,15 @@ const { data: log, refresh: refreshLog } = useAsyncData(
   { watch: [() => props.plot.id] }
 )
 
+// Operations of earlier Harvest Years on the same ground, for the spiral and the ground cover.
+const { data: earlierLog } = useAsyncData(
+  () => `plot-earlier-log-${props.plot.id}`,
+  async () => (await api.GET('/api/farms/{farm_id}/plots/{plot_id}/operations/earlier', {
+    params: { path: { farm_id: props.farmId, plot_id: props.plot.id } }
+  })).data ?? [],
+  { watch: [() => props.plot.id] }
+)
+
 const locked = computed(() => lockOf(props.plot.harvest_year) !== null)
 
 const source = computed(() => t(`app.plots.sourceValue.${props.plot.provenance.source}`, {
@@ -49,6 +58,7 @@ const activities = computed<Activity[]>(() => [
     detail: task.operation_type ? t(`app.operationTypes.${task.operation_type}`) : '',
     operationType: task.operation_type,
     priority: task.priority,
+    harvestYear: props.plot.harvest_year,
     task
   })),
   ...(log.value ?? []).map(entry => ({
@@ -60,9 +70,25 @@ const activities = computed<Activity[]>(() => [
     detail: summary(entry.actual_details, entry.actual_input),
     operationType: entry.operation_type,
     priority: 'none' as const,
-    applied: entry.actual_input
+    applied: entry.actual_input,
+    harvestYear: props.plot.harvest_year
   }))
 ])
+
+const earlier = computed<Activity[]>(() => (earlierLog.value ?? []).map(entry => ({
+  key: `earlier-${entry.operation_id}`,
+  done: true,
+  date: entry.performed_on ?? entry.completed_at?.slice(0, 10) ?? null,
+  title: `${t(`app.operationTypes.${entry.operation_type}`)} · ${entry.task_title}`,
+  detail: summary(entry.actual_details, entry.actual_input),
+  operationType: entry.operation_type,
+  priority: 'none' as const,
+  applied: entry.actual_input,
+  harvestYear: entry.harvest_year,
+  origin: { fieldNumber: entry.field_number, plotNumber: entry.plot_number, overlap: entry.overlap }
+})))
+
+const withEarlier = computed(() => [...earlier.value, ...activities.value])
 
 const view = useState<'spiral' | 'table'>('plot-activities-view', () => 'spiral')
 
@@ -150,15 +176,16 @@ async function changed() {
           </div>
         </div>
       </div>
-      <template v-if="activities.length">
+      <template v-if="view === 'spiral' ? withEarlier.length : activities.length">
         <AppActivitySpiral
           v-if="view === 'spiral'"
-          :activities="activities"
+          :activities="withEarlier"
           @select="activity => activity.task && openEditor(activity.task)"
         />
         <AppActivityTable
           v-else
           :activities="activities"
+          :cover-from="withEarlier"
           @select="activity => activity.task && openEditor(activity.task)"
         />
       </template>

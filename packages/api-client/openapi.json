@@ -2065,6 +2065,64 @@
         }
       }
     },
+    "/api/farms/{farm_id}/plots/{plot_id}/operations/earlier": {
+      "get": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Read Earlier Operation Log",
+        "description": "Done Operations of earlier Harvest Years on the same ground, oldest first.\n\nPlots belong to one Harvest Year, so the same ground is found by geometry: per earlier\nyear, the Plot that covers most of this one, if it covers at least half of it. A Plot\nwithout geometry has no earlier Operations.",
+        "operationId": "getEarlierOperationLog",
+        "parameters": [
+          {
+            "name": "plot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Plot Id"
+            }
+          },
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EarlierOperationLogEntry"
+                  },
+                  "title": "Response Getearlieroperationlog"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/farms/{farm_id}/task-stages": {
       "get": {
         "tags": [
@@ -3964,6 +4022,147 @@
           "postgis_version"
         ],
         "title": "DatabaseStatus"
+      },
+      "EarlierOperationLogEntry": {
+        "properties": {
+          "operation_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Operation Id"
+          },
+          "task_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Task Id"
+          },
+          "task_title": {
+            "type": "string",
+            "title": "Task Title"
+          },
+          "operation_type": {
+            "type": "string",
+            "title": "Operation Type"
+          },
+          "performed_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Performed On"
+          },
+          "actual_details": {
+            "anyOf": [
+              {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/TillageDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MechanicalWeedControlDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MulchingDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SowingDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/FertilisationDetails"
+                  },
+                  {
+                    "$ref": "#/components/schemas/HarvestDetails"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": {
+                    "fertilisation": "#/components/schemas/FertilisationDetails",
+                    "harvest": "#/components/schemas/HarvestDetails",
+                    "mechanical_weed_control": "#/components/schemas/MechanicalWeedControlDetails",
+                    "mulching": "#/components/schemas/MulchingDetails",
+                    "sowing": "#/components/schemas/SowingDetails",
+                    "tillage": "#/components/schemas/TillageDetails"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Details"
+          },
+          "actual_input": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AppliedInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "completed_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "harvest_year": {
+            "type": "integer",
+            "title": "Harvest Year"
+          },
+          "field_number": {
+            "type": "integer",
+            "title": "Field Number"
+          },
+          "plot_number": {
+            "type": "integer",
+            "title": "Plot Number"
+          },
+          "overlap": {
+            "type": "number",
+            "title": "Overlap"
+          }
+        },
+        "type": "object",
+        "required": [
+          "operation_id",
+          "task_id",
+          "task_title",
+          "operation_type",
+          "performed_on",
+          "actual_details",
+          "actual_input",
+          "completed_by",
+          "completed_at",
+          "harvest_year",
+          "field_number",
+          "plot_number",
+          "overlap"
+        ],
+        "title": "EarlierOperationLogEntry",
+        "description": "A Done Operation of an earlier Harvest Year on the same ground, with where it comes from."
       },
       "ExportProblem": {
         "properties": {

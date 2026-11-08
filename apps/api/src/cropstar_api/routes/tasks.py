@@ -9,9 +9,9 @@ from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, HTTPException, Query, Response, status
 from pydantic import BaseModel, StringConstraints, field_validator
-from sqlalchemy import case, nulls_last, or_, select
+from sqlalchemy import case, func, nulls_last, or_, select
 from sqlalchemy.orm import Session as DbSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import aliased, selectinload
 
 from cropstar_api.db import Db
 from cropstar_api.farms import FarmMembership
@@ -19,6 +19,7 @@ from cropstar_api.land_use import LandUseCategory, land_use_category
 from cropstar_api.models import (
     FarmInput,
     FarmInputKind,
+    Field,
     ImportBatch,
     ImportKind,
     Membership,
@@ -144,6 +145,16 @@ class OperationLogEntry(BaseModel):
     actual_input: AppliedInput | None
     completed_by: PersonOut | None
     completed_at: datetime | None
+
+
+class EarlierOperationLogEntry(OperationLogEntry):
+    """A Done Operation of an earlier Harvest Year on the same ground, with where it comes from."""
+
+    harvest_year: int
+    field_number: int
+    plot_number: int
+    # Share of the asking Plot's area the earlier Plot covers, from 0 to 1.
+    overlap: float
 
 
 class ImportedFrom(BaseModel):
@@ -428,12 +439,71 @@ def read_operation_log(
     plot_id: uuid.UUID, membership: FarmMembership, db: Db
 ) -> list[OperationLogEntry]:
     """The Operation Log: every Done Operation on this Plot, oldest first."""
+    return [entry for entry, _ in _log_entries(db, membership, [plot_id])]
+
+
+# An earlier Plot counts as the same ground when it covers at least this share of the Plot.
+PREDECESSOR_MIN_OVERLAP = 0.5
+
+
+@router.get("/plots/{plot_id}/operations/earlier", operation_id="getEarlierOperationLog")
+def read_earlier_operation_log(
+    plot_id: uuid.UUID, membership: FarmMembership, db: Db
+) -> list[EarlierOperationLogEntry]:
+    """Done Operations of earlier Harvest Years on the same ground, oldest first.
+
+    Plots belong to one Harvest Year, so the same ground is found by geometry: per earlier
+    year, the Plot that covers most of this one, if it covers at least half of it. A Plot
+    without geometry has no earlier Operations.
+    """
+    here = aliased(Plot)
+    here_field = aliased(Field)
+    overlap = func.ST_Area(func.ST_Intersection(Plot.geometry, here.geometry)) / func.ST_Area(
+        here.geometry
+    )
+    candidates = db.execute(
+        select(Plot.id, Plot.number, Field.number, Field.harvest_year, overlap)
+        .join(Field, Plot.field_id == Field.id)
+        .join(here, func.ST_Intersects(Plot.geometry, here.geometry))
+        .join(here_field, here.field_id == here_field.id)
+        .where(
+            here.id == plot_id,
+            here_field.farm_id == membership.farm_id,
+            Field.farm_id == membership.farm_id,
+            Field.harvest_year < here_field.harvest_year,
+        )
+    ).all()
+    best: dict[int, tuple[uuid.UUID, int, int, float]] = {}
+    for earlier_id, plot_number, field_number, year, share in candidates:
+        if share >= PREDECESSOR_MIN_OVERLAP and (year not in best or share > best[year][3]):
+            best[year] = (earlier_id, field_number, plot_number, float(share))
+    origin = {
+        plot: (year, field, number, share) for year, (plot, field, number, share) in best.items()
+    }
+    return [
+        EarlierOperationLogEntry(
+            **entry.model_dump(),
+            harvest_year=origin[plot][0],
+            field_number=origin[plot][1],
+            plot_number=origin[plot][2],
+            overlap=round(origin[plot][3], 3),
+        )
+        for entry, plot in _log_entries(db, membership, list(origin))
+    ]
+
+
+def _log_entries(
+    db: DbSession, membership: Membership, plot_ids: list[uuid.UUID]
+) -> list[tuple[OperationLogEntry, uuid.UUID]]:
+    """Done Operations on the given Plots, oldest first, each with the Plot it belongs to."""
+    if not plot_ids:
+        return []
     rows = db.execute(
         select(Operation, Task)
         .join(Task, Operation.task_id == Task.id)
         .where(
             Task.farm_id == membership.farm_id,
-            Operation.plot_id == plot_id,
+            Operation.plot_id.in_(plot_ids),
             Operation.status == TaskStatus.DONE,
         )
         .order_by(nulls_last(Operation.performed_on.asc()), Operation.completed_at.asc())
@@ -441,18 +511,21 @@ def read_operation_log(
     people = _people(db, {o.completed_by_id for o, _ in rows if o.completed_by_id})
     inputs = _farm_inputs(db, membership.farm_id, [o.actual_details for o, _ in rows])
     return [
-        OperationLogEntry(
-            operation_id=operation.id,
-            task_id=task.id,
-            task_title=task.title,
-            operation_type=task.operation_type or "",
-            performed_on=operation.performed_on,
-            actual_details=from_stored(operation.actual_details),
-            actual_input=_applied(operation.actual_details, inputs),
-            completed_by=people.get(operation.completed_by_id)
-            if operation.completed_by_id
-            else None,
-            completed_at=operation.completed_at,
+        (
+            OperationLogEntry(
+                operation_id=operation.id,
+                task_id=task.id,
+                task_title=task.title,
+                operation_type=task.operation_type or "",
+                performed_on=operation.performed_on,
+                actual_details=from_stored(operation.actual_details),
+                actual_input=_applied(operation.actual_details, inputs),
+                completed_by=people.get(operation.completed_by_id)
+                if operation.completed_by_id
+                else None,
+                completed_at=operation.completed_at,
+            ),
+            operation.plot_id,
         )
         for operation, task in rows
     ]

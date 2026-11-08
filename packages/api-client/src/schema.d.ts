@@ -622,6 +622,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/farms/{farm_id}/plots/{plot_id}/operations/earlier": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read Earlier Operation Log
+         * @description Done Operations of earlier Harvest Years on the same ground, oldest first.
+         *
+         *     Plots belong to one Harvest Year, so the same ground is found by geometry: per earlier
+         *     year, the Plot that covers most of this one, if it covers at least half of it. A Plot
+         *     without geometry has no earlier Operations.
+         */
+        get: operations["getEarlierOperationLog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/farms/{farm_id}/task-stages": {
         parameters: {
             query?: never;
@@ -1266,6 +1290,42 @@ export interface components {
             postgres_version: string | null;
             /** Postgis Version */
             postgis_version: string | null;
+        };
+        /**
+         * EarlierOperationLogEntry
+         * @description A Done Operation of an earlier Harvest Year on the same ground, with where it comes from.
+         */
+        EarlierOperationLogEntry: {
+            /**
+             * Operation Id
+             * Format: uuid
+             */
+            operation_id: string;
+            /**
+             * Task Id
+             * Format: uuid
+             */
+            task_id: string;
+            /** Task Title */
+            task_title: string;
+            /** Operation Type */
+            operation_type: string;
+            /** Performed On */
+            performed_on: string | null;
+            /** Actual Details */
+            actual_details: (components["schemas"]["TillageDetails"] | components["schemas"]["MechanicalWeedControlDetails"] | components["schemas"]["MulchingDetails"] | components["schemas"]["SowingDetails"] | components["schemas"]["FertilisationDetails"] | components["schemas"]["HarvestDetails"]) | null;
+            actual_input: components["schemas"]["AppliedInput"] | null;
+            completed_by: components["schemas"]["PersonOut"] | null;
+            /** Completed At */
+            completed_at: string | null;
+            /** Harvest Year */
+            harvest_year: number;
+            /** Field Number */
+            field_number: number;
+            /** Plot Number */
+            plot_number: number;
+            /** Overlap */
+            overlap: number;
         };
         /** ExportProblem */
         ExportProblem: {
@@ -3862,6 +3922,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OperationLogEntry"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    getEarlierOperationLog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plot_id: string;
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EarlierOperationLogEntry"][];
                 };
             };
             /** @description Validation Error */

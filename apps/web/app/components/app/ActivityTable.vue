@@ -5,13 +5,14 @@ import type { Activity } from '~/utils/activities'
  * A Plot's Activities as a table: undated Tasks by priority on top, then newest first with a "today" line.
  * The row background is the ground cover derived from the Operations; the reason is in the row's tooltip.
  */
-const props = defineProps<{ activities: Activity[] }>()
+// `coverFrom` may include Operations of earlier Harvest Years, so the ground cover at the start is known.
+const props = defineProps<{ activities: Activity[], coverFrom?: Activity[] }>()
 const emit = defineEmits<{ select: [activity: Activity] }>()
 
 const { t } = useI18n()
 const { day } = useFormat()
 const today = todayIso()
-const { look } = useActivityCover(() => props.activities)
+const { look } = useActivityCover(() => props.coverFrom ?? props.activities)
 
 const rows = computed(() => newestFirst(props.activities))
 // "Today" sits above the first Activity that is not in the future.
