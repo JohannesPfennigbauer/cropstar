@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Schemas } from '@cropstar/api-client'
+import type { Activity } from '~/utils/activities'
 
 type Plot = Schemas['PlotProperties']
 type Task = Schemas['TaskOut']
@@ -11,10 +12,9 @@ const emit = defineEmits<{ changed: [] }>()
 const { t } = useI18n()
 const api = useApi()
 const localePath = useLocalePath()
-const { day, moment } = useFormat()
+const { moment } = useFormat()
 const { summary } = useOperationDetails()
 const { lockOf } = useHarvestYear()
-const today = todayIso()
 
 const { data: tasks, refresh: refreshTasks } = useAsyncData(
   () => `plot-tasks-${props.plot.id}`,
@@ -39,40 +39,32 @@ const source = computed(() => t(`app.plots.sourceValue.${props.plot.provenance.s
   from: props.plot.provenance.borrowed_from_year
 }))
 
-interface Row {
-  key: string
-  done: boolean
-  date: string | null
-  title: string
-  detail: string
-  task?: Task
-  applied?: Schemas['AppliedInput'] | null
-}
+// Activities: Open Tasks and the Operation Log of this Plot, shown as a spiral (default) or a table.
+const activities = computed<Activity[]>(() => [
+  ...(tasks.value ?? []).map(task => ({
+    key: `task-${task.id}`,
+    done: false,
+    date: task.due_date,
+    title: task.title,
+    detail: task.operation_type ? t(`app.operationTypes.${task.operation_type}`) : '',
+    operationType: task.operation_type,
+    priority: task.priority,
+    task
+  })),
+  ...(log.value ?? []).map(entry => ({
+    key: `log-${entry.operation_id}`,
+    done: true,
+    // An Operation recorded without a day counts on the day it was completed.
+    date: entry.performed_on ?? entry.completed_at?.slice(0, 10) ?? null,
+    title: `${t(`app.operationTypes.${entry.operation_type}`)} · ${entry.task_title}`,
+    detail: summary(entry.actual_details, entry.actual_input),
+    operationType: entry.operation_type,
+    priority: 'none' as const,
+    applied: entry.actual_input
+  }))
+])
 
-// Open Tasks first, those without a date at the very top; then the log, newest first.
-const rows = computed<Row[]>(() => {
-  const open = [...(tasks.value ?? [])]
-    .sort((a, b) => (a.due_date ?? '').localeCompare(b.due_date ?? ''))
-    .map(task => ({
-      key: `task-${task.id}`,
-      done: false,
-      date: task.due_date,
-      title: task.title,
-      detail: task.operation_type ? t(`app.operationTypes.${task.operation_type}`) : '',
-      task
-    }))
-  const done = [...(log.value ?? [])]
-    .sort((a, b) => (b.performed_on ?? '').localeCompare(a.performed_on ?? ''))
-    .map(entry => ({
-      key: `log-${entry.operation_id}`,
-      done: true,
-      date: entry.performed_on,
-      title: `${t(`app.operationTypes.${entry.operation_type}`)} · ${entry.task_title}`,
-      detail: summary(entry.actual_details, entry.actual_input),
-      applied: entry.actual_input
-    }))
-  return [...open, ...done]
-})
+const view = useState<'spiral' | 'table'>('plot-activities-view', () => 'spiral')
 
 const editorOpen = ref(false)
 const editing = ref<Task | null>(null)
@@ -117,62 +109,59 @@ async function changed() {
             class="size-3.5"
           />
         </ULink>
-        <UButton
-          size="xs"
-          variant="soft"
-          icon="i-lucide-plus"
-          :label="t('app.plots.newTask')"
-          :disabled="locked"
-          :title="locked ? t('app.harvestYear.locked', { year: plot.harvest_year }) : undefined"
-          data-testid="new-plot-task"
-          @click="openEditor(null)"
+        <div class="flex items-center gap-2">
+          <UButton
+            size="xs"
+            variant="soft"
+            icon="i-lucide-plus"
+            :label="t('app.plots.newTask')"
+            :disabled="locked"
+            :title="locked ? t('app.harvestYear.locked', { year: plot.harvest_year }) : undefined"
+            data-testid="new-plot-task"
+            @click="openEditor(null)"
+          />
+          <div
+            class="flex rounded-md border border-default p-0.5"
+            role="group"
+            :aria-label="t('app.activities.view.label')"
+          >
+            <UButton
+              size="xs"
+              :variant="view === 'table' ? 'soft' : 'ghost'"
+              :color="view === 'table' ? 'primary' : 'neutral'"
+              icon="i-lucide-table-2"
+              :aria-label="t('app.activities.view.table')"
+              :aria-pressed="view === 'table'"
+              :title="t('app.activities.view.table')"
+              data-testid="activities-view-table"
+              @click="view = 'table'"
+            />
+            <UButton
+              size="xs"
+              :variant="view === 'spiral' ? 'soft' : 'ghost'"
+              :color="view === 'spiral' ? 'primary' : 'neutral'"
+              icon="i-lucide-orbit"
+              :aria-label="t('app.activities.view.spiral')"
+              :aria-pressed="view === 'spiral'"
+              :title="t('app.activities.view.spiral')"
+              data-testid="activities-view-spiral"
+              @click="view = 'spiral'"
+            />
+          </div>
+        </div>
+      </div>
+      <template v-if="activities.length">
+        <AppActivitySpiral
+          v-if="view === 'spiral'"
+          :activities="activities"
+          @select="activity => activity.task && openEditor(activity.task)"
         />
-      </div>
-      <div
-        v-if="rows.length"
-        class="mt-2 max-h-64 overflow-y-auto rounded-md border border-default"
-      >
-        <table
-          class="w-full text-left text-xs"
-          data-testid="plot-history"
-        >
-          <tbody class="divide-y divide-default">
-            <tr
-              v-for="row in rows"
-              :key="row.key"
-              :class="row.task ? 'cursor-pointer hover:bg-elevated' : ''"
-              :data-testid="row.done ? 'plot-log-row' : 'plot-task-row'"
-              @click="row.task && openEditor(row.task)"
-            >
-              <td class="w-6 py-1.5 pl-2 align-top">
-                <UIcon
-                  :name="row.done ? 'i-lucide-circle-check' : 'i-lucide-circle'"
-                  class="mt-0.5 size-3.5"
-                  :class="row.done ? 'text-primary' : 'text-muted'"
-                  :aria-label="row.done ? t('app.tasks.status.done') : t('app.tasks.status.open')"
-                />
-              </td>
-              <td
-                class="w-24 py-1.5 align-top whitespace-nowrap tabular-nums"
-                :class="row.task && isOverdue(row.task, today) ? 'font-semibold text-error' : 'text-muted'"
-              >
-                {{ row.date ? day(row.date) : '–' }}
-              </td>
-              <td class="py-1.5 pr-2 align-top">
-                <span class="block font-medium text-highlighted">{{ row.title }}</span>
-                <span
-                  v-if="row.detail"
-                  class="block text-toned"
-                >{{ row.detail }}</span>
-                <AppNutrientsApplied
-                  v-if="row.applied"
-                  :applied="row.applied"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+        <AppActivityTable
+          v-else
+          :activities="activities"
+          @select="activity => activity.task && openEditor(activity.task)"
+        />
+      </template>
       <p
         v-else
         class="mt-1 text-xs text-muted"

@@ -71,6 +71,9 @@ test('plots, an Operation on two of them, its log, and a locked season', async (
 
   await page.getByRole('link', { name: 'Übersicht', exact: true }).click()
   await page.getByTestId('plot-row').filter({ hasText: 'Winterroggen' }).click()
+  // Activities open as a spiral; the table shows the full details.
+  await expect(page.getByTestId('plot-activities-spiral').getByTestId('activity-card').filter({ hasText: 'Düngung · Gülle ausbringen' })).toBeVisible()
+  await page.getByTestId('activities-view-table').click()
   const history = page.getByTestId('plot-history')
   await expect(history.getByTestId('plot-log-row')).toContainText('Düngung · Gülle ausbringen')
   await expect(history.getByTestId('plot-log-row')).toContainText('Rindergülle · 18 m³/ha · Schleppschuh')

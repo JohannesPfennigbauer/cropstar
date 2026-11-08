@@ -472,7 +472,7 @@
       "withoutGeometry": "{n} plot without geometry | {n} plots without geometry",
       "provisional": "provisional",
       "noGeometry": "no geometry",
-      "history": "Tasks & operations",
+      "history": "Activities",
       "historyEmpty": "No open tasks and no recorded operations on this plot yet."
     },
     "landUseCategory": {
@@ -1041,6 +1041,26 @@
       },
       "noInputs": "Add some under Farm › Farm inputs to choose them here.",
       "nutrientsApplied": "≙ {nutrients} per ha"
+    },
+    "activities": {
+      "view": {
+        "label": "View",
+        "table": "Table",
+        "spiral": "Spiral"
+      },
+      "today": "Today",
+      "undated": "no date",
+      "priority": "Priority {level}",
+      "scrollHint": "Mouse wheel: activities move along the spiral · past inside, future outside",
+      "cover": {
+        "why": "Ground cover, derived from the operations: {why}",
+        "unknown": "unknown before records begin",
+        "crop": "crop since {since} on {sinceDate}, {progress} % of the time until {harvest} on {harvestDate}",
+        "catchCrop": "crop since {since} on {sinceDate}",
+        "stubble": "stubble since {since} on {sinceDate}",
+        "soil": "bare soil since {since} on {sinceDate}",
+        "undated": "No date · background by priority: {priority}"
+      }
     }
   }
 }

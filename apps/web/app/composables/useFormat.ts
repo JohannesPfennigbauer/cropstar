@@ -26,10 +26,17 @@ export function useFormat() {
       .format(new Date(Date.UTC(year!, month! - 1, date!)))
   }
 
+  /** A calendar date in compact numeric form: "20.03.27". */
+  function shortDay(value: string): string {
+    const [year, month, date] = value.split('-').map(Number)
+    return new Intl.DateTimeFormat(intlLocale(), { day: '2-digit', month: '2-digit', year: '2-digit', timeZone: 'UTC' })
+      .format(new Date(Date.UTC(year!, month! - 1, date!)))
+  }
+
   function moment(value: string): string {
     return new Intl.DateTimeFormat(intlLocale(), { dateStyle: 'medium', timeStyle: 'short' })
       .format(new Date(value))
   }
 
-  return { hectares, decimal, day, moment }
+  return { hectares, decimal, day, shortDay, moment }
 }

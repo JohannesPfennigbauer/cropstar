@@ -472,7 +472,7 @@
       "withoutGeometry": "{n} Schlag ohne Geometrie | {n} Schläge ohne Geometrie",
       "provisional": "vorläufig",
       "noGeometry": "ohne Geometrie",
-      "history": "Aufgaben & Maßnahmen",
+      "history": "Tätigkeiten",
       "historyEmpty": "Noch keine offenen Aufgaben und keine erledigten Maßnahmen auf diesem Schlag."
     },
     "landUseCategory": {
@@ -1041,6 +1041,26 @@
       },
       "noInputs": "Lege unter Betrieb › Betriebsmittel welche an, um sie hier zu wählen.",
       "nutrientsApplied": "≙ {nutrients} je ha"
+    },
+    "activities": {
+      "view": {
+        "label": "Ansicht",
+        "table": "Tabelle",
+        "spiral": "Spirale"
+      },
+      "today": "Heute",
+      "undated": "ohne Datum",
+      "priority": "Priorität {level}",
+      "scrollHint": "Mausrad: Tätigkeiten wandern die Spirale entlang · innen Vergangenheit, außen Zukunft",
+      "cover": {
+        "why": "Bodenbedeckung, abgeleitet aus den Maßnahmen: {why}",
+        "unknown": "vor Beginn der Aufzeichnungen unbekannt",
+        "crop": "Bestand seit {since} am {sinceDate}, {progress} % der Zeit bis {harvest} am {harvestDate}",
+        "catchCrop": "Bestand seit {since} am {sinceDate}",
+        "stubble": "Stoppel seit {since} am {sinceDate}",
+        "soil": "offener Boden seit {since} am {sinceDate}",
+        "undated": "Ohne Datum · Hintergrund nach Priorität: {priority}"
+      }
     }
   }
 }

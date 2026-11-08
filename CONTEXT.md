@@ -152,3 +152,13 @@ _Avoid_: Product, Material, Produkt
 **Operation Log** (de: _Maßnahmenprotokoll_):
 All Done Operations of one Plot, in date order.
 _Avoid_: Field record, Schlagkartei
+
+**Activities** (de: _Tätigkeiten_):
+A Plot's Open Tasks and its Operation Log together, shown on the Plot as a spiral (past inside,
+future outside, undated Tasks at the front) or as a table. A collective term for display; it is
+not stored on its own.
+
+**Ground Cover** (de: _Bodenbedeckung_):
+What the Operations imply about the soil surface of a Plot: a growing crop from sowing, ripening
+towards its harvest; stubble after the harvest; bare soil from tillage until the next sowing;
+unknown before the first record. Derived and descriptive, never measured.
