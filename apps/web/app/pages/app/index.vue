@@ -158,7 +158,7 @@ watch(selected, async (id) => {
       v-else
       class="grid gap-6 lg:h-[calc(100dvh-9rem)] lg:grid-cols-2"
     >
-      <section class="flex min-h-0 flex-col">
+      <section class="flex min-h-0 min-w-0 flex-col">
         <div class="flex items-center justify-between gap-3">
           <h1 class="truncate text-3xl font-semibold text-highlighted">
             {{ farm.name }}

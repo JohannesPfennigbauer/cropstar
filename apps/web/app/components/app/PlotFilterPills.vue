@@ -21,6 +21,15 @@ function toggleGroup(group: PlotGroup) {
   filter.value = { group: next, crops: filter.value.crops.filter(c => inside.has(c)) }
 }
 
+// One scrollable line per row; a plain mouse wheel scrolls it sideways while it can move.
+function sideways(event: WheelEvent) {
+  const row = event.currentTarget as HTMLElement
+  if (Math.abs(event.deltaX) > Math.abs(event.deltaY) || row.scrollWidth <= row.clientWidth) return
+  const before = row.scrollLeft
+  row.scrollLeft += event.deltaY
+  if (row.scrollLeft !== before) event.preventDefault()
+}
+
 function toggleCrop(name: string) {
   const crops = filter.value.crops.includes(name)
     ? filter.value.crops.filter(c => c !== name)
@@ -31,13 +40,14 @@ function toggleCrop(name: string) {
 
 <template>
   <div
-    class="space-y-1.5"
+    class="min-w-0 space-y-1.5"
     data-testid="plot-filter-pills"
   >
     <div
-      class="flex flex-wrap gap-1.5"
+      class="pill-row flex gap-1.5"
       role="group"
       :aria-label="t('app.plots.filter.groups')"
+      @wheel="sideways"
     >
       <button
         v-for="pill in groups"
@@ -61,9 +71,10 @@ function toggleCrop(name: string) {
     </div>
     <div
       v-if="crops.length > 1"
-      class="flex flex-wrap gap-1"
+      class="pill-row flex gap-1"
       role="group"
       :aria-label="t('app.plots.filter.crops')"
+      @wheel="sideways"
     >
       <button
         v-for="crop in crops"
@@ -88,7 +99,15 @@ function toggleCrop(name: string) {
 </template>
 
 <style scoped>
+.pill-row {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-bottom: 0.25rem;
+}
 .pill {
+  flex-shrink: 0;
+  white-space: nowrap;
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;

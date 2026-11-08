@@ -25,20 +25,22 @@ export function matchesFilter(plot: FilterablePlot, filter: PlotFilter): boolean
     && (filter.crops.length === 0 || filter.crops.includes(plot.land_use_name))
 }
 
-/** First row: "active" (if any Plot is active), then every category present, in legend order. */
+const inactiveLast = (category: LandUseCategory) => (INACTIVE.includes(category) ? 1 : 0)
+
+/** First row: "active" (if any Plot is active), then every category present, in legend order; fallow and other last. */
 export function groupPills(plots: FilterablePlot[]): { group: PlotGroup, count: number }[] {
   const count = (group: PlotGroup) => plots.filter(p => inGroup(p.land_use_category, group)).length
   const pills: { group: PlotGroup, count: number }[] = []
   const active = count('active')
   if (active) pills.push({ group: 'active', count: active })
-  for (const category of LAND_USE_CATEGORIES) {
+  for (const category of [...LAND_USE_CATEGORIES].sort((a, b) => inactiveLast(a) - inactiveLast(b))) {
     const n = count(category)
     if (n) pills.push({ group: category, count: n })
   }
   return pills
 }
 
-/** Second row: the crops within the chosen group, most frequent first. */
+/** Second row: the crops within the chosen group, most frequent first; fallow and other (e.g. GLÖZ) last. */
 export function cropPills(plots: FilterablePlot[], group: PlotGroup | null): { name: string, category: LandUseCategory, count: number }[] {
   const byName = new Map<string, { name: string, category: LandUseCategory, count: number }>()
   for (const plot of plots) {
@@ -47,5 +49,6 @@ export function cropPills(plots: FilterablePlot[], group: PlotGroup | null): { n
     entry.count++
     byName.set(plot.land_use_name, entry)
   }
-  return [...byName.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'de-AT'))
+  return [...byName.values()].sort((a, b) =>
+    inactiveLast(a.category) - inactiveLast(b.category) || b.count - a.count || a.name.localeCompare(b.name, 'de-AT'))
 }
