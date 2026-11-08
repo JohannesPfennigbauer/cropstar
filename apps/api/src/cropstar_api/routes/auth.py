@@ -9,6 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session as DbSession
 from sqlalchemy.orm import joinedload
 
+from cropstar_api import task_stages
 from cropstar_api.auth.dependencies import (
     AppMailer,
     AppSettings,
@@ -133,6 +134,7 @@ def register(
         farm = Farm(name=body.farm_name)
         db.add(farm)
         db.flush()
+        task_stages.create_defaults(db, farm.id)
         db.add(Membership(farm_id=farm.id, user_id=identity.user_id, role=Role.ADMIN))
     set_session_cookie(response, auth.open_session(db, identity), settings)
     return me_of(db, identity)

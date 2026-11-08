@@ -8,6 +8,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from cropstar_api import task_stages
 from cropstar_api.auth.provider import PasswordAuthProvider, normalize_email
 from cropstar_api.geometry import from_ama_geojson
 from cropstar_api.models import AreaSource, Farm, Field, Membership, Plot, Role, User
@@ -41,6 +42,7 @@ def seed_demo(db: Session, auth: PasswordAuthProvider, email: str, password: str
         farm = Farm(name=DEMO_FARM_NAME)
         db.add(farm)
         db.flush()
+        task_stages.create_defaults(db, farm.id)
         db.add(Membership(farm_id=farm.id, user_id=user_id, role=Role.ADMIN))
     for field in db.scalars(select(Field).where(Field.farm_id == farm.id)):
         db.delete(field)

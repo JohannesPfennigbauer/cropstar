@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('plan a task, tick it off, find it under done', async ({ page }) => {
+test('a task moves across the board with clicks, and back with undo', async ({ page }) => {
   await page.goto('/app/register')
   await page.getByLabel('Name deines Betriebs').fill('Hof Aufgaben')
   await page.getByLabel('E-Mail').fill(`e2e-tasks-${Date.now()}@example.at`)
@@ -18,13 +18,27 @@ test('plan a task, tick it off, find it under done', async ({ page }) => {
   await page.getByRole('option', { name: 'Hoch' }).click()
   await dialog.getByRole('button', { name: 'Anlegen' }).click()
 
-  const row = page.getByTestId('task-row').filter({ hasText: 'Hecke am Kellerberg schneiden' })
-  await expect(row).toContainText('Hoch')
+  const board = page.getByTestId('task-board')
+  await expect(board.getByTestId('board-column')).toHaveText(['Geplant', 'Offen', 'In Arbeit', 'Erledigt'])
+  await expect(board.getByTestId('board-lane')).toHaveText(['Ohne Datum'])
+  const card = board.getByTestId('task-card').filter({ hasText: 'Hecke am Kellerberg schneiden' })
+  await expect(card).toContainText('Hoch')
 
-  await row.getByTestId('task-toggle').click()
-  await expect(page.getByTestId('task-row')).toHaveCount(0)
+  // Each click moves it one status on; the last one records it as done.
+  const toasts = page.getByRole('region', { name: /Notifications/ })
+  await card.click()
+  await expect(toasts).toContainText('→ Offen')
+  await card.click()
+  await expect(toasts).toContainText('→ In Arbeit')
+  await card.click()
+  await expect(toasts).toContainText('„Hecke am Kellerberg schneiden“ erledigt')
+  await expect(card).toHaveClass(/opacity-70/)
 
-  await page.getByRole('tab', { name: 'Erledigt' }).click()
-  await expect(page.getByTestId('task-row').filter({ hasText: 'Hecke am Kellerberg schneiden' }))
-    .toBeVisible()
+  await toasts.getByRole('button', { name: 'Rückgängig' }).last().click()
+  await expect(card).not.toHaveClass(/opacity-70/)
+
+  // A double click opens it.
+  await card.dblclick()
+  await expect(page.getByRole('dialog', { name: 'Aufgabe' })).toBeVisible()
+  await expect(page.getByTestId('task-stage')).toHaveText('In Arbeit')
 })

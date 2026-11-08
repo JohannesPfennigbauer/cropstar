@@ -17,6 +17,7 @@ from cropstar_api.routes import (
     harvest_years,
     imports,
     status,
+    task_stages,
     tasks,
 )
 from cropstar_api.settings import Settings
@@ -51,6 +52,7 @@ def create_app(settings: Settings | None = None, mailer: Mailer | None = None) -
     app.include_router(area_uploads.router, prefix="/api")
     app.include_router(harvest_years.router, prefix="/api")
     app.include_router(tasks.router, prefix="/api")
+    app.include_router(task_stages.router, prefix="/api")
     app.include_router(farm_inputs.router, prefix="/api")
     app.include_router(imports.router, prefix="/api")
     return app

@@ -622,6 +622,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/farms/{farm_id}/task-stages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Task Stages */
+        get: operations["listTaskStages"];
+        /** Update Task Stages */
+        put: operations["updateTaskStages"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/farms/{farm_id}/farm-inputs": {
         parameters: {
             query?: never;
@@ -2218,6 +2236,8 @@ export interface components {
             operation_type?: string | null;
             /** Planned Details */
             planned_details?: (components["schemas"]["TillageDetails"] | components["schemas"]["MechanicalWeedControlDetails"] | components["schemas"]["MulchingDetails"] | components["schemas"]["SowingDetails"] | components["schemas"]["FertilisationDetails"] | components["schemas"]["HarvestDetails"]) | null;
+            /** Stage Id */
+            stage_id?: string | null;
         };
         /** TaskFieldRef */
         TaskFieldRef: {
@@ -2276,6 +2296,8 @@ export interface components {
             operations: components["schemas"]["OperationOut"][];
             /** Allowed Actions */
             allowed_actions: components["schemas"]["Action"][];
+            /** Stage Id */
+            stage_id: string | null;
             imported: components["schemas"]["ImportedFrom"] | null;
         };
         /** TaskPlotRef */
@@ -2303,6 +2325,34 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** TaskStageIn */
+        TaskStageIn: {
+            /** Id */
+            id?: string | null;
+            /** Name */
+            name: string;
+        };
+        /** TaskStageOut */
+        TaskStageOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Task Count */
+            task_count: number;
+        };
+        /**
+         * TaskStagesUpdate
+         * @description The whole list, in board order. Stages left out are removed; their Tasks move to the
+         *     first stage.
+         */
+        TaskStagesUpdate: {
+            /** Stages */
+            stages: components["schemas"]["TaskStageIn"][];
+        };
         /**
          * TaskStatus
          * @enum {string}
@@ -2329,6 +2379,8 @@ export interface components {
             plot_ids?: string[] | null;
             /** Planned Details */
             planned_details?: (components["schemas"]["TillageDetails"] | components["schemas"]["MechanicalWeedControlDetails"] | components["schemas"]["MulchingDetails"] | components["schemas"]["SowingDetails"] | components["schemas"]["FertilisationDetails"] | components["schemas"]["HarvestDetails"]) | null;
+            /** Stage Id */
+            stage_id?: string | null;
         };
         /** TillageDetails */
         TillageDetails: {
@@ -3810,6 +3862,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OperationLogEntry"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listTaskStages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskStageOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    updateTaskStages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TaskStagesUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskStageOut"][];
                 };
             };
             /** @description Validation Error */

@@ -255,6 +255,19 @@ async function deleteFarm() {
       </UCard>
 
       <UCard>
+        <h2 class="text-lg font-semibold text-highlighted">
+          {{ t('app.tasks.stages.title') }}
+        </h2>
+        <p class="mt-1 mb-4 text-sm text-muted">
+          {{ t('app.tasks.stages.lead') }}
+        </p>
+        <AppTaskStagesSettings
+          :farm-id="details.id"
+          :can-edit="isAdmin"
+        />
+      </UCard>
+
+      <UCard>
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 class="text-lg font-semibold text-highlighted">

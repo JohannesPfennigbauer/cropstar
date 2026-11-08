@@ -2065,6 +2065,108 @@
         }
       }
     },
+    "/api/farms/{farm_id}/task-stages": {
+      "get": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "List Task Stages",
+        "operationId": "listTaskStages",
+        "parameters": [
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TaskStageOut"
+                  },
+                  "title": "Response Listtaskstages"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Update Task Stages",
+        "operationId": "updateTaskStages",
+        "parameters": [
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskStagesUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TaskStageOut"
+                  },
+                  "title": "Response Updatetaskstages"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/farms/{farm_id}/farm-inputs": {
       "get": {
         "tags": [
@@ -7162,6 +7264,18 @@
               }
             ],
             "title": "Planned Details"
+          },
+          "stage_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage Id"
           }
         },
         "type": "object",
@@ -7394,6 +7508,18 @@
             "type": "array",
             "title": "Allowed Actions"
           },
+          "stage_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage Id"
+          },
           "imported": {
             "anyOf": [
               {
@@ -7427,6 +7553,7 @@
           "planned_input",
           "operations",
           "allowed_actions",
+          "stage_id",
           "imported"
         ],
         "title": "TaskOut"
@@ -7482,6 +7609,76 @@
           "title"
         ],
         "title": "TaskRef"
+      },
+      "TaskStageIn": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "TaskStageIn"
+      },
+      "TaskStageOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "task_count": {
+            "type": "integer",
+            "title": "Task Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "task_count"
+        ],
+        "title": "TaskStageOut"
+      },
+      "TaskStagesUpdate": {
+        "properties": {
+          "stages": {
+            "items": {
+              "$ref": "#/components/schemas/TaskStageIn"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "minItems": 1,
+            "title": "Stages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "stages"
+        ],
+        "title": "TaskStagesUpdate",
+        "description": "The whole list, in board order. Stages left out are removed; their Tasks move to the\nfirst stage."
       },
       "TaskStatus": {
         "type": "string",
@@ -7623,6 +7820,18 @@
               }
             ],
             "title": "Planned Details"
+          },
+          "stage_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage Id"
           }
         },
         "type": "object",

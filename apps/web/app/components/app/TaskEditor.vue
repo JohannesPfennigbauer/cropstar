@@ -40,6 +40,7 @@ const schema = computed(() => z.object({
   assignee: z.string(),
   areas: z.array(z.string()),
   operation_type: z.string(),
+  stage_id: z.string(),
   planned_details: z.custom<OperationDetails | null>().superRefine((details, context) => {
     const problem = detailsProblem(details)
     if (problem) context.addIssue({ code: 'custom', message: t(`app.details.errors.${problem}`) })
@@ -62,6 +63,7 @@ function emptyState() {
       ? [...props.task.fields.map(f => `field:${f.id}`), ...props.task.plots.map(p => `plot:${p.id}`)]
       : areasLocked.value ? [] : (props.presetPlotIds ?? []).map(id => `plot:${id}`),
     operation_type: props.task?.operation_type ?? GENERAL,
+    stage_id: props.task?.stage_id ?? stageItems.value[0]?.value ?? '',
     planned_details: props.task?.planned_details
       ?? (props.task?.operation_type ? emptyDetails(props.task.operation_type as OperationTypeCode) : null),
     done: false
@@ -86,6 +88,14 @@ const { data: areaOptions } = useAsyncData(
   },
   { watch: [areaYear, () => props.farmId] }
 )
+
+const { data: stages } = useAsyncData(
+  () => `task-stages-${props.farmId}`,
+  async () => (await api.GET('/api/farms/{farm_id}/task-stages', {
+    params: { path: { farm_id: props.farmId } }
+  })).data ?? []
+)
+const stageItems = computed(() => (stages.value ?? []).map(stage => ({ label: stage.name, value: stage.id })))
 
 const state = reactive(emptyState())
 const isOperation = computed(() => state.operation_type !== GENERAL)
@@ -177,7 +187,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     assignee_id: event.data.assignee === NOBODY ? null : event.data.assignee,
     field_ids: event.data.areas.filter(a => a.startsWith('field:')).map(a => a.slice(6)),
     plot_ids: event.data.areas.filter(a => a.startsWith('plot:')).map(a => a.slice(5)),
-    planned_details: isOperation.value ? cleanDetails(event.data.planned_details) : null
+    planned_details: isOperation.value ? cleanDetails(event.data.planned_details) : null,
+    ...(event.data.stage_id ? { stage_id: event.data.stage_id } : {})
   }
   const path = { farm_id: props.farmId }
   const result = props.task
@@ -350,6 +361,18 @@ async function remove() {
               v-model="state.due_date"
               type="date"
               class="w-full"
+            />
+          </UFormField>
+          <UFormField
+            v-if="stageItems.length && (!task || task.status === 'open')"
+            :label="t('app.tasks.fields.stage')"
+            name="stage_id"
+          >
+            <USelect
+              v-model="state.stage_id"
+              :items="stageItems"
+              class="w-full"
+              data-testid="task-stage"
             />
           </UFormField>
           <UFormField

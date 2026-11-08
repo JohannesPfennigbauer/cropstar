@@ -12,7 +12,13 @@ test('an admin uploads the eAMA export into an empty farm', async ({ page }) => 
 
   await expect(page.getByText('Erntejahr 2026 übernommen', { exact: true })).toBeVisible()
   await expect(page.getByTestId('plots-provenance')).toContainText('Wie bei AMA beantragt · Erntejahr 2026')
-  await expect(page.getByRole('link', { name: /Winterroggen/ })).toBeVisible()
+  await expect(page.getByTestId('field-heading').first()).toHaveText(/^1\s*Kellerberg$/)
+
+  // A Plot opens in place, with its source and its history.
+  await page.getByTestId('plot-row').filter({ hasText: 'Winterroggen' }).click()
+  await expect(page).toHaveURL(/plot=/)
+  await expect(page.getByTestId('plot-panel')).toContainText('AMA-Mehrfachantrag 2026')
+  await expect(page.getByTestId('plot-panel')).toContainText('Noch keine offenen Aufgaben')
   await expect(page.locator('canvas.maplibregl-canvas')).toBeVisible()
 })
 
@@ -35,5 +41,5 @@ test('a corrected export is assigned to the existing areas before it is applied'
   await dialog.getByTestId('area-upload-confirm').click()
 
   await expect(page.getByRole('region', { name: /Notifications/ })).toContainText('1 neu, 1 geändert, 1 entfernt.')
-  await expect(page.getByRole('link', { name: /Körnermais/ })).toBeVisible()
+  await expect(page.getByTestId('plot-row').filter({ hasText: 'Körnermais' })).toBeVisible()
 })

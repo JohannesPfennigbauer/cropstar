@@ -471,7 +471,9 @@
       "logEmpty": "Noch keine erledigten Maßnahmen auf diesem Schlag.",
       "withoutGeometry": "{n} Schlag ohne Geometrie | {n} Schläge ohne Geometrie",
       "provisional": "vorläufig",
-      "noGeometry": "ohne Geometrie"
+      "noGeometry": "ohne Geometrie",
+      "history": "Aufgaben & Maßnahmen",
+      "historyEmpty": "Noch keine offenen Aufgaben und keine erledigten Maßnahmen auf diesem Schlag."
     },
     "landUseCategory": {
       "cereals": "Getreide",
@@ -516,7 +518,8 @@
         "priority": "Priorität",
         "assignee": "Zuständig",
         "done": "Bereits erledigt",
-        "areas": "Flächen"
+        "areas": "Flächen",
+        "stage": "Status"
       },
       "priority": {
         "none": "Keine",
@@ -581,7 +584,44 @@
       "searchAreas": "Suchen …",
       "areasHelp": "Feldstücke und Schläge aus dem Erntejahr {year}. Ohne Fläche gilt die Aufgabe für den ganzen Betrieb.",
       "source": "Quelle",
-      "importedFrom": "Importiert aus farmdok am {date}"
+      "importedFrom": "Importiert aus farmdok am {date}",
+      "board": {
+        "noDate": "Ohne Datum",
+        "overdue": "Überfällig",
+        "week": "KW {week} · {from} – {to}",
+        "thisWeek": "diese Woche",
+        "refused": {
+          "locked": "Das Erntejahr ist gesperrt.",
+          "role": "Das darf deine Rolle nicht.",
+          "failed": "Das hat nicht geklappt. Bitte versuch es noch einmal."
+        },
+        "moved": "„{task}“ → {stage}",
+        "done": "„{task}“ erledigt",
+        "undo": "Rückgängig",
+        "onePlot": "einen Schlag",
+        "clearPlot": "Filter entfernen",
+        "archive": "Archiv ({n})",
+        "archiveEmpty": "Noch nichts archiviert.",
+        "hint": "Klick: in den nächsten Status · Doppelklick oder Stift: bearbeiten · Erledigtes wandert nach 30 Minuten ins Archiv.",
+        "cardLabel": "{task}: Klick schiebt weiter, Doppelklick öffnet",
+        "edit": "Bearbeiten"
+      },
+      "stages": {
+        "title": "Aufgaben-Status",
+        "lead": "Die Schritte, die eine Aufgabe bis „Erledigt“ durchläuft – die Spalten im Aufgaben-Board. Erledigt bedeutet immer: ist passiert.",
+        "saved": "Status gespeichert.",
+        "name": "Name von Status {n}",
+        "up": "Nach oben",
+        "down": "Nach unten",
+        "remove": "Entfernen",
+        "removeHint": "{n} Aufgabe wandert in den ersten Status | {n} Aufgaben wandern in den ersten Status",
+        "doneFixed": "fest, zählt als passiert",
+        "add": "Status hinzufügen",
+        "problems": {
+          "empty": "Jeder Status braucht einen Namen.",
+          "duplicate": "Zwei Status heißen gleich."
+        }
+      }
     },
     "roles": {
       "admin": "Admin",

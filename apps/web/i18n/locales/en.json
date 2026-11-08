@@ -471,7 +471,9 @@
       "logEmpty": "No completed operations on this plot yet.",
       "withoutGeometry": "{n} plot without geometry | {n} plots without geometry",
       "provisional": "provisional",
-      "noGeometry": "no geometry"
+      "noGeometry": "no geometry",
+      "history": "Tasks & operations",
+      "historyEmpty": "No open tasks and no recorded operations on this plot yet."
     },
     "landUseCategory": {
       "cereals": "Cereals",
@@ -516,7 +518,8 @@
         "priority": "Priority",
         "assignee": "Responsible",
         "done": "Already done",
-        "areas": "Areas"
+        "areas": "Areas",
+        "stage": "Status"
       },
       "priority": {
         "none": "None",
@@ -581,7 +584,44 @@
       "searchAreas": "Search …",
       "areasHelp": "Fields and plots of harvest year {year}. Without an area, the task is for the whole farm.",
       "source": "Source",
-      "importedFrom": "Imported from farmdok on {date}"
+      "importedFrom": "Imported from farmdok on {date}",
+      "board": {
+        "noDate": "No date",
+        "overdue": "Overdue",
+        "week": "Week {week} · {from} – {to}",
+        "thisWeek": "this week",
+        "refused": {
+          "locked": "The harvest year is locked.",
+          "role": "Your role cannot do that.",
+          "failed": "That did not work. Please try again."
+        },
+        "moved": "\"{task}\" → {stage}",
+        "done": "\"{task}\" done",
+        "undo": "Undo",
+        "onePlot": "one plot",
+        "clearPlot": "Remove filter",
+        "archive": "Archive ({n})",
+        "archiveEmpty": "Nothing archived yet.",
+        "hint": "Click: next status · Double click or pencil: edit · Done tasks move to the archive after 30 minutes.",
+        "cardLabel": "{task}: click moves it on, double click opens it",
+        "edit": "Edit"
+      },
+      "stages": {
+        "title": "Task statuses",
+        "lead": "The steps a task goes through until \"Done\" – the columns of the task board. Done always means: it happened.",
+        "saved": "Statuses saved.",
+        "name": "Name of status {n}",
+        "up": "Move up",
+        "down": "Move down",
+        "remove": "Remove",
+        "removeHint": "{n} task moves to the first status | {n} tasks move to the first status",
+        "doneFixed": "fixed, counts as happened",
+        "add": "Add status",
+        "problems": {
+          "empty": "Every status needs a name.",
+          "duplicate": "Two statuses have the same name."
+        }
+      }
     },
     "roles": {
       "admin": "Admin",

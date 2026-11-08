@@ -63,6 +63,10 @@ class TaskRepository(Protocol):
 
     def farm_input(self, farm_id: uuid.UUID, input_id: uuid.UUID) -> FarmInput | None: ...
 
+    def stage_ids(self, farm_id: uuid.UUID) -> list[uuid.UUID]:
+        """The Farm's Task stages, in board order."""
+        ...
+
 
 class TaskError(Exception):
     code = "task_error"
@@ -124,6 +128,10 @@ class DetailsTypeMismatchError(TaskError):
     code = "details_type_mismatch"
 
 
+class StageNotFoundError(TaskError):
+    code = "stage_not_found"
+
+
 class FarmInputNotFoundError(TaskError):
     code = "farm_input_not_found"
 
@@ -159,6 +167,8 @@ class NewTask:
     plot_ids: frozenset[uuid.UUID] = frozenset()
     operation_type: str | None = None
     planned_details: OperationDetails | None = None
+    # Defaults to the Farm's first stage.
+    stage_id: uuid.UUID | None = None
 
 
 EDITABLE_FIELDS = frozenset(
@@ -171,6 +181,7 @@ EDITABLE_FIELDS = frozenset(
         "field_ids",
         "plot_ids",
         "planned_details",
+        "stage_id",
     }
 )
 EDITABLE_OPERATION_FIELDS = frozenset({"planned_details", "actual_details", "performed_on"})
@@ -207,6 +218,7 @@ class TaskLifecycle:
             self._check_operation_areas(new.field_ids, new.plot_ids)
         planned = self._stored_details(farm_id, new.operation_type, new.planned_details)
         self._check_assignee(farm_id, new.assignee_id)
+        stage_id = self._stage(farm_id, new.stage_id)
         now = self._clock()
         task = Task(
             id=uuid.uuid4(),
@@ -222,6 +234,7 @@ class TaskLifecycle:
             updated_at=now,
             operation_type=new.operation_type,
             planned_details=planned,
+            stage_id=stage_id,
         )
         task.operations = []
         self._set_areas(actor, Action.CREATE_TASK, task, new.field_ids, new.plot_ids)
@@ -252,6 +265,8 @@ class TaskLifecycle:
             }
         if "assignee_id" in changes:
             self._check_assignee(farm_id, changes["assignee_id"])
+        if "stage_id" in changes:
+            changes = changes | {"stage_id": self._stage(farm_id, changes["stage_id"])}
         if "field_ids" in changes or "plot_ids" in changes:
             field_ids = frozenset(changes.get("field_ids", {f.id for f in task.fields}))
             plot_ids = frozenset(changes.get("plot_ids", {p.id for p in task.plots}))
@@ -560,6 +575,14 @@ class TaskLifecycle:
                         planned_details=task.planned_details,
                     )
                 )
+
+    def _stage(self, farm_id: uuid.UUID, stage_id: uuid.UUID | None) -> uuid.UUID | None:
+        stages = self._repository.stage_ids(farm_id)
+        if stage_id is None:
+            return stages[0] if stages else None
+        if stage_id not in stages:
+            raise StageNotFoundError(str(stage_id))
+        return stage_id
 
     def _check_assignee(self, farm_id: uuid.UUID, assignee_id: uuid.UUID | None) -> None:
         if assignee_id is None:

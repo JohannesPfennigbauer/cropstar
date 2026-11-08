@@ -65,7 +65,7 @@ export async function registerFarm(page: Page) {
   await page.getByLabel('Passwort').fill('correct horse battery')
   await page.getByRole('button', { name: 'Konto und Betrieb anlegen' }).click()
   await expect(page.getByTestId('current-farm')).toHaveText('Hof Upload')
-  await page.getByRole('link', { name: 'Schläge', exact: true }).click()
+  await page.getByRole('link', { name: 'Übersicht', exact: true }).click()
 }
 
 export async function openUpload(page: Page, files: string[]) {

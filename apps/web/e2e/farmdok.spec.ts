@@ -21,7 +21,7 @@ test('an older year comes from the farmdok field list with borrowed geometry, an
   const batch = page.getByTestId('import-batch-row')
   await expect(batch).toContainText('farmdok-Feldstücksliste · 2025')
 
-  await page.getByRole('link', { name: 'Schläge', exact: true }).click()
+  await page.getByRole('link', { name: 'Übersicht', exact: true }).click()
   await page.getByTestId('harvest-year').click()
   await page.getByRole('option', { name: '2025' }).click()
   await expect(page.getByTestId('plots-provenance')).toContainText('Vorläufige Geometrie, übernommen aus Erntejahr 2026')

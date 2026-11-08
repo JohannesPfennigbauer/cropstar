@@ -88,9 +88,9 @@ function removedData() {
   return props.removed ? mapped(props.removed) : EMPTY
 }
 
-function bounds(): LngLatBoundsLike | null {
+function bounds(features: AreaFeature[] = [...props.plots.features, ...(props.removed?.features ?? [])]): LngLatBoundsLike | null {
   let west = Infinity, south = Infinity, east = -Infinity, north = -Infinity
-  for (const feature of [...props.plots.features, ...(props.removed?.features ?? [])]) {
+  for (const feature of features) {
     for (const polygon of feature.geometry?.coordinates ?? []) {
       for (const ring of polygon) {
         for (const position of ring) {
@@ -110,12 +110,19 @@ function bounds(): LngLatBoundsLike | null {
 let fitted: string | null = null
 
 // Only when the areas cover other ground: restyling them must not undo the user's zoom.
-function fit(animate: boolean) {
+function fit(animate: boolean, force = false) {
   const box = bounds()
   const key = JSON.stringify(box)
-  if (!map || !ready || !box || key === fitted) return
+  if (!map || !ready || !box || (key === fitted && !force)) return
   fitted = key
   map.fitBounds(box, { padding: 48, maxZoom: 17, animate })
+}
+
+/** Centres the map on the selected area, if it has a geometry. */
+function focusSelected() {
+  const selected = props.plots.features.find(f => f.id === props.selectedId)
+  const box = selected ? bounds([selected]) : null
+  if (map && ready && box) map.fitBounds(box, { padding: 80, maxZoom: 16.5, animate: true })
 }
 
 function setState(id: string | null | undefined, key: 'hover' | 'selected', value: boolean) {
@@ -232,6 +239,7 @@ onMounted(() => {
     setState(props.selectedId, 'selected', true)
     setState(props.hoveredId, 'hover', true)
     fit(false)
+    if (props.selectedId) focusSelected()
   })
 })
 
@@ -267,6 +275,8 @@ watch(() => props.hoveredId, (now, before) => {
 watch(() => props.selectedId, (now, before) => {
   setState(before, 'selected', false)
   setState(now, 'selected', true)
+  if (now) focusSelected()
+  else fit(true, true)
 })
 watch(basemap, applyBasemap)
 </script>

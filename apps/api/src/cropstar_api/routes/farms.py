@@ -10,6 +10,7 @@ from pydantic import BaseModel, EmailStr, StringConstraints
 from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session as DbSession
 
+from cropstar_api import task_stages
 from cropstar_api.auth.dependencies import AppMailer, AppSettings, CurrentIdentity
 from cropstar_api.auth.mailer import Email
 from cropstar_api.auth.provider import hash_token
@@ -111,6 +112,7 @@ def create_farm(body: FarmCreate, identity: CurrentIdentity, db: Db) -> Me:
     farm = Farm(name=body.name)
     db.add(farm)
     db.flush()
+    task_stages.create_defaults(db, farm.id)
     db.add(Membership(farm_id=farm.id, user_id=identity.user_id, role=Role.ADMIN))
     db.flush()
     return me_of(db, identity)

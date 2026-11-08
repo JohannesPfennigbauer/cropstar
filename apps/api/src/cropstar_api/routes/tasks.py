@@ -50,6 +50,7 @@ from cropstar_api.tasks.lifecycle import (
     OperationFieldsError,
     OperationNeedsPlotsError,
     OperationNotFoundError,
+    StageNotFoundError,
     TaskError,
     TaskLifecycle,
     TaskNotFoundError,
@@ -176,6 +177,8 @@ class TaskOut(BaseModel):
     planned_input: AppliedInput | None
     operations: list[OperationOut]
     allowed_actions: list[Action]
+    # The Farm's Task stage it stands in; meaningful while the Task is Open.
+    stage_id: uuid.UUID | None
     # Set for Tasks an import created.
     imported: ImportedFrom | None
 
@@ -192,6 +195,8 @@ class TaskCreate(BaseModel):
     operation_type: str | None = None
     # Of the Operation Type's kind; copied into each Operation's Planned Details.
     planned_details: OperationDetails | None = None
+    # Defaults to the Farm's first stage.
+    stage_id: uuid.UUID | None = None
 
     @field_validator("description")
     @classmethod
@@ -211,8 +216,9 @@ class TaskUpdate(BaseModel):
     field_ids: list[uuid.UUID] | None = None
     plot_ids: list[uuid.UUID] | None = None
     planned_details: OperationDetails | None = None
+    stage_id: uuid.UUID | None = None
 
-    @field_validator("title", "priority")
+    @field_validator("title", "priority", "stage_id")
     @classmethod
     def _not_null(cls, value: object) -> object:
         if value is None:
@@ -498,6 +504,7 @@ def _domain_errors() -> Iterator[None]:
         OperationFieldsError,
         DetailsWithoutOperationTypeError,
         DetailsTypeMismatchError,
+        StageNotFoundError,
     ) as error:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, detail=error.code) from None
     except TaskError as error:  # pragma: no cover - every subclass is mapped above
@@ -661,6 +668,7 @@ def _out(db: DbSession, membership: Membership, tasks: list[Task]) -> list[TaskO
                 for o in sorted(task.operations, key=lambda o: (o.plot.field.number, o.plot.number))
             ],
             allowed_actions=lifecycle.allowed_actions(actor, task),
+            stage_id=task.stage_id,
             imported=imported(task),
         )
         for task in tasks

@@ -22,9 +22,8 @@ test('plots, an Operation on two of them, its log, and a locked season', async (
   })
   expect(created.status()).toBe(201)
 
-  // The seeded Plots are on the list and on the map.
-  await page.getByRole('link', { name: 'Schläge', exact: true }).click()
-  await expect(page.getByRole('link', { name: /Winterroggen/ })).toBeVisible()
+  // The seeded Plots are on the overview, next to the map.
+  await expect(page.getByTestId('plot-row').filter({ hasText: 'Winterroggen' })).toBeVisible()
   await expect(page.locator('canvas.maplibregl-canvas')).toBeVisible()
 
   await page.getByRole('link', { name: 'Aufgaben', exact: true }).click()
@@ -50,11 +49,17 @@ test('plots, an Operation on two of them, its log, and a locked season', async (
   await plan.getByLabel('Notiz').fill('Schleppschuh')
   await editor.getByRole('button', { name: 'Anlegen' }).click()
 
-  const row = page.getByTestId('task-row').filter({ hasText: 'Gülle ausbringen' })
-  await expect(row.getByTestId('operation-badge')).toHaveText('Düngung · 0/2')
+  const card = page.getByTestId('task-card').filter({ hasText: 'Gülle ausbringen' })
+  await expect(card.getByTestId('operation-badge')).toHaveText('Düngung · 0/2')
 
+  // Planned → Open → In progress; the next click records what really happened.
+  const toasts = page.getByRole('region', { name: /Notifications/ })
+  await card.click()
+  await expect(toasts).toContainText('→ Offen')
+  await card.click()
+  await expect(toasts).toContainText('→ In Arbeit')
   // Only the rye is done today; the sunflowers stay Open.
-  await row.getByTestId('task-toggle').click()
+  await card.click()
   const completion = page.getByRole('dialog', { name: 'Gülle ausbringen erledigen' })
   const rows = completion.getByTestId('complete-row')
   await expect(rows.first().getByLabel('Menge je ha')).toHaveValue('20')
@@ -62,12 +67,13 @@ test('plots, an Operation on two of them, its log, and a locked season', async (
   await rows.nth(1).getByRole('checkbox').click()
   await rows.first().getByLabel('Menge je ha').fill('18')
   await completion.getByTestId('record-operations').click()
-  await expect(row.getByTestId('operation-badge')).toHaveText('Düngung · 1/2')
+  await expect(card.getByTestId('operation-badge')).toHaveText('Düngung · 1/2')
 
-  await page.getByRole('link', { name: 'Schläge', exact: true }).click()
-  await page.getByRole('link', { name: /Winterroggen/ }).click()
-  await expect(page.getByTestId('operation-log')).toContainText('Düngung · Gülle ausbringen')
-  await expect(page.getByTestId('operation-log')).toContainText('Rindergülle · 18 m³/ha · Schleppschuh')
+  await page.getByRole('link', { name: 'Übersicht', exact: true }).click()
+  await page.getByTestId('plot-row').filter({ hasText: 'Winterroggen' }).click()
+  const history = page.getByTestId('plot-history')
+  await expect(history.getByTestId('plot-log-row')).toContainText('Düngung · Gülle ausbringen')
+  await expect(history.getByTestId('plot-log-row')).toContainText('Rindergülle · 18 m³/ha · Schleppschuh')
   await expect(page.getByTestId('nutrients-applied')).toContainText('≙ 63,2 kg N (38,5 jahreswirksam) · 25 kg P₂O₅ · 124,9 kg K₂O je ha')
   await expect(page.getByTestId('nutrients-applied')).toContainText('Richtwert · RSD, 8. Auflage')
   const plotPage = page.url()
@@ -78,12 +84,15 @@ test('plots, an Operation on two of them, its log, and a locked season', async (
   await expect(page.getByTestId('harvest-year-row')).toContainText(`Gesperrt von ${email}`)
 
   await page.goto(plotPage)
-  await expect(page.getByTestId('lock-notice')).toBeVisible()
+  await expect(page.getByTestId('plot-panel').getByTestId('lock-notice')).toBeVisible()
   await expect(page.getByTestId('new-plot-task')).toBeDisabled()
 
-  await page.getByRole('link', { name: 'Aufgaben', exact: true }).click()
-  await expect(row.getByTestId('task-toggle')).toBeDisabled()
-  await row.getByText('Gülle ausbringen').click()
+  // The history's heading leads to the Plot's Tasks; a locked season refuses moving them.
+  await page.getByTestId('plot-history-link').click()
+  await expect(page.getByTestId('plot-filter')).toContainText('Schlag 1.1')
+  await card.click()
+  await expect(toasts).toContainText('Das Erntejahr ist gesperrt.')
+  await card.getByTestId('task-edit').click()
   const locked = page.getByRole('dialog', { name: 'Aufgabe' })
   await expect(locked.getByTestId('lock-notice')).toBeVisible()
   await expect(locked.getByLabel('Titel')).toBeDisabled()

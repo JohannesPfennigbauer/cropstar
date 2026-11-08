@@ -106,6 +106,16 @@ _Avoid_: Todo, Job, Auftrag
 Discarding is reversible; deleting is not, and a deleted Task leaves no trace. A Task
 with Operations takes its Status from them: Open while any Operation is Open.
 
+**Stage** (de: _Schritt_; the app shows it as "Status"):
+A Farm's own step an Open Task goes through on the board, e.g. Geplant, Offen, In Arbeit;
+named and ordered per Farm. Stages say how far the work is, never whether it happened:
+that is only Done.
+_Avoid_: Phase, Column
+
+**Archived** (de: _archiviert_):
+Not on the board any more: Done for over 30 minutes, imported, or Discarded. A view, not a
+Status.
+
 **Operation Type** (de: _Maßnahmen-Typ_):
 One entry of the list of kinds of work the model and reports understand: tillage,
 mechanical weed control, mulching, sowing, fertilisation, harvest. The list is the same

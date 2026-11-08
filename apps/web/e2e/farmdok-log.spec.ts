@@ -34,8 +34,9 @@ test('a year\'s work comes from the farmdok crop production log, with open quest
   await expect(batch).toContainText('5 Aufgaben')
 
   await page.getByRole('link', { name: 'Aufgaben', exact: true }).click()
-  await page.getByRole('tab', { name: 'Erledigt' }).click()
-  await page.getByText('Mähdrusch').first().click()
+  // Imported work was done long ago: it is in the archive, not on the board.
+  await page.getByTestId('show-archive').click()
+  await page.getByTestId('task-row').filter({ hasText: 'Mähdrusch' }).first().click()
   await expect(page.getByTestId('task-imported')).toContainText('Importiert aus farmdok am')
   await page.keyboard.press('Escape')
 

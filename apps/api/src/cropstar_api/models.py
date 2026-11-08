@@ -323,6 +323,23 @@ class HarvestYearLock(Base):
     locked_by: Mapped[User | None] = relationship()
 
 
+class TaskStage(Base):
+    """A step of the not-yet-done phase, e.g. Geplant, Offen, In Arbeit; named and ordered per
+    Farm. Done and Discarded are not stages: they are what happened, with fixed meaning."""
+
+    __tablename__ = "task_stages"
+    __table_args__ = (Index("ix_task_stages_farm_id_position", "farm_id", "position"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    farm_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("farms.id", ondelete="CASCADE"))
+    name: Mapped[str] = mapped_column(String(60))
+    position: Mapped[int] = mapped_column(SmallInteger)
+
+
+# A new Farm starts with these stages, in this order.
+DEFAULT_TASK_STAGES = ("Geplant", "Offen", "In Arbeit")
+
+
 class TaskStatus(enum.StrEnum):
     OPEN = "open"
     DONE = "done"
@@ -396,6 +413,10 @@ class Task(Base):
     # Set when an import created the Task; undoing the import removes it.
     import_batch_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("import_batches.id", ondelete="SET NULL"), index=True
+    )
+    # Where an Open Task stands on the board; kept while Done, so reopening returns there.
+    stage_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("task_stages.id", ondelete="SET NULL"), index=True
     )
     # The template copied into each Operation's Planned Details; see `operation_details`.
     planned_details: Mapped[dict[str, Any] | None] = mapped_column(JSONB)

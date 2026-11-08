@@ -12,6 +12,7 @@ from cropstar_api.tasks.lifecycle import (
     InvalidTransitionError,
     MixedHarvestYearsError,
     NewTask,
+    StageNotFoundError,
     TaskLifecycle,
     TaskNotFoundError,
 )
@@ -28,6 +29,7 @@ class InMemoryTasks:
         self.all_plots: list[Plot] = []
         self.locks: set[tuple[uuid.UUID, int]] = set()
         self.inputs: list[FarmInput] = []
+        self.stages: dict[uuid.UUID, list[uuid.UUID]] = {}
 
     def get(self, farm_id: uuid.UUID, task_id: uuid.UUID) -> Task | None:
         task = self.tasks.get(task_id)
@@ -53,6 +55,9 @@ class InMemoryTasks:
 
     def locked_years(self, farm_id: uuid.UUID) -> frozenset[int]:
         return frozenset(year for farm, year in self.locks if farm == farm_id)
+
+    def stage_ids(self, farm_id: uuid.UUID) -> list[uuid.UUID]:
+        return self.stages.get(farm_id, [])
 
     def farm_input(self, farm_id: uuid.UUID, input_id: uuid.UUID) -> FarmInput | None:
         return next((i for i in self.inputs if i.farm_id == farm_id and i.id == input_id), None)
@@ -345,3 +350,22 @@ def test_editing_areas_moves_the_harvest_year(
 
     lifecycle.edit(anna, FARM, task.id, {"plot_ids": []})
     assert (task.harvest_year, task.plots) == (None, [])
+
+
+def test_tasks_start_in_the_first_stage_and_move_between_the_farms_stages(
+    lifecycle: TaskLifecycle, repo: InMemoryTasks
+) -> None:
+    planned, doing = uuid.uuid4(), uuid.uuid4()
+    repo.stages[FARM] = [planned, doing]
+    repo.stages[OTHER_FARM] = [elsewhere := uuid.uuid4()]
+    anna = member(repo, Role.WORKER)
+
+    task = lifecycle.create(anna, FARM, NewTask("Zaun"))
+    lifecycle.edit(anna, FARM, task.id, {"stage_id": doing})
+
+    assert task.stage_id == doing
+    with pytest.raises(StageNotFoundError):
+        lifecycle.edit(anna, FARM, task.id, {"stage_id": elsewhere})
+    with pytest.raises(StageNotFoundError):
+        lifecycle.create(anna, FARM, NewTask("Zaun", stage_id=elsewhere))
+    assert lifecycle.create(anna, FARM, NewTask("Tor", stage_id=doing)).stage_id == doing
