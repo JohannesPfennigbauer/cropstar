@@ -448,7 +448,6 @@
       },
       "upload": "Flächen hochladen",
       "field": "Feldstück {number}",
-      "plot": "Schlag {number}",
       "emptyTitle": "Noch keine Schläge",
       "empty": "Lade den Flächen-Export deines eAMA-Antrags hoch, dann erscheinen deine Feldstücke und Schläge hier auf der Karte.",
       "emptyReadOnly": "Sobald ein Admin deines Betriebs den Flächen-Export aus eAMA hochlädt, erscheinen die Feldstücke und Schläge hier auf der Karte.",

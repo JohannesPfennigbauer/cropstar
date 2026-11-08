@@ -217,19 +217,18 @@ watch(selected, async (id) => {
                     :style="{ backgroundColor: landUseColor(plot.land_use_category) }"
                     aria-hidden="true"
                   />
-                  <span class="min-w-0 flex-1">
-                    <span class="block truncate text-sm font-medium text-highlighted">
-                      {{ landUseLabel(plot.land_use_name) }}
+                  <span class="min-w-0 flex-1 truncate text-sm">
+                    <span class="font-medium text-highlighted">
+                      <span class="tabular-nums">{{ plot.number }}:</span> {{ landUseLabel(plot.land_use_name) }}
                     </span>
-                    <span class="block text-xs text-muted">
-                      {{ t('app.plots.plot', { number: plot.number }) }}
-                      <template v-if="plot.provenance.source === 'borrowed'">
-                        · {{ t('app.plots.provisional') }}
-                      </template>
-                      <template v-else-if="plot.provenance.source === 'none'">
-                        · {{ t('app.plots.noGeometry') }}
-                      </template>
-                    </span>
+                    <span
+                      v-if="plot.provenance.source === 'borrowed'"
+                      class="text-xs text-muted"
+                    > · {{ t('app.plots.provisional') }}</span>
+                    <span
+                      v-else-if="plot.provenance.source === 'none'"
+                      class="text-xs text-muted"
+                    > · {{ t('app.plots.noGeometry') }}</span>
                   </span>
                   <span class="shrink-0 text-sm tabular-nums text-toned">
                     {{ hectares(plot.declared_area_ha) }}

@@ -448,7 +448,6 @@
       },
       "upload": "Upload areas",
       "field": "Field {number}",
-      "plot": "Plot {number}",
       "emptyTitle": "No plots yet",
       "empty": "Upload the area export of your eAMA application and your fields and plots appear here on the map.",
       "emptyReadOnly": "Once an admin of your farm uploads the area export from eAMA, the fields and plots appear here on the map.",
