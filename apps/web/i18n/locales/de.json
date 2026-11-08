@@ -476,7 +476,13 @@
       "rotation": "Fruchtfolge",
       "rotationEntry": "Erntejahr {year} · {crop} · Feldstück {field} · Schlag {plot}",
       "rotationOverlap": "deckt {overlap} % dieses Schlags",
-      "rotationUnknown": "Erntejahr {year}: keine Fläche auf diesem Boden bekannt"
+      "rotationUnknown": "Erntejahr {year}: keine Fläche auf diesem Boden bekannt",
+      "filter": {
+        "active": "Aktive",
+        "groups": "Kulturgruppen",
+        "crops": "Kulturen",
+        "shown": "{n} angezeigt"
+      }
     },
     "landUseCategory": {
       "cereals": "Getreide",

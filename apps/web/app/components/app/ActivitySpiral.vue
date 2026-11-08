@@ -30,8 +30,8 @@ const ordered = computed(() => chronological(props.activities))
 const layout = computed(() => layoutTimeline(ordered.value))
 const today = isoToDay(todayIso())
 
-// Starts with today a little past the middle of the spiral, or with the latest Activity in front.
-const initialOffset = () => layout.value.slotAtDay(today) - slots.value * 0.6 || Infinity
+// Starts fully outward: the latest Activity (or the last undated Task) stands in front.
+const initialOffset = () => Infinity
 const { offset, nudge, reset } = useSmoothOffset(
   initialOffset(),
   // From the earliest to the latest Activity standing at the front, fully visible.

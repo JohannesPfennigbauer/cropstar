@@ -476,7 +476,13 @@
       "rotation": "Crop rotation",
       "rotationEntry": "Harvest year {year} · {crop} · field {field} · plot {plot}",
       "rotationOverlap": "covers {overlap} % of this plot",
-      "rotationUnknown": "Harvest year {year}: no area known on this ground"
+      "rotationUnknown": "Harvest year {year}: no area known on this ground",
+      "filter": {
+        "active": "Active",
+        "groups": "Crop groups",
+        "crops": "Crops",
+        "shown": "{n} shown"
+      }
     },
     "landUseCategory": {
       "cereals": "Cereals",

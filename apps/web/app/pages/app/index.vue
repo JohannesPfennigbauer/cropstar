@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { PlotFilter, PlotGroup } from '~/utils/plot-filter'
+
 definePageMeta({ layout: 'app' })
 
 const { t } = useI18n()
@@ -65,14 +67,33 @@ const provenance = computed(() => {
   return missing && source !== 'none' ? `${text} · ${t('app.plots.withoutGeometry', missing)}` : text
 })
 
+// The Plot filter lives in the address too: ?group=active&crop=WINTERROGGEN&crop=...
+const filter = computed<PlotFilter>({
+  get: () => {
+    const group = typeof route.query.group === 'string' ? route.query.group as PlotGroup : null
+    const crops = ([] as unknown[]).concat(route.query.crop ?? []).filter((c): c is string => typeof c === 'string')
+    return { group, crops }
+  },
+  set: ({ group, crops }) => {
+    const query = { ...route.query, group: group ?? undefined, crop: crops.length ? crops : undefined }
+    router.replace({ query })
+  }
+})
+const filtering = computed(() => filter.value.group !== null || filter.value.crops.length > 0)
+
+const visiblePlots = computed(() => (data.value?.plots.features ?? []).filter(f => matchesFilter(f.properties, filter.value)))
+const mapPlots = computed(() => data.value ? { ...data.value.plots, features: visiblePlots.value } : null)
+
 const groups = computed(() => {
   if (!data.value) return []
-  return data.value.fields.features.map(field => ({
-    field: field.properties,
-    plots: data.value!.plots.features
-      .filter(plot => plot.properties.field.id === field.id)
-      .map(plot => plot.properties)
-  }))
+  return data.value.fields.features
+    .map(field => ({
+      field: field.properties,
+      plots: visiblePlots.value
+        .filter(plot => plot.properties.field.id === field.id)
+        .map(plot => plot.properties)
+    }))
+    .filter(group => !filtering.value || group.plots.length > 0)
 })
 
 // Keep the open Plot in view when it is opened from the map.
@@ -155,22 +176,39 @@ watch(selected, async (id) => {
         </div>
         <p
           v-if="data"
-          class="mt-1 text-sm text-muted"
+          class="mt-1 flex items-center gap-1.5 text-sm text-muted"
         >
-          {{ t('app.plots.fieldCount', data.fields.features.length) }}
-          · {{ t('app.plots.plotCount', data.plots.features.length) }}
+          <span>
+            {{ t('app.plots.fieldCount', data.fields.features.length) }}
+            · {{ t('app.plots.plotCount', data.plots.features.length) }}
+            <template v-if="filtering">
+              · {{ t('app.plots.filter.shown', { n: visiblePlots.length }) }}
+            </template>
+          </span>
+          <UTooltip
+            v-if="provenance"
+            :text="provenance"
+          >
+            <span
+              class="inline-flex cursor-help text-dimmed"
+              tabindex="0"
+              data-testid="plots-provenance"
+            >
+              <UIcon
+                name="i-lucide-info"
+                class="size-3.5"
+                aria-hidden="true"
+              />
+              <span class="sr-only">{{ provenance }}</span>
+            </span>
+          </UTooltip>
         </p>
-        <p
-          v-if="provenance"
-          class="mt-1 flex items-center gap-1.5 text-xs text-dimmed"
-          data-testid="plots-provenance"
-        >
-          <UIcon
-            name="i-lucide-file-check"
-            class="size-3.5 shrink-0"
-          />
-          {{ provenance }}
-        </p>
+        <AppPlotFilterPills
+          v-if="data && data.plots.features.length"
+          v-model="filter"
+          class="mt-3"
+          :plots="data.plots.features.map(f => f.properties)"
+        />
         <AppLockNotice
           :year="harvestYear"
           class="mt-3"
@@ -253,8 +291,8 @@ watch(selected, async (id) => {
 
       <section class="h-[60vh] min-h-80 lg:h-auto">
         <AppFarmMap
-          v-if="data"
-          :plots="data.plots"
+          v-if="data && mapPlots"
+          :plots="mapPlots"
           :fields="data.fields"
           :hovered-id="hovered"
           :selected-id="selected"
