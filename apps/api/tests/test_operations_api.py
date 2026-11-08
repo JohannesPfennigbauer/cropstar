@@ -1,8 +1,10 @@
+import uuid
 from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy.orm import Session
 
+from cropstar_api import plot_lineage
 from cropstar_api.models import AreaSource, Field, Plot
 from tests.farm_fixtures import Areas, Farm, create, tasks_url
 
@@ -354,7 +356,7 @@ def test_earlier_harvest_years_on_the_same_ground(farm: Farm, areas: Areas) -> N
 def test_ground_covered_less_than_half_is_not_the_same(
     farm: Farm, areas: Areas, db: Session
 ) -> None:
-    # A 2025 Plot shifted by 60 m covers only 40 % of the 2027 Plot.
+    # A 2025 Plot shifted by 60 m shares only 40 % with the 2026 Plot: not its Predecessor.
     ring = "600260 502027, 600360 502027, 600360 502127, 600260 502127, 600260 502027"
     field = Field(
         farm_id=farm.id,
@@ -381,6 +383,7 @@ def test_ground_covered_less_than_half_is_not_the_same(
         imported_at=datetime.now(UTC),
     )
     db.add(shifted)
+    plot_lineage.relink(db, uuid.UUID(farm.id), 2025)
     db.commit()
     till_and_complete(farm, str(shifted.id), "Grubbern", "2024-09-20")
 

@@ -362,6 +362,18 @@ class OperationType(Base):
     position: Mapped[int] = mapped_column(SmallInteger)
 
 
+# A Plot's Predecessors: Plots of the nearest earlier Harvest Year on the same ground, kept by
+# `plot_lineage.relink`. `overlap` is the share of the Plot the Predecessor covers (0 to 1).
+plot_predecessors = Table(
+    "plot_predecessors",
+    Base.metadata,
+    Column("plot_id", ForeignKey("plots.id", ondelete="CASCADE"), primary_key=True),
+    Column(
+        "predecessor_id", ForeignKey("plots.id", ondelete="CASCADE"), primary_key=True, index=True
+    ),
+    Column("overlap", Numeric(4, 3), nullable=False),
+)
+
 task_fields = Table(
     "task_fields",
     Base.metadata,

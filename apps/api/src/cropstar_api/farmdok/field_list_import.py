@@ -16,6 +16,7 @@ from geoalchemy2 import WKBElement
 from sqlalchemy import exists, select
 from sqlalchemy.orm import Session
 
+from cropstar_api import plot_lineage
 from cropstar_api.farmdok.field_list import FieldList
 from cropstar_api.farmdok.field_list_plan import FieldListPlan, GeometryMatch, Reference, plan
 from cropstar_api.geometry import to_wgs84_geojson
@@ -229,7 +230,7 @@ def apply(
                 **provenance(planned_plot.geometry),
             )
         )
-    db.flush()
+    plot_lineage.relink(db, farm_id, planned.harvest_year)
     return batch
 
 
@@ -253,6 +254,7 @@ def undo(db: Session, batch: ImportBatch) -> None:
     for field in db.scalars(select(Field).where(Field.import_batch_id == batch.id)):
         db.delete(field)
     db.flush()
+    plot_lineage.relink(db, batch.farm_id, batch.harvest_year)
     db.delete(batch)
 
 

@@ -8,7 +8,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from cropstar_api import task_stages
+from cropstar_api import plot_lineage, task_stages
 from cropstar_api.auth.provider import PasswordAuthProvider, normalize_email
 from cropstar_api.geometry import from_ama_geojson
 from cropstar_api.models import AreaSource, Farm, Field, Membership, Plot, Role, User
@@ -82,5 +82,5 @@ def seed_demo(db: Session, auth: PasswordAuthProvider, email: str, password: str
                 imported_at=now,
             )
         )
-    db.flush()
+    plot_lineage.relink(db, farm.id, DEMO_HARVEST_YEAR)
     return farm

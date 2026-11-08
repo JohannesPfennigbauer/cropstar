@@ -31,7 +31,7 @@ const { data: log, refresh: refreshLog } = useAsyncData(
   { watch: [() => props.plot.id] }
 )
 
-// Operations of earlier Harvest Years on the same ground, for the spiral and the ground cover.
+// Operations of earlier Harvest Years on the same ground: part of the Activities in both views.
 const { data: earlierLog } = useAsyncData(
   () => `plot-earlier-log-${props.plot.id}`,
   async () => (await api.GET('/api/farms/{farm_id}/plots/{plot_id}/operations/earlier', {
@@ -120,6 +120,10 @@ async function changed() {
       />
       {{ source }}
     </p>
+    <AppCropRotation
+      :farm-id="farmId"
+      :plot="plot"
+    />
     <AppLockNotice :year="plot.harvest_year" />
 
     <div>
@@ -176,7 +180,7 @@ async function changed() {
           </div>
         </div>
       </div>
-      <template v-if="view === 'spiral' ? withEarlier.length : activities.length">
+      <template v-if="withEarlier.length">
         <AppActivitySpiral
           v-if="view === 'spiral'"
           :activities="withEarlier"
@@ -184,8 +188,7 @@ async function changed() {
         />
         <AppActivityTable
           v-else
-          :activities="activities"
-          :cover-from="withEarlier"
+          :activities="withEarlier"
           @select="activity => activity.task && openEditor(activity.task)"
         />
       </template>

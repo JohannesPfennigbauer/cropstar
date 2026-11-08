@@ -154,15 +154,19 @@ All Done Operations of one Plot, in date order.
 _Avoid_: Field record, Schlagkartei
 
 **Activities** (de: _Tätigkeiten_):
-A Plot's Open Tasks and its Operation Log together, shown on the Plot as a spiral (past inside,
-future outside, undated Tasks at the front) or as a table. The spiral also shows the Operations
-of the Predecessor Plots, with each change of Harvest Year marked. A collective term for
-display; it is not stored on its own.
+A Plot's Open Tasks and its Operation Log together, including the Operations of its Lineage,
+shown on the Plot as a spiral (past inside, future outside, undated Tasks at the front) or as a
+table. A collective term for display; it is not stored on its own.
 
-**Predecessor Plot** (de: _Vorgänger-Schlag_):
-The Plot of an earlier Harvest Year on the same ground: per earlier year, the Plot that covers
-the largest share of this Plot's geometry, if it covers at least half of it. Found by geometry,
-since Plots belong to one Harvest Year; a Plot without geometry has none.
+**Predecessor** (de: _Vorgänger_):
+A Plot of the nearest earlier Harvest Year on the same ground: the area it shares with the Plot
+is at least half of the smaller of the two. A split Plot has the one large Predecessor, a
+merged Plot several. Stored per Plot and renewed whenever a Harvest Year's areas change; a Plot
+without geometry has none.
+
+**Lineage** (de: _Herkunft_):
+A Plot's Predecessors and theirs, back through all earlier Harvest Years. It gives the crop
+rotation on that ground and the Operations of earlier years.
 
 **Ground Cover** (de: _Bodenbedeckung_):
 What the Operations imply about the soil surface of a Plot: a growing crop from sowing, ripening

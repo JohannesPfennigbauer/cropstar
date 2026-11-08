@@ -1060,6 +1060,64 @@
         }
       }
     },
+    "/api/farms/{farm_id}/plots/{plot_id}/lineage": {
+      "get": {
+        "tags": [
+          "areas"
+        ],
+        "summary": "Read Plot Lineage",
+        "description": "The Plot's Predecessors and theirs, back through all earlier Harvest Years, newest year\nfirst. Within a year, the Plot covering most of this one comes first.",
+        "operationId": "getPlotLineage",
+        "parameters": [
+          {
+            "name": "plot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Plot Id"
+            }
+          },
+          {
+            "name": "farm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Farm Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EarlierPlotOut"
+                  },
+                  "title": "Response Getplotlineage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/farms/{farm_id}/area-uploads/preview": {
       "post": {
         "tags": [
@@ -2071,7 +2129,7 @@
           "tasks"
         ],
         "summary": "Read Earlier Operation Log",
-        "description": "Done Operations of earlier Harvest Years on the same ground, oldest first.\n\nPlots belong to one Harvest Year, so the same ground is found by geometry: per earlier\nyear, the Plot that covers most of this one, if it covers at least half of it. A Plot\nwithout geometry has no earlier Operations.",
+        "description": "Done Operations of earlier Harvest Years on the same ground, oldest first: those of the\nPlot's Predecessors and theirs, back through all earlier years.",
         "operationId": "getEarlierOperationLog",
         "parameters": [
           {
@@ -4163,6 +4221,55 @@
         ],
         "title": "EarlierOperationLogEntry",
         "description": "A Done Operation of an earlier Harvest Year on the same ground, with where it comes from."
+      },
+      "EarlierPlotOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "harvest_year": {
+            "type": "integer",
+            "title": "Harvest Year"
+          },
+          "field_number": {
+            "type": "integer",
+            "title": "Field Number"
+          },
+          "plot_number": {
+            "type": "integer",
+            "title": "Plot Number"
+          },
+          "land_use_code": {
+            "type": "string",
+            "title": "Land Use Code"
+          },
+          "land_use_name": {
+            "type": "string",
+            "title": "Land Use Name"
+          },
+          "land_use_category": {
+            "$ref": "#/components/schemas/LandUseCategory"
+          },
+          "overlap": {
+            "type": "number",
+            "title": "Overlap"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "harvest_year",
+          "field_number",
+          "plot_number",
+          "land_use_code",
+          "land_use_name",
+          "land_use_category",
+          "overlap"
+        ],
+        "title": "EarlierPlotOut",
+        "description": "A Plot of an earlier Harvest Year on the same ground."
       },
       "ExportProblem": {
         "properties": {

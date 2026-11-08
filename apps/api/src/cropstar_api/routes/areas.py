@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy import Select, func, select
 
+from cropstar_api import plot_lineage
 from cropstar_api.db import Db
 from cropstar_api.farms import FarmMembership
 from cropstar_api.geometry import to_wgs84_geojson
@@ -138,6 +139,41 @@ def read_plot(membership: FarmMembership, db: Db, plot_id: uuid.UUID) -> PlotFea
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="plot_not_found")
     plot, field, geometry = row
     return _plot_feature(plot, field, geometry)
+
+
+class EarlierPlotOut(BaseModel):
+    """A Plot of an earlier Harvest Year on the same ground."""
+
+    id: uuid.UUID
+    harvest_year: int
+    field_number: int
+    plot_number: int
+    land_use_code: str
+    land_use_name: str
+    land_use_category: LandUseCategory
+    # Share of the asking Plot's area this earlier Plot covers, from 0 to 1.
+    overlap: float
+
+
+@router.get("/plots/{plot_id}/lineage", operation_id="getPlotLineage")
+def read_plot_lineage(
+    membership: FarmMembership, db: Db, plot_id: uuid.UUID
+) -> list[EarlierPlotOut]:
+    """The Plot's Predecessors and theirs, back through all earlier Harvest Years, newest year
+    first. Within a year, the Plot covering most of this one comes first."""
+    return [
+        EarlierPlotOut(
+            id=p.id,
+            harvest_year=p.harvest_year,
+            field_number=p.field_number,
+            plot_number=p.plot_number,
+            land_use_code=p.land_use_code,
+            land_use_name=p.land_use_name,
+            land_use_category=land_use_category(p.land_use_code),
+            overlap=p.overlap,
+        )
+        for p in plot_lineage.lineage(db, membership.farm_id, plot_id)
+    ]
 
 
 def _plots(farm_id: uuid.UUID) -> Select[Plot, Field, str | None]:

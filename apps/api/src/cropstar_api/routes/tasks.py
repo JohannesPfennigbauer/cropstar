@@ -9,17 +9,17 @@ from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, HTTPException, Query, Response, status
 from pydantic import BaseModel, StringConstraints, field_validator
-from sqlalchemy import case, func, nulls_last, or_, select
+from sqlalchemy import case, nulls_last, or_, select
 from sqlalchemy.orm import Session as DbSession
-from sqlalchemy.orm import aliased, selectinload
+from sqlalchemy.orm import selectinload
 
+from cropstar_api import plot_lineage
 from cropstar_api.db import Db
 from cropstar_api.farms import FarmMembership
 from cropstar_api.land_use import LandUseCategory, land_use_category
 from cropstar_api.models import (
     FarmInput,
     FarmInputKind,
-    Field,
     ImportBatch,
     ImportKind,
     Membership,
@@ -442,51 +442,20 @@ def read_operation_log(
     return [entry for entry, _ in _log_entries(db, membership, [plot_id])]
 
 
-# An earlier Plot counts as the same ground when it covers at least this share of the Plot.
-PREDECESSOR_MIN_OVERLAP = 0.5
-
-
 @router.get("/plots/{plot_id}/operations/earlier", operation_id="getEarlierOperationLog")
 def read_earlier_operation_log(
     plot_id: uuid.UUID, membership: FarmMembership, db: Db
 ) -> list[EarlierOperationLogEntry]:
-    """Done Operations of earlier Harvest Years on the same ground, oldest first.
-
-    Plots belong to one Harvest Year, so the same ground is found by geometry: per earlier
-    year, the Plot that covers most of this one, if it covers at least half of it. A Plot
-    without geometry has no earlier Operations.
-    """
-    here = aliased(Plot)
-    here_field = aliased(Field)
-    overlap = func.ST_Area(func.ST_Intersection(Plot.geometry, here.geometry)) / func.ST_Area(
-        here.geometry
-    )
-    candidates = db.execute(
-        select(Plot.id, Plot.number, Field.number, Field.harvest_year, overlap)
-        .join(Field, Plot.field_id == Field.id)
-        .join(here, func.ST_Intersects(Plot.geometry, here.geometry))
-        .join(here_field, here.field_id == here_field.id)
-        .where(
-            here.id == plot_id,
-            here_field.farm_id == membership.farm_id,
-            Field.farm_id == membership.farm_id,
-            Field.harvest_year < here_field.harvest_year,
-        )
-    ).all()
-    best: dict[int, tuple[uuid.UUID, int, int, float]] = {}
-    for earlier_id, plot_number, field_number, year, share in candidates:
-        if share >= PREDECESSOR_MIN_OVERLAP and (year not in best or share > best[year][3]):
-            best[year] = (earlier_id, field_number, plot_number, float(share))
-    origin = {
-        plot: (year, field, number, share) for year, (plot, field, number, share) in best.items()
-    }
+    """Done Operations of earlier Harvest Years on the same ground, oldest first: those of the
+    Plot's Predecessors and theirs, back through all earlier years."""
+    origin = {p.id: p for p in plot_lineage.lineage(db, membership.farm_id, plot_id)}
     return [
         EarlierOperationLogEntry(
             **entry.model_dump(),
-            harvest_year=origin[plot][0],
-            field_number=origin[plot][1],
-            plot_number=origin[plot][2],
-            overlap=round(origin[plot][3], 3),
+            harvest_year=origin[plot].harvest_year,
+            field_number=origin[plot].field_number,
+            plot_number=origin[plot].plot_number,
+            overlap=origin[plot].overlap,
         )
         for entry, plot in _log_entries(db, membership, list(origin))
     ]

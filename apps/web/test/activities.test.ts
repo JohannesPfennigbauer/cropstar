@@ -4,7 +4,6 @@ import {
   chronological,
   coverTimeline,
   gapFor,
-  harvestYearTransitions,
   isoToDay,
   layoutTimeline,
   newestFirst,
@@ -106,22 +105,5 @@ describe('symbols', () => {
   it('show priority without a symbol for none', () => {
     expect(priorityIcon('high')).toBe('i-lucide-chevrons-up')
     expect(priorityIcon('none')).toBeNull()
-  })
-})
-
-describe('harvest year transitions', () => {
-  it('sit between the last Activity of one Harvest Year and the first of the next', () => {
-    const ordered = chronological([
-      activity('ploughed', '2025-09-20', 'tillage', { harvestYear: 2026 }),
-      activity('sown', '2025-10-05', 'sowing', { harvestYear: 2026 }),
-      activity('cultivated', '2026-09-01', 'tillage', { harvestYear: 2027 }),
-      activity('later', null, null, { harvestYear: 2027 })
-    ])
-    const layout = layoutTimeline(ordered)
-    const [mark, ...rest] = harvestYearTransitions(ordered, layout)
-    expect(rest).toEqual([])
-    expect(mark!.harvestYear).toBe(2027)
-    expect(mark!.slot).toBeGreaterThan(layout.slotOf.get('sown')!)
-    expect(mark!.slot).toBeLessThan(layout.slotOf.get('cultivated')!)
   })
 })

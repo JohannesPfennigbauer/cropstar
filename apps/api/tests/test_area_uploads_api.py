@@ -328,3 +328,16 @@ def test_oversized_uploads_are_refused_before_reading(
     response = upload(farm.admin, farm, demo_export(), preview=True)
 
     assert (response.status_code, response.json()["detail"]) == (413, "upload_too_large")
+
+
+def test_uploaded_plots_are_linked_to_the_same_ground_a_year_before(farm: Farm) -> None:
+    before = uploaded_2026(farm)
+    assert upload(farm.admin, farm, demo_export(2027), preview=False).status_code == 200
+    plot = next(p for p in areas_of(farm.admin, farm, "plots", 2027) if p["number"] == 1)
+
+    lineage = farm.admin.client.get(f"/api/farms/{farm.id}/plots/{plot['id']}/lineage").json()
+
+    field_number = plot["field"]["number"]
+    assert [(p["id"], p["harvest_year"], p["overlap"]) for p in lineage] == [
+        (before[field_number, 1], 2026, 1.0)
+    ]

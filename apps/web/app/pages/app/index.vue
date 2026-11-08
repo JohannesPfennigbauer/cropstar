@@ -135,7 +135,7 @@ watch(selected, async (id) => {
 
     <div
       v-else
-      class="grid gap-6 lg:h-[calc(100dvh-9rem)] lg:grid-cols-[2fr_3fr]"
+      class="grid gap-6 lg:h-[calc(100dvh-9rem)] lg:grid-cols-2"
     >
       <section class="flex min-h-0 flex-col">
         <div class="flex items-center justify-between gap-3">

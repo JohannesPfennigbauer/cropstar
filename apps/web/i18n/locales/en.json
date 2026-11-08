@@ -473,7 +473,11 @@
       "provisional": "provisional",
       "noGeometry": "no geometry",
       "history": "Activities",
-      "historyEmpty": "No open tasks and no recorded operations on this plot yet."
+      "historyEmpty": "No open tasks and no recorded operations on this plot yet.",
+      "rotation": "Crop rotation",
+      "rotationEntry": "Harvest year {year} · {crop} · field {field} · plot {plot}",
+      "rotationOverlap": "covers {overlap} % of this plot",
+      "rotationUnknown": "Harvest year {year}: no area known on this ground"
     },
     "landUseCategory": {
       "cereals": "Cereals",
@@ -1061,8 +1065,7 @@
         "soil": "bare soil since {since} on {sinceDate}",
         "undated": "No date · background by priority: {priority}"
       },
-      "origin": "harvest year {year}, field {field} · plot {plot}, covers {overlap} % of this plot",
-      "harvestYear": "Harvest year {year}"
+      "origin": "harvest year {year}, field {field} · plot {plot}, covers {overlap} % of this plot"
     }
   }
 }

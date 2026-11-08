@@ -473,7 +473,11 @@
       "provisional": "vorläufig",
       "noGeometry": "ohne Geometrie",
       "history": "Tätigkeiten",
-      "historyEmpty": "Noch keine offenen Aufgaben und keine erledigten Maßnahmen auf diesem Schlag."
+      "historyEmpty": "Noch keine offenen Aufgaben und keine erledigten Maßnahmen auf diesem Schlag.",
+      "rotation": "Fruchtfolge",
+      "rotationEntry": "Erntejahr {year} · {crop} · Feldstück {field} · Schlag {plot}",
+      "rotationOverlap": "deckt {overlap} % dieses Schlags",
+      "rotationUnknown": "Erntejahr {year}: keine Fläche auf diesem Boden bekannt"
     },
     "landUseCategory": {
       "cereals": "Getreide",
@@ -1061,8 +1065,7 @@
         "soil": "offener Boden seit {since} am {sinceDate}",
         "undated": "Ohne Datum · Hintergrund nach Priorität: {priority}"
       },
-      "origin": "Erntejahr {year}, Feldstück {field} · Schlag {plot}, deckt {overlap} % dieses Schlags",
-      "harvestYear": "Erntejahr {year}"
+      "origin": "Erntejahr {year}, Feldstück {field} · Schlag {plot}, deckt {overlap} % dieses Schlags"
     }
   }
 }

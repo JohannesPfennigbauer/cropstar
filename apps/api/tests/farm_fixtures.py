@@ -1,5 +1,6 @@
 """Shared fixtures: a Farm with Admin, Worker, Advisor and a stranger, plus some areas."""
 
+import uuid
 from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -9,6 +10,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from cropstar_api import plot_lineage
 from cropstar_api.app import create_app
 from cropstar_api.auth.provider import PasswordAuthProvider
 from cropstar_api.models import AreaSource, Field, Membership, Plot, Role
@@ -147,5 +149,6 @@ def areas(farm: Farm, db: Session) -> Areas:
         plot_2026=str(plot(f2026, 1, "307", "SONNENBLUMEN").id),
         elsewhere_plot=str(plot(field(stranger_farm, 2027, 9), 1, "142", "WINTERROGGEN").id),
     )
+    plot_lineage.relink(db, uuid.UUID(farm.id), 2026)
     db.commit()
     return result

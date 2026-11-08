@@ -407,6 +407,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/farms/{farm_id}/plots/{plot_id}/lineage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read Plot Lineage
+         * @description The Plot's Predecessors and theirs, back through all earlier Harvest Years, newest year
+         *     first. Within a year, the Plot covering most of this one comes first.
+         */
+        get: operations["getPlotLineage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/farms/{farm_id}/area-uploads/preview": {
         parameters: {
             query?: never;
@@ -631,11 +652,8 @@ export interface paths {
         };
         /**
          * Read Earlier Operation Log
-         * @description Done Operations of earlier Harvest Years on the same ground, oldest first.
-         *
-         *     Plots belong to one Harvest Year, so the same ground is found by geometry: per earlier
-         *     year, the Plot that covers most of this one, if it covers at least half of it. A Plot
-         *     without geometry has no earlier Operations.
+         * @description Done Operations of earlier Harvest Years on the same ground, oldest first: those of the
+         *     Plot's Predecessors and theirs, back through all earlier years.
          */
         get: operations["getEarlierOperationLog"];
         put?: never;
@@ -1324,6 +1342,30 @@ export interface components {
             field_number: number;
             /** Plot Number */
             plot_number: number;
+            /** Overlap */
+            overlap: number;
+        };
+        /**
+         * EarlierPlotOut
+         * @description A Plot of an earlier Harvest Year on the same ground.
+         */
+        EarlierPlotOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Harvest Year */
+            harvest_year: number;
+            /** Field Number */
+            field_number: number;
+            /** Plot Number */
+            plot_number: number;
+            /** Land Use Code */
+            land_use_code: string;
+            /** Land Use Name */
+            land_use_name: string;
+            land_use_category: components["schemas"]["LandUseCategory"];
             /** Overlap */
             overlap: number;
         };
@@ -3408,6 +3450,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlotFeature"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    getPlotLineage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plot_id: string;
+                farm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EarlierPlotOut"][];
                 };
             };
             /** @description Validation Error */

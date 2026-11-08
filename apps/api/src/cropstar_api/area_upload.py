@@ -18,7 +18,7 @@ from shapely.geometry.base import BaseGeometry
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from cropstar_api import area_reconciliation
+from cropstar_api import area_reconciliation, plot_lineage
 from cropstar_api.area_reconciliation import ExistingArea, Plan
 from cropstar_api.eama import AreaDeclaration
 from cropstar_api.geometry import from_ama_geojson
@@ -190,3 +190,4 @@ def apply(
     for field_id in plan.removed_fields:
         db.delete(fields_by_id[field_id])
     db.flush()
+    plot_lineage.relink(db, farm_id, declaration.harvest_year)
